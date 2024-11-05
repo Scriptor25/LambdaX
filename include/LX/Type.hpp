@@ -20,8 +20,11 @@ namespace LX
         [[nodiscard]] virtual bool IsInt() const;
         [[nodiscard]] virtual bool IsSigned() const;
         [[nodiscard]] virtual bool IsFloat() const;
+        [[nodiscard]] virtual bool IsPointer() const;
+        [[nodiscard]] virtual bool IsFunction() const;
         [[nodiscard]] virtual TypePtr Element() const;
         [[nodiscard]] virtual TypePtr Result() const;
+        [[nodiscard]] virtual size_t ParamCount() const;
         [[nodiscard]] virtual TypePtr Param(size_t) const;
         [[nodiscard]] virtual llvm::Type* GenIR(Builder&) const = 0;
 
@@ -58,6 +61,7 @@ namespace LX
 
         explicit PointerType(TypePtr element_type);
 
+        [[nodiscard]] bool IsPointer() const override;
         [[nodiscard]] TypePtr Element() const override;
         [[nodiscard]] llvm::Type* GenIR(Builder&) const override;
 
@@ -70,12 +74,21 @@ namespace LX
 
         explicit FunctionType(TypePtr result_type, std::vector<TypePtr> param_types);
 
+        [[nodiscard]] bool IsFunction() const override;
         [[nodiscard]] TypePtr Result() const override;
+        [[nodiscard]] size_t ParamCount() const override;
         [[nodiscard]] TypePtr Param(size_t) const override;
         [[nodiscard]] llvm::Type* GenIR(Builder&) const override;
 
         TypePtr ResultType;
         std::vector<TypePtr> ParamTypes;
+    };
+
+    struct TempType : Type
+    {
+        explicit TempType(std::string);
+
+        [[nodiscard]] llvm::Type* GenIR(Builder&) const override;
     };
 }
 

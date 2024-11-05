@@ -4,9 +4,7 @@
 #include <string>
 #include <vector>
 #include <llvm/IR/IRBuilder.h>
-#include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
-#include <LX/Context.hpp>
 #include <LX/Value.hpp>
 
 namespace LX
@@ -23,15 +21,14 @@ namespace LX
         };
 
     public:
-        Builder(Context&, const std::string&);
+        Builder(Context&, llvm::LLVMContext&, const std::string&);
 
         [[nodiscard]] Context& Ctx() const;
 
         [[nodiscard]] llvm::LLVMContext& IRContext() const;
         [[nodiscard]] llvm::Module& IRModule() const;
+        [[nodiscard]] std::unique_ptr<llvm::Module> IRModulePtr();
         [[nodiscard]] llvm::IRBuilder<>& IRBuilder() const;
-
-        void PrintIR(const std::string&);
 
         void Push();
         void Pop();
@@ -39,13 +36,13 @@ namespace LX
         Value& DefVar(const std::string&);
         const Value& GetVar(const std::string&);
 
-        bool Cast(const Value&, const TypePtr&, Value&);
-        bool Equalize(Value&, Value&);
+        void Cast(const Value&, const TypePtr&, Value&);
+        void Equalize(Value&, Value&);
 
     private:
         Context& m_Ctx;
+        llvm::LLVMContext& m_IRContext;
 
-        std::unique_ptr<llvm::LLVMContext> m_IRContext;
         std::unique_ptr<llvm::Module> m_IRModule;
         std::unique_ptr<llvm::IRBuilder<>> m_IRBuilder;
 

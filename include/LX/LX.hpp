@@ -10,6 +10,7 @@ namespace LX
     class Context;
     class Parser;
     class Builder;
+    class Linker;
 
     struct Type;
     typedef std::shared_ptr<Type> TypePtr;

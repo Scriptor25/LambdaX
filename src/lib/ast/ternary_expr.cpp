@@ -1,11 +1,12 @@
 #include <LX/AST.hpp>
 #include <LX/Builder.hpp>
 #include <LX/Error.hpp>
-#include <LX/Type.hpp>
 #include <LX/Value.hpp>
 
-LX::TernaryExpr::TernaryExpr(TypePtr type, ExprPtr condition, ExprPtr then, ExprPtr else_)
-    : Expr(std::move(type)), Condition(std::move(condition)), Then(std::move(then)), Else(std::move(else_))
+#include "LX/Type.hpp"
+
+LX::TernaryExpr::TernaryExpr(ExprPtr condition, ExprPtr then, ExprPtr else_)
+    : Condition(std::move(condition)), Then(std::move(then)), Else(std::move(else_))
 {
 }
 
@@ -40,12 +41,17 @@ void LX::TernaryExpr::GenIR(Builder& builder, Value& ref) const
     else_bb = builder.IRBuilder().GetInsertBlock();
     builder.IRBuilder().CreateBr(end_bb);
 
+    const auto dst_ty = Type::Equalize(builder.Ctx(), then.Type, else_.Type);
+    builder.IRBuilder().SetInsertPoint(then_bb->getTerminator());
+    builder.Cast(then, dst_ty, then);
+    builder.IRBuilder().SetInsertPoint(else_bb->getTerminator());
+    builder.Cast(else_, dst_ty, else_);
+
     builder.IRBuilder().SetInsertPoint(end_bb);
-    const auto phi = builder.IRBuilder().CreatePHI(Type->GenIR(builder), 2);
+    const auto phi = builder.IRBuilder().CreatePHI(then.ValueIR->getType(), 2);
     phi->addIncoming(then.ValueIR, then_bb);
     phi->addIncoming(else_.ValueIR, else_bb);
 
-    ref.Type = Type;
-    ref.TypeIR = Type->GenIR(builder);
+    ref.Type = then.Type;
     ref.ValueIR = phi;
 }

@@ -35,14 +35,14 @@ namespace LX
         Token Expect(TokenType);
         Token Expect(const std::string&);
 
-        TypePtr ParseType();
+        TypePtr& ParseType();
+        void ParseTypeList(std::vector<TypePtr>&, const std::string&);
 
         void ParseParameter(Parameter&);
         void ParseParameterList(std::vector<Parameter>&, const std::string&);
 
         StmtPtr ParseStmt();
         StmtPtr ParseFunction(const std::string&);
-        StmtPtr ParseVariable(const std::string&);
 
         ExprPtr ParseExpr();
         void ParseExprList(std::vector<ExprPtr>&, const std::string&);

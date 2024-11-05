@@ -17,9 +17,19 @@ LX::FunctionType::FunctionType(TypePtr result_type, std::vector<TypePtr> param_t
 {
 }
 
+bool LX::FunctionType::IsFunction() const
+{
+    return true;
+}
+
 LX::TypePtr LX::FunctionType::Result() const
 {
     return ResultType;
+}
+
+size_t LX::FunctionType::ParamCount() const
+{
+    return ParamTypes.size();
 }
 
 LX::TypePtr LX::FunctionType::Param(const size_t index) const

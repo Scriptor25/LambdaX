@@ -14,6 +14,12 @@ LX::TypePtr LX::Type::Equalize(Context& ctx, const TypePtr& a, const TypePtr& b)
         return ctx.GetIntType(bits, sign);
     }
 
+    if (a->IsFloat() || b->IsFloat())
+    {
+        const auto bits = std::max(a->Bits, b->Bits);
+        return ctx.GetFloatType(bits);
+    }
+
     return {};
 }
 
@@ -42,9 +48,24 @@ bool LX::Type::IsFloat() const
     return false;
 }
 
+bool LX::Type::IsPointer() const
+{
+    return false;
+}
+
+bool LX::Type::IsFunction() const
+{
+    return false;
+}
+
 LX::TypePtr LX::Type::Result() const
 {
     Error("type '{}' does not override Result", Name);
+}
+
+size_t LX::Type::ParamCount() const
+{
+    Error("type '{}' does not override ParamCount", Name);
 }
 
 LX::TypePtr LX::Type::Param(size_t) const

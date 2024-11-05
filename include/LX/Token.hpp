@@ -10,11 +10,12 @@ namespace LX
     enum TokenType
     {
         TokenType_EOF,
-        TokenType_Symbol,
-        TokenType_Int,
         TokenType_Float,
+        TokenType_Int,
         TokenType_Operator,
         TokenType_Other,
+        TokenType_String,
+        TokenType_Symbol,
     };
 
     struct Token
@@ -44,6 +45,7 @@ namespace std
                 {LX::TokenType_Float, "Float"},
                 {LX::TokenType_Operator, "Operator"},
                 {LX::TokenType_Other, "Other"},
+                {LX::TokenType_String, "String"},
             };
             return formatter<string>::format(names[type], ctx);
         }

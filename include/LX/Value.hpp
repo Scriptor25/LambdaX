@@ -11,7 +11,6 @@ namespace LX
         bool operator!() const;
 
         TypePtr Type;
-        llvm::Type* TypeIR{};
         llvm::Value* ValueIR{};
     };
 }

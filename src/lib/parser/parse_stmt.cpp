@@ -4,7 +4,5 @@
 LX::StmtPtr LX::Parser::ParseStmt()
 {
     const auto name = Expect(TokenType_Symbol).StringValue;
-
-    if (At("(")) return ParseFunction(name);
-    return ParseVariable(name);
+    return ParseFunction(name);
 }

@@ -3,6 +3,7 @@
 #include <LX/ArgParser.hpp>
 #include <LX/AST.hpp>
 #include <LX/Builder.hpp>
+#include <LX/Linker.hpp>
 #include <LX/Parser.hpp>
 #include <LX/Value.hpp>
 
@@ -36,6 +37,7 @@ int main(const int argc, const char* const* argv)
     const auto& input_filenames = args.Args;
     const auto& output_filename = args.Options["output"];
 
+    LX::Linker linker("lx");
     for (const auto& filename : input_filenames)
     {
         std::ifstream stream(filename);
@@ -46,19 +48,17 @@ int main(const int argc, const char* const* argv)
         }
 
         LX::Context ctx;
-        LX::Builder builder(ctx, "module");
+        LX::Builder builder(ctx, linker.IRContext(), filename);
         LX::Parser::Parse(ctx, stream, filename, [&](LX::StmtPtr ptr)
         {
-            // ptr->Print(std::cout) << std::endl;
+            ptr->Print(std::cerr) << std::endl;
 
             LX::Value ref;
             ptr->GenIR(builder, ref);
-
-            if (ref.ValueIR)
-                ref.ValueIR->print(llvm::outs());
         });
         stream.close();
 
-        builder.PrintIR(output_filename);
+        linker.Link(builder);
     }
+    linker.Output(output_filename);
 }

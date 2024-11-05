@@ -2,5 +2,5 @@
 
 bool LX::Value::operator!() const
 {
-    return !Type || !TypeIR || !ValueIR;
+    return !Type || !ValueIR;
 }

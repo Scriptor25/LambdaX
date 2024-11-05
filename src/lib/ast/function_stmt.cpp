@@ -1,6 +1,7 @@
 #include <llvm/IR/Verifier.h>
 #include <LX/AST.hpp>
 #include <LX/Builder.hpp>
+#include <LX/Context.hpp>
 #include <LX/Error.hpp>
 #include <LX/Type.hpp>
 #include <LX/Value.hpp>
@@ -33,9 +34,8 @@ void LX::FunctionStmt::GenIR(Builder& builder, Value& ref) const
     }
 
     {
-        auto& [type, type_ir, value_ir] = builder.DefVar(Name);
+        auto& [type, value_ir] = builder.DefVar(Name);
         type = ref.Type = builder.Ctx().GetPointerType(Type);
-        type_ir = ref.TypeIR = function->getType();
         value_ir = ref.ValueIR = function;
     }
 
@@ -52,9 +52,8 @@ void LX::FunctionStmt::GenIR(Builder& builder, Value& ref) const
         const auto arg = function->getArg(i);
         arg->setName(param_name_);
 
-        auto& [type_, type_ir_, value_ir_] = builder.DefVar(param_name_);
+        auto& [type_, value_ir_] = builder.DefVar(param_name_);
         type_ = param_type_;
-        type_ir_ = arg->getType();
         value_ir_ = arg;
     }
 

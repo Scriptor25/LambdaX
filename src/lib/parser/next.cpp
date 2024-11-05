@@ -38,14 +38,15 @@ LX::Token& LX::Parser::Next()
 {
     enum State
     {
-        State_Idle,
-        State_Comment,
-        State_Symbol,
         State_Bin,
-        State_Oct,
+        State_Comment,
         State_Dec,
         State_Hex,
+        State_Idle,
+        State_Oct,
         State_Operator,
+        State_String,
+        State_Symbol,
     };
 
     State state = State_Idle;
@@ -97,6 +98,7 @@ LX::Token& LX::Parser::Next()
             case ':':
             case ',':
             case ';':
+            case '$':
                 where = m_Where;
                 value += static_cast<char>(m_Tok);
                 m_Tok = Get();
@@ -125,6 +127,11 @@ LX::Token& LX::Parser::Next()
                 state = State_Oct;
                 value = "0";
                 continue;
+
+            case '"':
+                where = m_Where;
+                state = State_String;
+                break;
 
             default:
                 where = m_Where;
@@ -196,6 +203,15 @@ LX::Token& LX::Parser::Next()
         case State_Operator:
             if (!is_compound_operator(m_Tok))
                 return m_Token = {where, TokenType_Operator, value};
+            value += static_cast<char>(m_Tok);
+            break;
+
+        case State_String:
+            if (m_Tok == '"')
+            {
+                m_Tok = Get();
+                return m_Token = {where, TokenType_String, value};
+            }
             value += static_cast<char>(m_Tok);
             break;
         }

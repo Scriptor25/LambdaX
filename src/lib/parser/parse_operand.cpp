@@ -12,7 +12,22 @@ LX::ExprPtr LX::Parser::ParseOperand()
             std::vector<ExprPtr> args;
             ParseExprList(args, ")");
             Expect(")");
-            expr = std::make_unique<CallExpr>(expr->Type->Element()->Result(), std::move(expr), std::move(args));
+            expr = std::make_unique<CallExpr>(std::move(expr), std::move(args));
+            continue;
+        }
+
+        if (NextAt("["))
+        {
+            auto index = ParseExpr();
+            Expect("]");
+            expr = std::make_unique<SubscriptExpr>(std::move(expr), std::move(index));
+            continue;
+        }
+
+        if (NextAt("as"))
+        {
+            const auto type = ParseType();
+            expr = std::make_unique<CastExpr>(std::move(expr), type);
             continue;
         }
 

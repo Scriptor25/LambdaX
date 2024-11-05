@@ -6,8 +6,8 @@
 #include <LX/Type.hpp>
 #include <LX/Value.hpp>
 
-LX::BinaryExpr::BinaryExpr(TypePtr type, std::string op, ExprPtr lhs, ExprPtr rhs)
-    : Expr(std::move(type)), Op(std::move(op)), Lhs(std::move(lhs)), Rhs(std::move(rhs))
+LX::BinaryExpr::BinaryExpr(std::string op, ExprPtr lhs, ExprPtr rhs)
+    : Op(std::move(op)), Lhs(std::move(lhs)), Rhs(std::move(rhs))
 {
 }
 
@@ -56,8 +56,7 @@ void LX::BinaryExpr::GenIR(Builder& builder, Value& ref) const
     if (!rhs) Error("rhs is null");
 
     if (lhs.Type != rhs.Type)
-        if (!builder.Equalize(lhs, rhs))
-            Error("failed to equalize binary operands");
+        builder.Equalize(lhs, rhs);
 
     if (const auto& op = ops[Op]; op && op(builder, lhs, rhs, ref))
         return;

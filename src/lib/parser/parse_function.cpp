@@ -2,6 +2,7 @@
 #include <LX/AST.hpp>
 #include <LX/Parameter.hpp>
 #include <LX/Parser.hpp>
+#include <LX/Type.hpp>
 
 LX::StmtPtr LX::Parser::ParseFunction(const std::string& name)
 {
@@ -18,17 +19,10 @@ LX::StmtPtr LX::Parser::ParseFunction(const std::string& name)
         param_types[i] = params[i].Type;
 
     auto type = m_Ctx.GetFunctionType(result_type, param_types);
-    m_Ctx.DefVar(name) = m_Ctx.GetPointerType(type);
 
     ExprPtr body;
     if (NextAt("="))
-    {
-        m_Ctx.Push();
-        for (const auto& [type_, name_] : params)
-            m_Ctx.DefVar(name_) = type_;
         body = ParseExpr();
-        m_Ctx.Pop();
-    }
 
     return std::make_unique<FunctionStmt>(type, name, params, std::move(body));
 }

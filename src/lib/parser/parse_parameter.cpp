@@ -4,5 +4,6 @@
 void LX::Parser::ParseParameter(Parameter& parameter)
 {
     parameter.Type = ParseType();
-    parameter.Name = Expect(TokenType_Symbol).StringValue;
+    if (At(TokenType_Symbol))
+        parameter.Name = Skip().StringValue;
 }

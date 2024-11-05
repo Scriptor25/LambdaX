@@ -1,3 +1,4 @@
+#include <filesystem>
 #include <ranges>
 #include <LX/Builder.hpp>
 #include <LX/Error.hpp>
@@ -18,12 +19,15 @@ bool LX::Builder::StackFrame::contains(const std::string& name) const
     return Variables.contains(name);
 }
 
-LX::Builder::Builder(Context& ctx, const std::string& module_name)
-    : m_Ctx(ctx)
+LX::Builder::Builder(Context& ctx, llvm::LLVMContext& context, const std::string& filename)
+    : m_Ctx(ctx), m_IRContext(context)
 {
-    m_IRContext = std::make_unique<llvm::LLVMContext>();
-    m_IRModule = std::make_unique<llvm::Module>(module_name, *m_IRContext);
-    m_IRBuilder = std::make_unique<llvm::IRBuilder<>>(*m_IRContext);
+    const auto module_id = std::filesystem::path(filename).filename().string();
+
+    m_IRModule = std::make_unique<llvm::Module>(module_id, IRContext());
+    m_IRBuilder = std::make_unique<llvm::IRBuilder<>>(IRContext());
+
+    IRModule().setSourceFileName(filename);
 
     Push();
 }
@@ -35,7 +39,7 @@ LX::Context& LX::Builder::Ctx() const
 
 llvm::LLVMContext& LX::Builder::IRContext() const
 {
-    return *m_IRContext;
+    return m_IRContext;
 }
 
 llvm::Module& LX::Builder::IRModule() const
@@ -43,16 +47,14 @@ llvm::Module& LX::Builder::IRModule() const
     return *m_IRModule;
 }
 
+std::unique_ptr<llvm::Module> LX::Builder::IRModulePtr()
+{
+    return std::move(m_IRModule);
+}
+
 llvm::IRBuilder<>& LX::Builder::IRBuilder() const
 {
     return *m_IRBuilder;
-}
-
-void LX::Builder::PrintIR(const std::string& filename)
-{
-    std::error_code ec;
-    llvm::raw_fd_ostream stream(filename, ec);
-    m_IRModule->print(stream, nullptr);
 }
 
 void LX::Builder::Push()
@@ -79,60 +81,81 @@ const LX::Value& LX::Builder::GetVar(const std::string& name)
     Error("undefined variable '{}'", name);
 }
 
-bool LX::Builder::Cast(const Value& src, const TypePtr& dst_ty, Value& dst)
+void LX::Builder::Cast(const Value& src, const TypePtr& dst_ty, Value& dst)
 {
+    if (!src) Error("cannot cast null value");
+    if (!dst_ty) Error("cannot cast to null type");
+
     const auto src_ty = src.Type;
     if (src_ty == dst_ty)
     {
         dst = src;
-        return true;
+        return;
     }
 
     const auto src_val_ir = src.ValueIR;
     const auto dst_ty_ir = dst_ty->GenIR(*this);
     dst.Type = dst_ty;
-    dst.TypeIR = dst_ty_ir;
 
     if (src_ty->IsInt())
     {
         if (dst_ty->IsInt())
         {
             dst.ValueIR = IRBuilder().CreateIntCast(src_val_ir, dst_ty_ir, dst_ty->IsSigned());
-            return true;
+            return;
         }
         if (dst_ty->IsFloat())
         {
             if (src_ty->IsSigned()) dst.ValueIR = IRBuilder().CreateSIToFP(src_val_ir, dst_ty_ir);
             else dst.ValueIR = IRBuilder().CreateUIToFP(src_val_ir, dst_ty_ir);
-            return true;
+            return;
         }
-        return false;
+        if (dst_ty->IsPointer())
+        {
+            dst.ValueIR = IRBuilder().CreateIntToPtr(src_val_ir, dst_ty_ir);
+            return;
+        }
     }
-
-    if (src_ty->IsFloat())
+    else if (src_ty->IsFloat())
     {
         if (dst_ty->IsInt())
         {
             if (dst_ty->IsSigned()) dst.ValueIR = IRBuilder().CreateFPToSI(src_val_ir, dst_ty_ir);
             else dst.ValueIR = IRBuilder().CreateFPToUI(src_val_ir, dst_ty_ir);
-            return true;
+            return;
         }
         if (dst_ty->IsFloat())
         {
             dst.ValueIR = IRBuilder().CreateFPCast(src_val_ir, dst_ty_ir);
-            return true;
+            return;
         }
-        return false;
+    }
+    else if (src_ty->IsPointer())
+    {
+        if (dst_ty->IsInt())
+        {
+            dst.ValueIR = IRBuilder().CreatePtrToInt(src_val_ir, dst_ty_ir);
+            return;
+        }
+        if (dst_ty->IsPointer())
+        {
+            dst.ValueIR = src.ValueIR;
+            return;
+        }
     }
 
-    return false;
+    Error("cannot cast value of type '{}' to type '{}'", src_ty, dst_ty);
 }
 
-bool LX::Builder::Equalize(Value& a, Value& b)
+void LX::Builder::Equalize(Value& a, Value& b)
 {
+    if (!a || !b)
+        Error("cannot equalize if one or more values are missing");
+
     if (a.Type == b.Type)
-        return true;
+        return;
 
     const auto dst_ty = Type::Equalize(m_Ctx, a.Type, b.Type);
-    return Cast(a, dst_ty, a) && Cast(b, dst_ty, b);
+    Cast(a, dst_ty, a);
+    Cast(b, dst_ty, b);
 }
