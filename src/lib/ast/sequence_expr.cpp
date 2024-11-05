@@ -16,7 +16,7 @@ std::ostream& LX::SequenceExpr::Print(std::ostream& os) const
         return s;
     };
 
-    os << spacing() << '(';
+    os << '(';
     if (Children.size() == 1)
         return Children[0]->Print(os) << ')';
     depth += 2;

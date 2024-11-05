@@ -31,7 +31,11 @@ std::ostream& LX::ConstFunctionExpr::Print(std::ostream& os) const
 void LX::ConstFunctionExpr::GenIR(Builder& builder, Value& ref) const
 {
     const auto type = llvm::dyn_cast<llvm::FunctionType>(Type->GenIR(builder));
-    const auto function = llvm::Function::Create(type, llvm::GlobalValue::ExternalLinkage, "", builder.IRModule());
+    const auto function = llvm::Function::Create(
+        type,
+        llvm::GlobalValue::InternalLinkage,
+        "lambda",
+        builder.IRModule());
 
     ref.Type = builder.Ctx().GetPointerType(Type);
     ref.ValueIR = function;

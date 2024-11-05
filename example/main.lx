@@ -8,12 +8,12 @@ print(i32 i, i32 argc, [[i8]] argv) => i32
 )
 
 foo() => [] = (
-    puts("bar"),
-    foo
+    puts("foo"),
+    $ => i32 = (puts("bar"), 0)
 )
 
 main(i32 argc, [[i8]] argv) => i32 = (
     print(0, argc, argv),
-    foo() as [() => []](),
+    foo() as [() => i32](),
     0
 )
