@@ -132,6 +132,7 @@ LX::Token& LX::Parser::Next()
             case '^':
             case '!':
             case '~':
+            case '?':
                 state = State_Operator;
                 where = m_Where;
                 value += static_cast<char>(m_Tok);
@@ -143,7 +144,6 @@ LX::Token& LX::Parser::Next()
             case '}':
             case '[':
             case ']':
-            case '?':
             case '.':
             case ':':
             case ',':

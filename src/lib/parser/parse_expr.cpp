@@ -5,13 +5,5 @@
 
 LX::ExprPtr LX::Parser::ParseExpr()
 {
-    auto expr = ParseBinary(ParseOperand(), 0);
-    while (NextAt("?"))
-    {
-        auto then = ParseExpr();
-        Expect(":");
-        auto else_ = ParseExpr();
-        expr = std::make_unique<TernaryExpr>(std::move(expr), std::move(then), std::move(else_));
-    }
-    return expr;
+    return ParseBinary(ParseOperand(), 0);
 }

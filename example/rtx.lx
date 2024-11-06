@@ -113,11 +113,11 @@ sphere() => _sphere = {
             v1 = t1 <= t_min || t_max <= t1,
             v2 = t2 <= t_min || t_max <= t2,
             v1 && v2 ? { 0 } => record : (
-                t = (v1 ? t2 : t1),
+                t = v1 ? t2 : t1,
                 p = ray().at(r, t),
                 on = vec3().div(vec3().sub(p, s.center), s.radius),
-                f = (vec3().dot(r.direction, on) < 0),
-                n = (f ? on : vec3().neg(on)),
+                f = vec3().dot(r.direction, on) < 0,
+                n = f ? on : vec3().neg(on),
                 { !0, p, n, t, f }
             )
         )

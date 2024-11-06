@@ -9,38 +9,40 @@ LX::ExprPtr LX::Parser::ParseBinary(ExprPtr lhs, const unsigned min_pre)
     {
         {"=", 0},
 
-        {"||", 1},
+        {"?", 1},
 
-        {"^^", 2},
+        {"||", 2},
 
-        {"&&", 3},
+        {"^^", 3},
 
-        {"|", 4},
+        {"&&", 4},
 
-        {"^", 5},
+        {"|", 5},
 
-        {"&", 6},
+        {"^", 6},
 
-        {"==", 7},
-        {"!=", 7},
+        {"&", 7},
 
-        {"<", 8},
-        {"<=", 8},
-        {">", 8},
-        {">=", 8},
+        {"==", 8},
+        {"!=", 8},
 
-        {"<<", 9},
-        {">>", 9},
+        {"<", 9},
+        {"<=", 9},
+        {">", 9},
+        {">=", 9},
 
-        {"+", 10},
-        {"-", 10},
+        {"<<", 10},
+        {">>", 10},
 
-        {"*", 11},
-        {"/", 11},
-        {"%", 11},
+        {"+", 11},
+        {"-", 11},
 
-        {"**", 12},
-        {"//", 12},
+        {"*", 12},
+        {"/", 12},
+        {"%", 12},
+
+        {"**", 13},
+        {"//", 13},
     };
 
     auto get_pre = [&]
@@ -57,7 +59,13 @@ LX::ExprPtr LX::Parser::ParseBinary(ExprPtr lhs, const unsigned min_pre)
         while (At(TokenType_Operator) && (get_pre() > op_pre || !get_pre()))
             rhs = ParseBinary(std::move(rhs), op_pre + (get_pre() ? 1 : 0));
 
-        lhs = std::make_unique<BinaryExpr>(op, std::move(lhs), std::move(rhs));
+        if (op == "?")
+        {
+            Expect(":");
+            auto else_ = ParseExpr();
+            lhs = std::make_unique<TernaryExpr>(std::move(lhs), std::move(rhs), std::move(else_));
+        }
+        else lhs = std::make_unique<BinaryExpr>(op, std::move(lhs), std::move(rhs));
     }
 
     return lhs;
