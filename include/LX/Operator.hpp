@@ -25,4 +25,8 @@ namespace LX
     bool OperatorAnd(Builder&, const Value&, const Value&, Value&);
     bool OperatorShL(Builder&, const Value&, const Value&, Value&);
     bool OperatorShR(Builder&, const Value&, const Value&, Value&);
+
+    bool OperatorNeg(Builder&, const Value&, Value&);
+    bool OperatorNot(Builder&, const Value&, Value&);
+    bool OperatorLNot(Builder&, const Value&, Value&);
 }

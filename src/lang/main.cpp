@@ -51,7 +51,7 @@ int main(const int argc, const char* const* argv)
         LX::Builder builder(ctx, linker.IRContext(), filename);
         LX::Parser::Parse(ctx, stream, filename, [&](LX::StmtPtr ptr)
         {
-            ptr->Print(std::cerr) << std::endl;
+            // ptr->Print(std::cerr) << std::endl;
 
             LX::Value ref;
             ptr->GenIR(builder, ref);

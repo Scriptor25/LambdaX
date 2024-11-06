@@ -73,7 +73,28 @@ LX::TypePtr LX::Type::Param(size_t) const
     Error("type '{}' does not override Param", Name);
 }
 
+bool LX::Type::HasVarArg() const
+{
+    Error("type '{}' does not override HasVarArg", Name);
+}
+
+llvm::Type* LX::Type::GetIR(Builder& builder)
+{
+    if (IR) return IR;
+    return IR = GenIR(builder);
+}
+
 LX::TypePtr LX::Type::Element() const
 {
     Error("type '{}' does not override Element", Name);
+}
+
+LX::TypePtr LX::Type::Element(size_t) const
+{
+    Error("type '{}' does not override Element", Name);
+}
+
+size_t LX::Type::IndexOf(const std::string&) const
+{
+    Error("type '{}' does not override IndexOf", Name);
 }

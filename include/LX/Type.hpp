@@ -5,6 +5,7 @@
 #include <vector>
 #include <llvm/IR/Type.h>
 #include <LX/LX.hpp>
+#include <LX/Parameter.hpp>
 
 namespace LX
 {
@@ -23,13 +24,19 @@ namespace LX
         [[nodiscard]] virtual bool IsPointer() const;
         [[nodiscard]] virtual bool IsFunction() const;
         [[nodiscard]] virtual TypePtr Element() const;
+        [[nodiscard]] virtual TypePtr Element(size_t) const;
+        [[nodiscard]] virtual size_t IndexOf(const std::string&) const;
         [[nodiscard]] virtual TypePtr Result() const;
         [[nodiscard]] virtual size_t ParamCount() const;
         [[nodiscard]] virtual TypePtr Param(size_t) const;
-        [[nodiscard]] virtual llvm::Type* GenIR(Builder&) const = 0;
+        [[nodiscard]] virtual bool HasVarArg() const;
+        virtual llvm::Type* GenIR(Builder&) const = 0;
+
+        llvm::Type* GetIR(Builder&);
 
         std::string Name;
         unsigned Bits;
+        llvm::Type* IR{};
     };
 
     struct IntType : Type
@@ -40,7 +47,7 @@ namespace LX
 
         [[nodiscard]] bool IsInt() const override;
         [[nodiscard]] bool IsSigned() const override;
-        [[nodiscard]] llvm::Type* GenIR(Builder&) const override;
+        llvm::Type* GenIR(Builder&) const override;
 
         bool Sign;
     };
@@ -52,7 +59,7 @@ namespace LX
         explicit FloatType(unsigned bits);
 
         [[nodiscard]] bool IsFloat() const override;
-        [[nodiscard]] llvm::Type* GenIR(Builder&) const override;
+        llvm::Type* GenIR(Builder&) const override;
     };
 
     struct PointerType : Type
@@ -63,32 +70,41 @@ namespace LX
 
         [[nodiscard]] bool IsPointer() const override;
         [[nodiscard]] TypePtr Element() const override;
-        [[nodiscard]] llvm::Type* GenIR(Builder&) const override;
+        llvm::Type* GenIR(Builder&) const override;
 
         TypePtr ElementType;
     };
 
     struct FunctionType : Type
     {
-        static std::string GetName(const TypePtr& result_type, const std::vector<TypePtr>& param_types);
+        static std::string GetName(const TypePtr& result_type, const std::vector<TypePtr>& param_types, bool vararg);
 
-        explicit FunctionType(TypePtr result_type, std::vector<TypePtr> param_types);
+        explicit FunctionType(TypePtr result_type, std::vector<TypePtr> param_types, bool vararg);
 
         [[nodiscard]] bool IsFunction() const override;
         [[nodiscard]] TypePtr Result() const override;
         [[nodiscard]] size_t ParamCount() const override;
         [[nodiscard]] TypePtr Param(size_t) const override;
-        [[nodiscard]] llvm::Type* GenIR(Builder&) const override;
+        [[nodiscard]] bool HasVarArg() const override;
+        llvm::Type* GenIR(Builder&) const override;
 
         TypePtr ResultType;
         std::vector<TypePtr> ParamTypes;
+        bool VarArg;
     };
 
-    struct TempType : Type
+    struct StructType : Type
     {
-        explicit TempType(std::string);
+        static std::string GetName(const std::vector<Parameter>& elements);
+        static unsigned GetBits(const std::vector<Parameter>& elements);
 
-        [[nodiscard]] llvm::Type* GenIR(Builder&) const override;
+        explicit StructType(std::vector<Parameter> elements);
+
+        [[nodiscard]] TypePtr Element(size_t) const override;
+        [[nodiscard]] size_t IndexOf(const std::string&) const override;
+        llvm::Type* GenIR(Builder&) const override;
+
+        std::vector<Parameter> Elements;
     };
 }
 

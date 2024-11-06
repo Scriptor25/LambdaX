@@ -94,7 +94,7 @@ void LX::Builder::Cast(const Value& src, const TypePtr& dst_ty, Value& dst)
     }
 
     const auto src_val_ir = src.ValueIR;
-    const auto dst_ty_ir = dst_ty->GenIR(*this);
+    const auto dst_ty_ir = dst_ty->GetIR(*this);
     dst.Type = dst_ty;
 
     if (src_ty->IsInt())
@@ -158,4 +158,13 @@ void LX::Builder::Equalize(Value& a, Value& b)
     const auto dst_ty = Type::Equalize(m_Ctx, a.Type, b.Type);
     Cast(a, dst_ty, a);
     Cast(b, dst_ty, b);
+}
+
+llvm::Value* LX::Builder::CreateAlloca(llvm::Type* type) const
+{
+    const auto bkp = IRBuilder().GetInsertBlock();
+    IRBuilder().SetInsertPointPastAllocas(bkp->getParent());
+    const auto ptr = IRBuilder().CreateAlloca(type);
+    IRBuilder().SetInsertPoint(bkp);
+    return ptr;
 }

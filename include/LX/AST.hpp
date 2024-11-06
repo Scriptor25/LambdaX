@@ -106,6 +106,28 @@ namespace LX
         std::string Value;
     };
 
+    struct ConstStructExpr : Expr
+    {
+        ConstStructExpr(std::vector<ExprPtr>, TypePtr);
+
+        std::ostream& Print(std::ostream&) const override;
+        void GenIR(Builder&, Value&) const override;
+
+        std::vector<ExprPtr> Elements;
+        TypePtr Type;
+    };
+
+    struct MemberExpr : Expr
+    {
+        MemberExpr(ExprPtr, std::string);
+
+        std::ostream& Print(std::ostream&) const override;
+        void GenIR(Builder&, Value&) const override;
+
+        ExprPtr Parent;
+        std::string Member;
+    };
+
     struct SequenceExpr : Expr
     {
         explicit SequenceExpr(std::vector<ExprPtr>);
@@ -147,5 +169,16 @@ namespace LX
         ExprPtr Condition;
         ExprPtr Then;
         ExprPtr Else;
+    };
+
+    struct UnaryExpr : Expr
+    {
+        UnaryExpr(std::string, ExprPtr);
+
+        std::ostream& Print(std::ostream&) const override;
+        void GenIR(Builder&, Value&) const override;
+
+        std::string Operator;
+        ExprPtr Operand;
     };
 }

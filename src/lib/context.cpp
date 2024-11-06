@@ -38,6 +38,13 @@ LX::TypePtr& LX::Context::GetFloatType(const unsigned bits)
     return type = std::make_shared<FloatType>(bits);
 }
 
+LX::TypePtr& LX::Context::GetStructType(const std::vector<Parameter>& elements)
+{
+    auto& type = GetType(StructType::GetName(elements));
+    if (type) return type;
+    return type = std::make_shared<StructType>(elements);
+}
+
 LX::TypePtr& LX::Context::GetPointerType(const TypePtr& base)
 {
     auto& type = GetType(PointerType::GetName(base));
@@ -45,14 +52,20 @@ LX::TypePtr& LX::Context::GetPointerType(const TypePtr& base)
     return type = std::make_shared<PointerType>(base);
 }
 
-LX::TypePtr& LX::Context::GetFunctionType(const TypePtr& result_type, const std::vector<TypePtr>& param_types)
+LX::TypePtr& LX::Context::GetFunctionType(
+    const TypePtr& result_type,
+    const std::vector<TypePtr>& param_types,
+    const bool vararg)
 {
-    auto& type = GetType(FunctionType::GetName(result_type, param_types));
+    auto& type = GetType(FunctionType::GetName(result_type, param_types, vararg));
     if (type) return type;
-    return type = std::make_shared<FunctionType>(result_type, param_types);
+    return type = std::make_shared<FunctionType>(result_type, param_types, vararg);
 }
 
-LX::TypePtr& LX::Context::GetFunPtrType(const TypePtr& result_type, const std::vector<TypePtr>& param_types)
+LX::TypePtr& LX::Context::GetFunPtrType(
+    const TypePtr& result_type,
+    const std::vector<TypePtr>& param_types,
+    const bool vararg)
 {
-    return GetPointerType(GetFunctionType(result_type, param_types));
+    return GetPointerType(GetFunctionType(result_type, param_types, vararg));
 }

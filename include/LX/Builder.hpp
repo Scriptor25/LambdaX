@@ -39,6 +39,8 @@ namespace LX
         void Cast(const Value&, const TypePtr&, Value&);
         void Equalize(Value&, Value&);
 
+        llvm::Value* CreateAlloca(llvm::Type*) const;
+
     private:
         Context& m_Ctx;
         llvm::LLVMContext& m_IRContext;

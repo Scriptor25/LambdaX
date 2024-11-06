@@ -18,12 +18,29 @@ LX::ExprPtr LX::Parser::ParsePrimary()
         return std::make_unique<SequenceExpr>(std::move(children));
     }
 
+    if (NextAt("{"))
+    {
+        std::vector<ExprPtr> elements;
+        while (!(At("}") || AtEOF()))
+        {
+            elements.push_back(ParseExpr());
+            if (!At("}"))
+                Expect(",");
+        }
+        Expect("}");
+        TypePtr type;
+        if (NextAt("=>"))
+            type = ParseType();
+        return std::make_unique<ConstStructExpr>(std::move(elements), type);
+    }
+
     if (NextAt("$"))
     {
         std::vector<Parameter> params;
+        bool vararg = false;
         if (NextAt("("))
         {
-            ParseParameterList(params, ")");
+            vararg = ParseParameterList(params, ")");
             Expect(")");
         }
         Expect("=>");
@@ -31,10 +48,17 @@ LX::ExprPtr LX::Parser::ParsePrimary()
         std::vector<TypePtr> param_types;
         for (const auto& [type, name] : params)
             param_types.push_back(type);
-        const auto type = m_Ctx.GetFunctionType(result_type, param_types);
+        const auto type = m_Ctx.GetFunctionType(result_type, param_types, vararg);
         Expect("=");
         auto body = ParseExpr();
         return std::make_unique<ConstFunctionExpr>(type, params, std::move(body));
+    }
+
+    if (At(TokenType_Operator))
+    {
+        const auto op = Skip().StringValue;
+        auto operand = ParseOperand();
+        return std::make_unique<UnaryExpr>(op, std::move(operand));
     }
 
     if (At(TokenType_Symbol))

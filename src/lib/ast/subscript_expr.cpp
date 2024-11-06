@@ -25,7 +25,7 @@ void LX::SubscriptExpr::GenIR(Builder& builder, Value& ref) const
     if (!offset) Error("offset is null");
 
     const auto element_ty = base.Type->Element();
-    const auto ptr = builder.IRBuilder().CreateGEP(element_ty->GenIR(builder), base.ValueIR, {offset.ValueIR});
+    const auto ptr = builder.IRBuilder().CreateGEP(element_ty->GetIR(builder), base.ValueIR, {offset.ValueIR});
     ref.Type = element_ty;
-    ref.ValueIR = builder.IRBuilder().CreateLoad(ref.Type->GenIR(builder), ptr);
+    ref.ValueIR = builder.IRBuilder().CreateLoad(ref.Type->GetIR(builder), ptr);
 }

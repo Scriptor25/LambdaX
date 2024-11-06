@@ -30,7 +30,7 @@ std::ostream& LX::ConstFunctionExpr::Print(std::ostream& os) const
 
 void LX::ConstFunctionExpr::GenIR(Builder& builder, Value& ref) const
 {
-    const auto type = llvm::dyn_cast<llvm::FunctionType>(Type->GenIR(builder));
+    const auto type = llvm::dyn_cast<llvm::FunctionType>(Type->GetIR(builder));
     const auto function = llvm::Function::Create(
         type,
         llvm::GlobalValue::InternalLinkage,

@@ -30,18 +30,20 @@ void LX::CallExpr::GenIR(Builder& builder, Value& ref) const
     const auto callee_type = callee.Type->Element();
     if (!callee_type) Error("cannot create call on opaque pointer");
     if (!callee_type->IsFunction()) Error("callee is not a function pointer");
-    if (Args.size() != callee_type->ParamCount()) Error("incorrect number of arguments");
-
-    const auto type_ir = llvm::dyn_cast<llvm::FunctionType>(callee_type->GenIR(builder));
+    if (Args.size() < callee_type->ParamCount()) Error("not enough arguments");
+    if (!callee_type->HasVarArg() && Args.size() > callee_type->ParamCount()) Error("too many arguments");
 
     std::vector<llvm::Value*> args(Args.size());
     for (size_t i = 0; i < Args.size(); ++i)
     {
         Value arg;
         Args[i]->GenIR(builder, arg);
-        builder.Cast(arg, callee_type->Param(i), arg);
+        if (i < callee_type->ParamCount())
+            builder.Cast(arg, callee_type->Param(i), arg);
         args[i] = arg.ValueIR;
     }
+
+    const auto type_ir = llvm::dyn_cast<llvm::FunctionType>(callee_type->GetIR(builder));
 
     ref.Type = callee_type->Result();
     ref.ValueIR = builder.IRBuilder().CreateCall(type_ir, callee.ValueIR, args);

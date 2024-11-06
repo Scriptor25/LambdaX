@@ -1,4 +1,5 @@
 #include <LX/AST.hpp>
+#include <LX/Builder.hpp>
 
 LX::SequenceExpr::SequenceExpr(std::vector<ExprPtr> children)
     : Children(std::move(children))
@@ -31,6 +32,8 @@ std::ostream& LX::SequenceExpr::Print(std::ostream& os) const
 
 void LX::SequenceExpr::GenIR(Builder& builder, Value& ref) const
 {
+    builder.Push();
     for (const auto& child : Children)
         child->GenIR(builder, ref);
+    builder.Pop();
 }

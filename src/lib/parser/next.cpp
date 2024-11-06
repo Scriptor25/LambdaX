@@ -34,6 +34,56 @@ int LX::Parser::GetNewLine()
     return m_Stream.get();
 }
 
+void LX::Parser::Escape()
+{
+    m_Tok = Get();
+    switch (m_Tok)
+    {
+    case 'a':
+        m_Tok = '\a';
+        break;
+    case 'b':
+        m_Tok = '\b';
+        break;
+    case 'e':
+        m_Tok = '\x1b';
+        break;
+    case 'f':
+        m_Tok = '\f';
+        break;
+    case 'n':
+        m_Tok = '\n';
+        break;
+    case 'r':
+        m_Tok = '\r';
+        break;
+    case 't':
+        m_Tok = '\t';
+        break;
+    case 'v':
+        m_Tok = '\v';
+        break;
+    case 'x':
+        {
+            std::string s;
+            s += static_cast<char>(m_Tok = Get());
+            s += static_cast<char>(m_Tok = Get());
+            m_Tok = std::stoi(s, nullptr, 16);
+        }
+        break;
+    default:
+        if ('0' <= m_Tok && m_Tok <= '7')
+        {
+            std::string s;
+            s += static_cast<char>(m_Tok);
+            s += static_cast<char>(m_Tok = Get());
+            s += static_cast<char>(m_Tok = Get());
+            m_Tok = std::stoi(s, nullptr, 8);
+        }
+        break;
+    }
+}
+
 LX::Token& LX::Parser::Next()
 {
     enum State
@@ -212,6 +262,7 @@ LX::Token& LX::Parser::Next()
                 m_Tok = Get();
                 return m_Token = {where, TokenType_String, value};
             }
+            if (m_Tok == '\\') Escape();
             value += static_cast<char>(m_Tok);
             break;
         }

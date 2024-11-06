@@ -31,6 +31,13 @@ LX::ExprPtr LX::Parser::ParseOperand()
             continue;
         }
 
+        if (NextAt("."))
+        {
+            const auto member = Expect(TokenType_Symbol).StringValue;
+            expr = std::make_unique<MemberExpr>(std::move(expr), member);
+            continue;
+        }
+
         return expr;
     }
 }

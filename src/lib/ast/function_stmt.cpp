@@ -29,7 +29,7 @@ void LX::FunctionStmt::GenIR(Builder& builder, Value& ref) const
     auto function = builder.IRModule().getFunction(Name);
     if (!function)
     {
-        const auto type = llvm::dyn_cast<llvm::FunctionType>(Type->GenIR(builder));
+        const auto type = llvm::dyn_cast<llvm::FunctionType>(Type->GetIR(builder));
         function = llvm::Function::Create(type, llvm::GlobalValue::ExternalLinkage, Name, builder.IRModule());
     }
 

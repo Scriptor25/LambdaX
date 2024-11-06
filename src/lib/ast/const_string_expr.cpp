@@ -10,7 +10,21 @@ LX::ConstStringExpr::ConstStringExpr(std::string value)
 
 std::ostream& LX::ConstStringExpr::Print(std::ostream& os) const
 {
-    return os << Value;
+    std::string value;
+    for (const auto& c : Value)
+    {
+        if (c >= 0x20) value += c;
+        else
+        {
+            const auto a = c / 0x10;
+            const auto b = c % 0x10;
+
+            value += "\\x";
+            value += static_cast<char>(a >= 10 ? a - 10 + 'A' : a + '0');
+            value += static_cast<char>(b >= 10 ? b - 10 + 'A' : b + '0');
+        }
+    }
+    return os << '"' << value << '"';
 }
 
 void LX::ConstStringExpr::GenIR(Builder& builder, LX::Value& ref) const

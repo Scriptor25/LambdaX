@@ -22,6 +22,7 @@ namespace LX
 
         int Get();
         int GetNewLine();
+        void Escape();
         Token& Next();
 
         [[nodiscard]] bool AtEOF() const;
@@ -36,10 +37,10 @@ namespace LX
         Token Expect(const std::string&);
 
         TypePtr& ParseType();
-        void ParseTypeList(std::vector<TypePtr>&, const std::string&);
+        bool ParseTypeList(std::vector<TypePtr>&, const std::string&);
 
         void ParseParameter(Parameter&);
-        void ParseParameterList(std::vector<Parameter>&, const std::string&);
+        bool ParseParameterList(std::vector<Parameter>&, const std::string&);
 
         StmtPtr ParseStmt();
         StmtPtr ParseFunction(const std::string&);

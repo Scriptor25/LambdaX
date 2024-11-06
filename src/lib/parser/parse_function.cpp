@@ -8,7 +8,7 @@ LX::StmtPtr LX::Parser::ParseFunction(const std::string& name)
 {
     Expect("(");
     std::vector<Parameter> params;
-    ParseParameterList(params, ")");
+    const auto vararg = ParseParameterList(params, ")");
     Expect(")");
 
     Expect("=>");
@@ -18,7 +18,7 @@ LX::StmtPtr LX::Parser::ParseFunction(const std::string& name)
     for (size_t i = 0; i < params.size(); ++i)
         param_types[i] = params[i].Type;
 
-    auto type = m_Ctx.GetFunctionType(result_type, param_types);
+    auto type = m_Ctx.GetFunctionType(result_type, param_types, vararg);
 
     ExprPtr body;
     if (NextAt("="))

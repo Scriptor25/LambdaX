@@ -262,7 +262,7 @@ bool LX::OperatorRt(Builder& builder, const Value& lhs, const Value& rhs, Value&
     {
         const auto r = builder.IRBuilder().CreateFDiv(
             llvm::ConstantFP::get(
-                rhs.Type->GenIR(builder),
+                rhs.Type->GetIR(builder),
                 1.0),
             rhs.ValueIR);
         ref.ValueIR = builder.IRBuilder().CreateBinaryIntrinsic(llvm::Intrinsic::pow, lhs.ValueIR, r);
@@ -337,4 +337,42 @@ bool LX::OperatorShR(Builder& builder, const Value& lhs, const Value& rhs, Value
     }
 
     return false;
+}
+
+bool LX::OperatorNeg(Builder& builder, const Value& val, Value& ref)
+{
+    ref.Type = val.Type;
+
+    if (val.Type->IsInt())
+    {
+        ref.ValueIR = builder.IRBuilder().CreateNeg(val.ValueIR);
+        return true;
+    }
+    if (val.Type->IsFloat())
+    {
+        ref.ValueIR = builder.IRBuilder().CreateFNeg(val.ValueIR);
+        return true;
+    }
+
+    return false;
+}
+
+bool LX::OperatorNot(Builder& builder, const Value& val, Value& ref)
+{
+    ref.Type = val.Type;
+
+    if (val.Type->IsInt())
+    {
+        ref.ValueIR = builder.IRBuilder().CreateNot(val.ValueIR);
+        return true;
+    }
+
+    return false;
+}
+
+bool LX::OperatorLNot(Builder& builder, const Value& val, Value& ref)
+{
+    ref.Type = builder.Ctx().GetIntType(1, false);
+    ref.ValueIR = builder.IRBuilder().CreateIsNull(val.ValueIR);
+    return true;
 }

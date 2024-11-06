@@ -18,7 +18,7 @@ std::ostream& LX::BinaryExpr::Print(std::ostream& os) const
 
 void LX::BinaryExpr::GenIR(Builder& builder, Value& ref) const
 {
-    static std::map<std::string, std::function<bool(Builder&, const Value&, const Value&, Value&)>> ops
+    static std::map<std::string, std::function<bool(Builder&, const Value&, const Value&, Value&)>> OPS
     {
         // boolean and compare (iN, uN and fN)
         {"||", OperatorLOr},
@@ -48,6 +48,14 @@ void LX::BinaryExpr::GenIR(Builder& builder, Value& ref) const
         {">>", OperatorShR},
     };
 
+    if (Op == "=")
+    {
+        auto& dst = builder.DefVar(dynamic_cast<SymbolExpr*>(Lhs.get())->Name);
+        Rhs->GenIR(builder, dst);
+        ref = dst;
+        return;
+    }
+
     Value lhs, rhs;
     Lhs->GenIR(builder, lhs);
     Rhs->GenIR(builder, rhs);
@@ -58,8 +66,8 @@ void LX::BinaryExpr::GenIR(Builder& builder, Value& ref) const
     if (lhs.Type != rhs.Type)
         builder.Equalize(lhs, rhs);
 
-    if (const auto& op = ops[Op]; op && op(builder, lhs, rhs, ref))
+    if (const auto& op = OPS[Op]; op && op(builder, lhs, rhs, ref))
         return;
 
-    Error("undefined operator '{} {} {}'", lhs.Type, Op, rhs.Type);
+    Error("undefined binary operator '{} {} {}'", lhs.Type, Op, rhs.Type);
 }
