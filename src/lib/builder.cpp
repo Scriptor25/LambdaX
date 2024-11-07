@@ -90,9 +90,6 @@ const LX::ValuePtr& LX::Builder::GetVar(const std::string& name)
 
 LX::ValuePtr LX::Builder::Cast(const ValuePtr& src, const TypePtr& dst)
 {
-    if (!src) Error("cannot cast null value");
-    if (!dst) Error("cannot cast to null type");
-
     const auto src_ty = src->Type();
     if (src_ty == dst)
         return src;
@@ -154,9 +151,6 @@ LX::ValuePtr LX::Builder::Cast(const ValuePtr& src, const TypePtr& dst)
 
 void LX::Builder::Equalize(ValuePtr& a, ValuePtr& b)
 {
-    if (!a || !b)
-        Error("cannot equalize if one or more values are missing");
-
     if (a->Type() == b->Type())
         return;
 

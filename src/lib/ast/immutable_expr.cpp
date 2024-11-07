@@ -14,6 +14,6 @@ std::ostream& LX::ImmutableExpr::Print(std::ostream& os) const
 
 LX::ValuePtr LX::ImmutableExpr::GenIR(Builder& builder) const
 {
-    auto init = Init->GenIR(builder);
+    const auto init = Init->GenIR(builder);
     return builder.DefVar(Name) = RValue::Create(Type, init->Load(builder));
 }

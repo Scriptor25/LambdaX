@@ -66,6 +66,7 @@ LX::ValuePtr LX::BinaryExpr::GenIR(Builder& builder) const
         {"||", OperatorLOr},
         {"^^", OperatorLXOr},
         {"&&", OperatorLAnd},
+
         {"==", OperatorEQ},
         {"!=", OperatorNE},
         {"<", OperatorLT},
@@ -78,6 +79,7 @@ LX::ValuePtr LX::BinaryExpr::GenIR(Builder& builder) const
         {"*", OperatorMul},
         {"/", OperatorDiv},
         {"%", OperatorRem},
+
         {"**", OperatorPow},
         {"//", OperatorRt},
 
