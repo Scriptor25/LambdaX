@@ -8,7 +8,7 @@
 #include <LX/Type.hpp>
 
 LX::ConstFunctionExpr::ConstFunctionExpr(TypePtr type, std::vector<Parameter> params, ExprPtr body)
-    : Type(std::move(type)), Params(std::move(params)), Body(std::move(body))
+    : Expr(std::move(type)), Params(std::move(params)), Body(std::move(body))
 {
 }
 
@@ -25,20 +25,17 @@ std::ostream& LX::ConstFunctionExpr::Print(std::ostream& os) const
         }
         os << ')';
     }
-    return Body->Print(Type->Result()->Print(os << " => ") << " = ");
+    return Body->Print(Type->Element()->Result()->Print(os << " => ") << " = ");
 }
 
-void LX::ConstFunctionExpr::GenIR(Builder& builder, Value& ref) const
+LX::ValuePtr LX::ConstFunctionExpr::GenIR(Builder& builder) const
 {
-    const auto type = llvm::dyn_cast<llvm::FunctionType>(Type->GetIR(builder));
+    const auto type = llvm::dyn_cast<llvm::FunctionType>(Type->Element()->GetIR(builder));
     const auto function = llvm::Function::Create(
         type,
         llvm::GlobalValue::InternalLinkage,
         "lambda",
         builder.IRModule());
-
-    ref.Type = builder.Ctx().GetPointerType(Type);
-    ref.ValueIR = function;
 
     builder.Push();
     const auto bkp = builder.IRBuilder().GetInsertBlock();
@@ -50,19 +47,23 @@ void LX::ConstFunctionExpr::GenIR(Builder& builder, Value& ref) const
         const auto arg = function->getArg(i);
         arg->setName(param_name_);
 
-        auto& [type_, value_ir_] = builder.DefVar(param_name_);
-        type_ = param_type_;
-        value_ir_ = arg;
+        builder.DefVar(param_name_) =
+            param_type_->IsMutable()
+                ? LValue::Create(param_type_->Element(), arg)
+                : RValue::Create(param_type_, arg);
     }
 
-    Value value;
-    Body->GenIR(builder, value);
-    if (!value) Error("return value is null");
-    builder.Cast(value, Type->Result(), value);
-    builder.IRBuilder().CreateRet(value.ValueIR);
+    auto value = Body->GenIR(builder);
+    value = builder.Cast(value, Type->Element()->Result());
+    builder.IRBuilder().CreateRet(
+        Type->Element()->Result()->IsMutable()
+            ? value->Ptr()
+            : value->Load(builder));
     builder.IRBuilder().SetInsertPoint(bkp);
     builder.Pop();
 
     if (verifyFunction(*function, &llvm::errs()))
-        Error("failed to verify function lambda");
+        Error("failed to verify lambda function");
+
+    return RValue::Create(Type, function);
 }

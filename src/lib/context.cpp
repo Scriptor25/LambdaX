@@ -1,3 +1,4 @@
+#include <ranges>
 #include <LX/Context.hpp>
 #include <LX/Error.hpp>
 #include <LX/Type.hpp>
@@ -17,6 +18,8 @@ LX::Context::Context()
     m_Types["f16"] = std::make_shared<FloatType>(16);
     m_Types["f32"] = std::make_shared<FloatType>(32);
     m_Types["f64"] = std::make_shared<FloatType>(64);
+
+    Push();
 }
 
 LX::TypePtr& LX::Context::GetType(const std::string& name)
@@ -52,20 +55,58 @@ LX::TypePtr& LX::Context::GetPointerType(const TypePtr& base)
     return type = std::make_shared<PointerType>(base);
 }
 
+LX::TypePtr& LX::Context::GetMutableType(const TypePtr& element_type)
+{
+    auto& type = GetType(MutableType::GetName(element_type));
+    if (type) return type;
+    return type = std::make_shared<MutableType>(element_type);
+}
+
 LX::TypePtr& LX::Context::GetFunctionType(
     const TypePtr& result_type,
-    const std::vector<TypePtr>& param_types,
+    const std::vector<Parameter>& params,
     const bool vararg)
 {
-    auto& type = GetType(FunctionType::GetName(result_type, param_types, vararg));
+    auto& type = GetType(FunctionType::GetName(result_type, params, vararg));
     if (type) return type;
-    return type = std::make_shared<FunctionType>(result_type, param_types, vararg);
+    return type = std::make_shared<FunctionType>(result_type, params, vararg);
 }
 
 LX::TypePtr& LX::Context::GetFunPtrType(
     const TypePtr& result_type,
-    const std::vector<TypePtr>& param_types,
+    const std::vector<Parameter>& params,
     const bool vararg)
 {
-    return GetPointerType(GetFunctionType(result_type, param_types, vararg));
+    return GetPointerType(GetFunctionType(result_type, params, vararg));
+}
+
+void LX::Context::Push()
+{
+    m_Stack.emplace_back();
+}
+
+void LX::Context::Pop()
+{
+    m_Stack.pop_back();
+}
+
+LX::TypePtr& LX::Context::DefVar(const std::string& name)
+{
+    if (m_Stack.back().contains(name))
+        Error("cannot redefine symbol with name '{}'", name);
+    return m_Stack.back()[name];
+}
+
+LX::TypePtr LX::Context::GetVar(const std::string& name)
+{
+    for (const auto& frame : std::ranges::views::reverse(m_Stack))
+        if (frame.contains(name)) return frame.at(name);
+    Error("no symbol with name '{}'", name);
+}
+
+bool LX::Context::HasVar(const std::string& name)
+{
+    return std::ranges::any_of(
+        std::ranges::views::reverse(m_Stack),
+        [&](const auto& frame) { return frame.contains(name); });
 }

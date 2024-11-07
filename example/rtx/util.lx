@@ -1,0 +1,4 @@
+import "std.lx" as std
+
+export clamp(f64 x, f64 min, f64 max) => f64 = x < min ? min : x > max ? max : x
+export gamma(f64 c) => f64 = c < 0 ? 0 : std.sqrt(c)

@@ -23,5 +23,6 @@ namespace LX
     struct Expr;
     typedef std::unique_ptr<Expr> ExprPtr;
 
-    struct Value;
+    class Value;
+    typedef std::shared_ptr<Value> ValuePtr;
 }

@@ -23,6 +23,7 @@ namespace LX
         [[nodiscard]] virtual bool IsFloat() const;
         [[nodiscard]] virtual bool IsPointer() const;
         [[nodiscard]] virtual bool IsFunction() const;
+        [[nodiscard]] virtual bool IsMutable() const;
         [[nodiscard]] virtual TypePtr Element() const;
         [[nodiscard]] virtual TypePtr Element(size_t) const;
         [[nodiscard]] virtual size_t IndexOf(const std::string&) const;
@@ -30,13 +31,14 @@ namespace LX
         [[nodiscard]] virtual size_t ParamCount() const;
         [[nodiscard]] virtual TypePtr Param(size_t) const;
         [[nodiscard]] virtual bool HasVarArg() const;
-        virtual llvm::Type* GenIR(Builder&) const = 0;
-
         llvm::Type* GetIR(Builder&);
 
         std::string Name;
         unsigned Bits;
         llvm::Type* IR{};
+
+    private:
+        virtual llvm::Type* GenIR(Builder&) const = 0;
     };
 
     struct IntType : Type
@@ -75,11 +77,26 @@ namespace LX
         TypePtr ElementType;
     };
 
+    struct MutableType : Type
+    {
+        static std::string GetName(const TypePtr& element_type);
+
+        explicit MutableType(TypePtr element_type);
+
+        [[nodiscard]] bool IsMutable() const override;
+        [[nodiscard]] size_t IndexOf(const std::string&) const override;
+        [[nodiscard]] TypePtr Element(size_t) const override;
+        [[nodiscard]] TypePtr Element() const override;
+        llvm::Type* GenIR(Builder&) const override;
+
+        TypePtr ElementType;
+    };
+
     struct FunctionType : Type
     {
-        static std::string GetName(const TypePtr& result_type, const std::vector<TypePtr>& param_types, bool vararg);
+        static std::string GetName(const TypePtr& result_type, const std::vector<Parameter>& params, bool vararg);
 
-        explicit FunctionType(TypePtr result_type, std::vector<TypePtr> param_types, bool vararg);
+        FunctionType(TypePtr result_type, std::vector<Parameter> params, bool vararg);
 
         [[nodiscard]] bool IsFunction() const override;
         [[nodiscard]] TypePtr Result() const override;
@@ -89,7 +106,7 @@ namespace LX
         llvm::Type* GenIR(Builder&) const override;
 
         TypePtr ResultType;
-        std::vector<TypePtr> ParamTypes;
+        std::vector<Parameter> Params;
         bool VarArg;
     };
 

@@ -6,8 +6,51 @@
 #include <LX/Type.hpp>
 #include <LX/Value.hpp>
 
-LX::BinaryExpr::BinaryExpr(std::string op, ExprPtr lhs, ExprPtr rhs)
-    : Op(std::move(op)), Lhs(std::move(lhs)), Rhs(std::move(rhs))
+LX::TypePtr LX::BinaryExpr::GetType(Context& ctx, const std::string& operator_, const TypePtr& lhs, const TypePtr& rhs)
+{
+    static std::map<std::string, std::function<TypePtr(Context&, const TypePtr&)>> OPS
+    {
+        {"||", OperatorTypeLogical},
+        {"^^", OperatorTypeLogical},
+        {"&&", OperatorTypeLogical},
+
+        {"==", OperatorTypeCmp},
+        {"!=", OperatorTypeCmp},
+        {"<", OperatorTypeCmp},
+        {"<=", OperatorTypeCmp},
+        {">", OperatorTypeCmp},
+        {">=", OperatorTypeCmp},
+
+        {"+", OperatorTypeArith},
+        {"-", OperatorTypeArith},
+        {"*", OperatorTypeArith},
+        {"/", OperatorTypeArith},
+        {"%", OperatorTypeArith},
+
+        {"**", OperatorTypePow},
+        {"//", OperatorTypePow},
+
+        {"|", OperatorTypeBitwise},
+        {"^", OperatorTypeBitwise},
+        {"&", OperatorTypeBitwise},
+        {"<<", OperatorTypeBitwise},
+        {">>", OperatorTypeBitwise},
+    };
+
+    if (operator_ == "=")
+        return lhs;
+
+    const auto equ = Type::Equalize(ctx, lhs, rhs);
+
+    if (const auto& op = OPS[operator_]; op)
+        if (const auto type = op(ctx, equ))
+            return type;
+
+    Error("undefined binary operator '{} {} {}'", lhs, operator_, rhs);
+}
+
+LX::BinaryExpr::BinaryExpr(TypePtr type, std::string op, ExprPtr lhs, ExprPtr rhs)
+    : Expr(std::move(type)), Op(std::move(op)), Lhs(std::move(lhs)), Rhs(std::move(rhs))
 {
 }
 
@@ -16,11 +59,10 @@ std::ostream& LX::BinaryExpr::Print(std::ostream& os) const
     return Rhs->Print(Lhs->Print(os) << ' ' << Op << ' ');
 }
 
-void LX::BinaryExpr::GenIR(Builder& builder, Value& ref) const
+LX::ValuePtr LX::BinaryExpr::GenIR(Builder& builder) const
 {
-    static std::map<std::string, std::function<bool(Builder&, const Value&, const Value&, Value&)>> OPS
+    static std::map<std::string, std::function<ValuePtr(Builder&, const ValuePtr&, const ValuePtr&)>> OPS
     {
-        // boolean and compare (iN, uN and fN)
         {"||", OperatorLOr},
         {"^^", OperatorLXOr},
         {"&&", OperatorLAnd},
@@ -31,7 +73,6 @@ void LX::BinaryExpr::GenIR(Builder& builder, Value& ref) const
         {">", OperatorGT},
         {">=", OperatorGE},
 
-        // arithmetic operations (iN, uN and fN)
         {"+", OperatorAdd},
         {"-", OperatorSub},
         {"*", OperatorMul},
@@ -40,7 +81,6 @@ void LX::BinaryExpr::GenIR(Builder& builder, Value& ref) const
         {"**", OperatorPow},
         {"//", OperatorRt},
 
-        // bitwise operations (iN and uN)
         {"|", OperatorOr},
         {"^", OperatorXOr},
         {"&", OperatorAnd},
@@ -48,26 +88,20 @@ void LX::BinaryExpr::GenIR(Builder& builder, Value& ref) const
         {">>", OperatorShR},
     };
 
+    auto lhs = Lhs->GenIR(builder);
+    auto rhs = Rhs->GenIR(builder);
+
     if (Op == "=")
     {
-        auto& dst = builder.DefVar(dynamic_cast<SymbolExpr*>(Lhs.get())->Name);
-        Rhs->GenIR(builder, dst);
-        ref = dst;
-        return;
+        lhs->Store(builder, rhs->Load(builder));
+        return lhs;
     }
 
-    Value lhs, rhs;
-    Lhs->GenIR(builder, lhs);
-    Rhs->GenIR(builder, rhs);
+    builder.Equalize(lhs, rhs);
 
-    if (!lhs) Error("lhs is null");
-    if (!rhs) Error("rhs is null");
+    if (const auto& op = OPS[Op]; op)
+        if (const auto value = op(builder, lhs, rhs))
+            return value;
 
-    if (lhs.Type != rhs.Type)
-        builder.Equalize(lhs, rhs);
-
-    if (const auto& op = OPS[Op]; op && op(builder, lhs, rhs, ref))
-        return;
-
-    Error("undefined binary operator '{} {} {}'", lhs.Type, Op, rhs.Type);
+    Error("undefined binary operator '{} {} {}'", lhs->Type(), Op, rhs->Type());
 }

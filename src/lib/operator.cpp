@@ -4,375 +4,435 @@
 #include <LX/Type.hpp>
 #include <LX/Value.hpp>
 
-bool LX::OperatorLOr(Builder& builder, const Value& lhs, const Value& rhs, Value& ref)
+LX::ValuePtr LX::OperatorLOr(Builder& builder, const ValuePtr& lhs, const ValuePtr& rhs)
 {
-    const auto lb = builder.IRBuilder().CreateIsNotNull(lhs.ValueIR);
-    const auto rb = builder.IRBuilder().CreateIsNotNull(rhs.ValueIR);
-    ref.Type = builder.Ctx().GetIntType(1, false);
-    ref.ValueIR = builder.IRBuilder().CreateOr(lb, rb);
-    return true;
+    const auto lb = builder.IRBuilder().CreateIsNotNull(lhs->Load(builder));
+    const auto rb = builder.IRBuilder().CreateIsNotNull(rhs->Load(builder));
+    const auto type = builder.Ctx().GetIntType(1, false);
+    const auto value = builder.IRBuilder().CreateOr(lb, rb);
+    return RValue::Create(type, value);
 }
 
-bool LX::OperatorLXOr(Builder& builder, const Value& lhs, const Value& rhs, Value& ref)
+LX::ValuePtr LX::OperatorLXOr(Builder& builder, const ValuePtr& lhs, const ValuePtr& rhs)
 {
-    const auto lb = builder.IRBuilder().CreateIsNotNull(lhs.ValueIR);
-    const auto rb = builder.IRBuilder().CreateIsNotNull(rhs.ValueIR);
-    ref.Type = builder.Ctx().GetIntType(1, false);
-    ref.ValueIR = builder.IRBuilder().CreateXor(lb, rb);
-    return true;
+    const auto lb = builder.IRBuilder().CreateIsNotNull(lhs->Load(builder));
+    const auto rb = builder.IRBuilder().CreateIsNotNull(rhs->Load(builder));
+    const auto type = builder.Ctx().GetIntType(1, false);
+    const auto value = builder.IRBuilder().CreateXor(lb, rb);
+    return RValue::Create(type, value);
 }
 
-bool LX::OperatorLAnd(Builder& builder, const Value& lhs, const Value& rhs, Value& ref)
+LX::ValuePtr LX::OperatorLAnd(Builder& builder, const ValuePtr& lhs, const ValuePtr& rhs)
 {
-    const auto lb = builder.IRBuilder().CreateIsNotNull(lhs.ValueIR);
-    const auto rb = builder.IRBuilder().CreateIsNotNull(rhs.ValueIR);
-    ref.Type = builder.Ctx().GetIntType(1, false);
-    ref.ValueIR = builder.IRBuilder().CreateAnd(lb, rb);
-    return true;
+    const auto lb = builder.IRBuilder().CreateIsNotNull(lhs->Load(builder));
+    const auto rb = builder.IRBuilder().CreateIsNotNull(rhs->Load(builder));
+    const auto type = builder.Ctx().GetIntType(1, false);
+    const auto value = builder.IRBuilder().CreateAnd(lb, rb);
+    return RValue::Create(type, value);
 }
 
-bool LX::OperatorEQ(Builder& builder, const Value& lhs, const Value& rhs, Value& ref)
+LX::TypePtr LX::OperatorTypeLogical(Context& ctx, const TypePtr&)
 {
-    ref.Type = builder.Ctx().GetIntType(1, false);
-
-    if (lhs.Type->IsInt())
-    {
-        ref.ValueIR = builder.IRBuilder().CreateICmpEQ(lhs.ValueIR, rhs.ValueIR);
-        return true;
-    }
-    if (lhs.Type->IsFloat())
-    {
-        ref.ValueIR = builder.IRBuilder().CreateFCmpOEQ(lhs.ValueIR, rhs.ValueIR);
-        return true;
-    }
-
-    return false;
+    return ctx.GetIntType(1, false);
 }
 
-bool LX::OperatorNE(Builder& builder, const Value& lhs, const Value& rhs, Value& ref)
+LX::ValuePtr LX::OperatorEQ(Builder& builder, const ValuePtr& lhs, const ValuePtr& rhs)
 {
-    ref.Type = builder.Ctx().GetIntType(1, false);
+    const auto type = builder.Ctx().GetIntType(1, false);
 
-    if (lhs.Type->IsInt())
+    if (lhs->Type()->IsInt())
     {
-        ref.ValueIR = builder.IRBuilder().CreateICmpNE(lhs.ValueIR, rhs.ValueIR);
-        return true;
+        const auto value = builder.IRBuilder().CreateICmpEQ(lhs->Load(builder), rhs->Load(builder));
+        return RValue::Create(type, value);
     }
-    if (lhs.Type->IsFloat())
+    if (lhs->Type()->IsFloat())
     {
-        ref.ValueIR = builder.IRBuilder().CreateFCmpONE(lhs.ValueIR, rhs.ValueIR);
-        return true;
+        const auto value = builder.IRBuilder().CreateFCmpOEQ(lhs->Load(builder), rhs->Load(builder));
+        return RValue::Create(type, value);
     }
 
-    return false;
+    return {};
 }
 
-bool LX::OperatorLT(Builder& builder, const Value& lhs, const Value& rhs, Value& ref)
+LX::ValuePtr LX::OperatorNE(Builder& builder, const ValuePtr& lhs, const ValuePtr& rhs)
 {
-    ref.Type = builder.Ctx().GetIntType(1, false);
+    const auto type = builder.Ctx().GetIntType(1, false);
 
-    if (lhs.Type->IsInt())
+    if (lhs->Type()->IsInt())
     {
-        if (lhs.Type->IsSigned())
-            ref.ValueIR = builder.IRBuilder().CreateICmpSLT(lhs.ValueIR, rhs.ValueIR);
-        else ref.ValueIR = builder.IRBuilder().CreateICmpULT(lhs.ValueIR, rhs.ValueIR);
-        return true;
+        const auto value = builder.IRBuilder().CreateICmpNE(lhs->Load(builder), rhs->Load(builder));
+        return RValue::Create(type, value);
     }
-    if (lhs.Type->IsFloat())
+    if (lhs->Type()->IsFloat())
     {
-        ref.ValueIR = builder.IRBuilder().CreateFCmpOLT(lhs.ValueIR, rhs.ValueIR);
-        return true;
+        const auto value = builder.IRBuilder().CreateFCmpONE(lhs->Load(builder), rhs->Load(builder));
+        return RValue::Create(type, value);
     }
 
-    return false;
+    return {};
 }
 
-bool LX::OperatorLE(Builder& builder, const Value& lhs, const Value& rhs, Value& ref)
+LX::ValuePtr LX::OperatorLT(Builder& builder, const ValuePtr& lhs, const ValuePtr& rhs)
 {
-    ref.Type = builder.Ctx().GetIntType(1, false);
+    const auto type = builder.Ctx().GetIntType(1, false);
 
-    if (lhs.Type->IsInt())
+    if (lhs->Type()->IsInt())
     {
-        if (lhs.Type->IsSigned())
-            ref.ValueIR = builder.IRBuilder().CreateICmpSLE(lhs.ValueIR, rhs.ValueIR);
-        else ref.ValueIR = builder.IRBuilder().CreateICmpULE(lhs.ValueIR, rhs.ValueIR);
-        return true;
+        llvm::Value* value;
+        if (lhs->Type()->IsSigned())
+            value = builder.IRBuilder().CreateICmpSLT(lhs->Load(builder), rhs->Load(builder));
+        else value = builder.IRBuilder().CreateICmpULT(lhs->Load(builder), rhs->Load(builder));
+        return RValue::Create(type, value);
     }
-    if (lhs.Type->IsFloat())
+    if (lhs->Type()->IsFloat())
     {
-        ref.ValueIR = builder.IRBuilder().CreateFCmpOLE(lhs.ValueIR, rhs.ValueIR);
-        return true;
+        const auto value = builder.IRBuilder().CreateFCmpOLT(lhs->Load(builder), rhs->Load(builder));
+        return RValue::Create(type, value);
     }
 
-    return false;
+    return {};
 }
 
-bool LX::OperatorGT(Builder& builder, const Value& lhs, const Value& rhs, Value& ref)
+LX::ValuePtr LX::OperatorLE(Builder& builder, const ValuePtr& lhs, const ValuePtr& rhs)
 {
-    ref.Type = builder.Ctx().GetIntType(1, false);
+    const auto type = builder.Ctx().GetIntType(1, false);
 
-    if (lhs.Type->IsInt())
+    if (lhs->Type()->IsInt())
     {
-        if (lhs.Type->IsSigned())
-            ref.ValueIR = builder.IRBuilder().CreateICmpSGT(lhs.ValueIR, rhs.ValueIR);
-        else ref.ValueIR = builder.IRBuilder().CreateICmpUGT(lhs.ValueIR, rhs.ValueIR);
-        return true;
+        llvm::Value* value;
+        if (lhs->Type()->IsSigned())
+            value = builder.IRBuilder().CreateICmpSLE(lhs->Load(builder), rhs->Load(builder));
+        else value = builder.IRBuilder().CreateICmpULE(lhs->Load(builder), rhs->Load(builder));
+        return RValue::Create(type, value);
     }
-    if (lhs.Type->IsFloat())
+    if (lhs->Type()->IsFloat())
     {
-        ref.ValueIR = builder.IRBuilder().CreateFCmpOGT(lhs.ValueIR, rhs.ValueIR);
-        return true;
+        const auto value = builder.IRBuilder().CreateFCmpOLE(lhs->Load(builder), rhs->Load(builder));
+        return RValue::Create(type, value);
     }
 
-    return false;
+    return {};
 }
 
-bool LX::OperatorGE(Builder& builder, const Value& lhs, const Value& rhs, Value& ref)
+LX::ValuePtr LX::OperatorGT(Builder& builder, const ValuePtr& lhs, const ValuePtr& rhs)
 {
-    ref.Type = builder.Ctx().GetIntType(1, false);
+    const auto type = builder.Ctx().GetIntType(1, false);
 
-    if (lhs.Type->IsInt())
+    if (lhs->Type()->IsInt())
     {
-        if (lhs.Type->IsSigned())
-            ref.ValueIR = builder.IRBuilder().CreateICmpSGE(lhs.ValueIR, rhs.ValueIR);
-        else ref.ValueIR = builder.IRBuilder().CreateICmpUGE(lhs.ValueIR, rhs.ValueIR);
-        return true;
+        llvm::Value* value;
+        if (lhs->Type()->IsSigned())
+            value = builder.IRBuilder().CreateICmpSGT(lhs->Load(builder), rhs->Load(builder));
+        else value = builder.IRBuilder().CreateICmpUGT(lhs->Load(builder), rhs->Load(builder));
+        return RValue::Create(type, value);
     }
-    if (lhs.Type->IsFloat())
+    if (lhs->Type()->IsFloat())
     {
-        ref.ValueIR = builder.IRBuilder().CreateFCmpOGE(lhs.ValueIR, rhs.ValueIR);
-        return true;
+        const auto value = builder.IRBuilder().CreateFCmpOGT(lhs->Load(builder), rhs->Load(builder));
+        return RValue::Create(type, value);
     }
 
-    return false;
+    return {};
 }
 
-bool LX::OperatorAdd(Builder& builder, const Value& lhs, const Value& rhs, Value& ref)
+LX::ValuePtr LX::OperatorGE(Builder& builder, const ValuePtr& lhs, const ValuePtr& rhs)
 {
-    ref.Type = lhs.Type;
+    const auto type = builder.Ctx().GetIntType(1, false);
 
-    if (lhs.Type->IsInt())
+    if (lhs->Type()->IsInt())
     {
-        ref.ValueIR = builder.IRBuilder().CreateAdd(lhs.ValueIR, rhs.ValueIR);
-        return true;
+        llvm::Value* value;
+        if (lhs->Type()->IsSigned())
+            value = builder.IRBuilder().CreateICmpSGE(lhs->Load(builder), rhs->Load(builder));
+        else value = builder.IRBuilder().CreateICmpUGE(lhs->Load(builder), rhs->Load(builder));
+        return RValue::Create(type, value);
     }
-    if (lhs.Type->IsFloat())
+    if (lhs->Type()->IsFloat())
     {
-        ref.ValueIR = builder.IRBuilder().CreateFAdd(lhs.ValueIR, rhs.ValueIR);
-        return true;
+        const auto value = builder.IRBuilder().CreateFCmpOGE(lhs->Load(builder), rhs->Load(builder));
+        return RValue::Create(type, value);
     }
 
-    return false;
+    return {};
 }
 
-bool LX::OperatorSub(Builder& builder, const Value& lhs, const Value& rhs, Value& ref)
+LX::TypePtr LX::OperatorTypeCmp(Context& ctx, const TypePtr& type)
 {
-    ref.Type = lhs.Type;
-
-    if (lhs.Type->IsInt())
-    {
-        ref.ValueIR = builder.IRBuilder().CreateSub(lhs.ValueIR, rhs.ValueIR);
-        return true;
-    }
-    if (lhs.Type->IsFloat())
-    {
-        ref.ValueIR = builder.IRBuilder().CreateFSub(lhs.ValueIR, rhs.ValueIR);
-        return true;
-    }
-
-    return false;
+    if (type->IsInt() || type->IsFloat())
+        return ctx.GetIntType(1, false);
+    return {};
 }
 
-bool LX::OperatorMul(Builder& builder, const Value& lhs, const Value& rhs, Value& ref)
+LX::ValuePtr LX::OperatorAdd(Builder& builder, const ValuePtr& lhs, const ValuePtr& rhs)
 {
-    ref.Type = lhs.Type;
+    const auto type = lhs->Type();
 
-    if (lhs.Type->IsInt())
+    if (lhs->Type()->IsInt())
     {
-        ref.ValueIR = builder.IRBuilder().CreateMul(lhs.ValueIR, rhs.ValueIR);
-        return true;
+        const auto value = builder.IRBuilder().CreateAdd(lhs->Load(builder), rhs->Load(builder));
+        return RValue::Create(type, value);
     }
-    if (lhs.Type->IsFloat())
+    if (lhs->Type()->IsFloat())
     {
-        ref.ValueIR = builder.IRBuilder().CreateFMul(lhs.ValueIR, rhs.ValueIR);
-        return true;
+        const auto value = builder.IRBuilder().CreateFAdd(lhs->Load(builder), rhs->Load(builder));
+        return RValue::Create(type, value);
     }
 
-    return false;
+    return {};
 }
 
-bool LX::OperatorDiv(Builder& builder, const Value& lhs, const Value& rhs, Value& ref)
+LX::ValuePtr LX::OperatorSub(Builder& builder, const ValuePtr& lhs, const ValuePtr& rhs)
 {
-    ref.Type = lhs.Type;
+    const auto type = lhs->Type();
 
-    if (lhs.Type->IsInt())
+    if (lhs->Type()->IsInt())
     {
-        if (lhs.Type->IsSigned())
-            ref.ValueIR = builder.IRBuilder().CreateSDiv(lhs.ValueIR, rhs.ValueIR);
-        else ref.ValueIR = builder.IRBuilder().CreateUDiv(lhs.ValueIR, rhs.ValueIR);
-        return true;
+        const auto value = builder.IRBuilder().CreateSub(lhs->Load(builder), rhs->Load(builder));
+        return RValue::Create(type, value);
     }
-    if (lhs.Type->IsFloat())
+    if (lhs->Type()->IsFloat())
     {
-        ref.ValueIR = builder.IRBuilder().CreateFDiv(lhs.ValueIR, rhs.ValueIR);
-        return true;
+        const auto value = builder.IRBuilder().CreateFSub(lhs->Load(builder), rhs->Load(builder));
+        return RValue::Create(type, value);
     }
 
-    return false;
+    return {};
 }
 
-bool LX::OperatorRem(Builder& builder, const Value& lhs, const Value& rhs, Value& ref)
+LX::ValuePtr LX::OperatorMul(Builder& builder, const ValuePtr& lhs, const ValuePtr& rhs)
 {
-    ref.Type = lhs.Type;
+    const auto type = lhs->Type();
 
-    if (lhs.Type->IsInt())
+    if (lhs->Type()->IsInt())
     {
-        if (lhs.Type->IsSigned())
-            ref.ValueIR = builder.IRBuilder().CreateSRem(lhs.ValueIR, rhs.ValueIR);
-        else ref.ValueIR = builder.IRBuilder().CreateURem(lhs.ValueIR, rhs.ValueIR);
-        return true;
+        const auto value = builder.IRBuilder().CreateMul(lhs->Load(builder), rhs->Load(builder));
+        return RValue::Create(type, value);
     }
-    if (lhs.Type->IsFloat())
+    if (lhs->Type()->IsFloat())
     {
-        ref.ValueIR = builder.IRBuilder().CreateFRem(lhs.ValueIR, rhs.ValueIR);
-        return true;
+        const auto value = builder.IRBuilder().CreateFMul(lhs->Load(builder), rhs->Load(builder));
+        return RValue::Create(type, value);
     }
 
-    return false;
+    return {};
 }
 
-bool LX::OperatorPow(Builder& builder, const Value& lhs, const Value& rhs, Value& ref)
+LX::ValuePtr LX::OperatorDiv(Builder& builder, const ValuePtr& lhs, const ValuePtr& rhs)
 {
-    ref.Type = lhs.Type;
+    const auto type = lhs->Type();
 
-    if (lhs.Type->IsFloat())
+    if (lhs->Type()->IsInt())
     {
-        ref.ValueIR = builder.IRBuilder().CreateBinaryIntrinsic(llvm::Intrinsic::pow, lhs.ValueIR, rhs.ValueIR);
-        return true;
+        llvm::Value* value;
+        if (lhs->Type()->IsSigned())
+            value = builder.IRBuilder().CreateSDiv(lhs->Load(builder), rhs->Load(builder));
+        else value = builder.IRBuilder().CreateUDiv(lhs->Load(builder), rhs->Load(builder));
+        return RValue::Create(type, value);
+    }
+    if (lhs->Type()->IsFloat())
+    {
+        const auto value = builder.IRBuilder().CreateFDiv(lhs->Load(builder), rhs->Load(builder));
+        return RValue::Create(type, value);
     }
 
-    return false;
+    return {};
 }
 
-bool LX::OperatorRt(Builder& builder, const Value& lhs, const Value& rhs, Value& ref)
+LX::ValuePtr LX::OperatorRem(Builder& builder, const ValuePtr& lhs, const ValuePtr& rhs)
 {
-    ref.Type = lhs.Type;
+    const auto type = lhs->Type();
 
-    if (lhs.Type->IsFloat())
+    if (lhs->Type()->IsInt())
+    {
+        llvm::Value* value;
+        if (lhs->Type()->IsSigned())
+            value = builder.IRBuilder().CreateSRem(lhs->Load(builder), rhs->Load(builder));
+        else value = builder.IRBuilder().CreateURem(lhs->Load(builder), rhs->Load(builder));
+        return RValue::Create(type, value);
+    }
+    if (lhs->Type()->IsFloat())
+    {
+        const auto value = builder.IRBuilder().CreateFRem(lhs->Load(builder), rhs->Load(builder));
+        return RValue::Create(type, value);
+    }
+
+    return {};
+}
+
+LX::TypePtr LX::OperatorTypeArith(Context&, const TypePtr& type)
+{
+    if (type->IsInt() || type->IsFloat())
+        return type;
+    return {};
+}
+
+LX::ValuePtr LX::OperatorPow(Builder& builder, const ValuePtr& lhs, const ValuePtr& rhs)
+{
+    const auto type = lhs->Type();
+
+    if (lhs->Type()->IsFloat())
+    {
+        const auto value = builder.IRBuilder().
+                                   CreateBinaryIntrinsic(llvm::Intrinsic::pow, lhs->Load(builder), rhs->Load(builder));
+        return RValue::Create(type, value);
+    }
+
+    return {};
+}
+
+LX::ValuePtr LX::OperatorRt(Builder& builder, const ValuePtr& lhs, const ValuePtr& rhs)
+{
+    const auto type = lhs->Type();
+
+    if (lhs->Type()->IsFloat())
     {
         const auto r = builder.IRBuilder().CreateFDiv(
             llvm::ConstantFP::get(
-                rhs.Type->GetIR(builder),
+                rhs->Type()->GetIR(builder),
                 1.0),
-            rhs.ValueIR);
-        ref.ValueIR = builder.IRBuilder().CreateBinaryIntrinsic(llvm::Intrinsic::pow, lhs.ValueIR, r);
-        return true;
+            rhs->Load(builder));
+        const auto value = builder.IRBuilder().CreateBinaryIntrinsic(llvm::Intrinsic::pow, lhs->Load(builder), r);
+        return RValue::Create(type, value);
     }
 
-    return false;
+    return {};
 }
 
-bool LX::OperatorOr(Builder& builder, const Value& lhs, const Value& rhs, Value& ref)
+LX::TypePtr LX::OperatorTypePow(Context&, const TypePtr& type)
 {
-    ref.Type = lhs.Type;
-
-    if (lhs.Type->IsInt())
-    {
-        ref.ValueIR = builder.IRBuilder().CreateOr(lhs.ValueIR, rhs.ValueIR);
-        return true;
-    }
-
-    return false;
+    if (type->IsFloat())
+        return type;
+    return {};
 }
 
-bool LX::OperatorXOr(Builder& builder, const Value& lhs, const Value& rhs, Value& ref)
+LX::ValuePtr LX::OperatorOr(Builder& builder, const ValuePtr& lhs, const ValuePtr& rhs)
 {
-    ref.Type = lhs.Type;
+    const auto type = lhs->Type();
 
-    if (lhs.Type->IsInt())
+    if (lhs->Type()->IsInt())
     {
-        ref.ValueIR = builder.IRBuilder().CreateXor(lhs.ValueIR, rhs.ValueIR);
-        return true;
+        const auto value = builder.IRBuilder().CreateOr(lhs->Load(builder), rhs->Load(builder));
+        return RValue::Create(type, value);
     }
 
-    return false;
+    return {};
 }
 
-bool LX::OperatorAnd(Builder& builder, const Value& lhs, const Value& rhs, Value& ref)
+LX::ValuePtr LX::OperatorXOr(Builder& builder, const ValuePtr& lhs, const ValuePtr& rhs)
 {
-    ref.Type = lhs.Type;
+    const auto type = lhs->Type();
 
-    if (lhs.Type->IsInt())
+    if (lhs->Type()->IsInt())
     {
-        ref.ValueIR = builder.IRBuilder().CreateAnd(lhs.ValueIR, rhs.ValueIR);
-        return true;
+        const auto value = builder.IRBuilder().CreateXor(lhs->Load(builder), rhs->Load(builder));
+        return RValue::Create(type, value);
     }
 
-    return false;
+    return {};
 }
 
-bool LX::OperatorShL(Builder& builder, const Value& lhs, const Value& rhs, Value& ref)
+LX::ValuePtr LX::OperatorAnd(Builder& builder, const ValuePtr& lhs, const ValuePtr& rhs)
 {
-    ref.Type = lhs.Type;
+    const auto type = lhs->Type();
 
-    if (lhs.Type->IsInt())
+    if (lhs->Type()->IsInt())
     {
-        ref.ValueIR = builder.IRBuilder().CreateShl(lhs.ValueIR, rhs.ValueIR);
-        return true;
+        const auto value = builder.IRBuilder().CreateAnd(lhs->Load(builder), rhs->Load(builder));
+        return RValue::Create(type, value);
     }
 
-    return false;
+    return {};
 }
 
-bool LX::OperatorShR(Builder& builder, const Value& lhs, const Value& rhs, Value& ref)
+LX::ValuePtr LX::OperatorShL(Builder& builder, const ValuePtr& lhs, const ValuePtr& rhs)
 {
-    ref.Type = lhs.Type;
+    const auto type = lhs->Type();
 
-    if (lhs.Type->IsInt())
+    if (lhs->Type()->IsInt())
     {
-        if (lhs.Type->IsSigned())
-            ref.ValueIR = builder.IRBuilder().CreateAShr(lhs.ValueIR, rhs.ValueIR);
-        else ref.ValueIR = builder.IRBuilder().CreateLShr(lhs.ValueIR, rhs.ValueIR);
-        return true;
+        const auto value = builder.IRBuilder().CreateShl(lhs->Load(builder), rhs->Load(builder));
+        return RValue::Create(type, value);
     }
 
-    return false;
+    return {};
 }
 
-bool LX::OperatorNeg(Builder& builder, const Value& val, Value& ref)
+LX::ValuePtr LX::OperatorShR(Builder& builder, const ValuePtr& lhs, const ValuePtr& rhs)
 {
-    ref.Type = val.Type;
+    const auto type = lhs->Type();
 
-    if (val.Type->IsInt())
+    if (lhs->Type()->IsInt())
     {
-        ref.ValueIR = builder.IRBuilder().CreateNeg(val.ValueIR);
-        return true;
-    }
-    if (val.Type->IsFloat())
-    {
-        ref.ValueIR = builder.IRBuilder().CreateFNeg(val.ValueIR);
-        return true;
+        llvm::Value* value;
+        if (lhs->Type()->IsSigned())
+            value = builder.IRBuilder().CreateAShr(lhs->Load(builder), rhs->Load(builder));
+        else value = builder.IRBuilder().CreateLShr(lhs->Load(builder), rhs->Load(builder));
+        return RValue::Create(type, value);
     }
 
-    return false;
+    return {};
 }
 
-bool LX::OperatorNot(Builder& builder, const Value& val, Value& ref)
+LX::TypePtr LX::OperatorTypeBitwise(Context&, const TypePtr& type)
 {
-    ref.Type = val.Type;
-
-    if (val.Type->IsInt())
-    {
-        ref.ValueIR = builder.IRBuilder().CreateNot(val.ValueIR);
-        return true;
-    }
-
-    return false;
+    if (type->IsInt())
+        return type;
+    return {};
 }
 
-bool LX::OperatorLNot(Builder& builder, const Value& val, Value& ref)
+LX::ValuePtr LX::OperatorNeg(Builder& builder, const ValuePtr& val)
 {
-    ref.Type = builder.Ctx().GetIntType(1, false);
-    ref.ValueIR = builder.IRBuilder().CreateIsNull(val.ValueIR);
-    return true;
+    const auto type = val->Type();
+
+    if (val->Type()->IsInt())
+    {
+        const auto value = builder.IRBuilder().CreateNeg(val->Load(builder));
+        return RValue::Create(type, value);
+    }
+    if (val->Type()->IsFloat())
+    {
+        const auto value = builder.IRBuilder().CreateFNeg(val->Load(builder));
+        return RValue::Create(type, value);
+    }
+
+    return {};
+}
+
+LX::TypePtr LX::OperatorTypeNeg(Context& ctx, const TypePtr& type)
+{
+    if (type->IsInt() || type->IsFloat())
+        return type;
+    return {};
+}
+
+LX::ValuePtr LX::OperatorNot(Builder& builder, const ValuePtr& val)
+{
+    const auto type = val->Type();
+
+    if (val->Type()->IsInt())
+    {
+        const auto value = builder.IRBuilder().CreateNot(val->Load(builder));
+        return RValue::Create(type, value);
+    }
+
+    return {};
+}
+
+LX::TypePtr LX::OperatorTypeNot(Context& ctx, const TypePtr& type)
+{
+    if (type->IsInt())
+        return type;
+    return {};
+}
+
+LX::ValuePtr LX::OperatorLNot(Builder& builder, const ValuePtr& val)
+{
+    const auto type = builder.Ctx().GetIntType(1, false);
+    const auto value = builder.IRBuilder().CreateIsNull(val->Load(builder));
+    return RValue::Create(type, value);
+}
+
+LX::TypePtr LX::OperatorTypeLNot(Context& ctx, const TypePtr&)
+{
+    return ctx.GetIntType(1, false);
 }

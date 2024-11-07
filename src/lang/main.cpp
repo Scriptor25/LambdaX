@@ -3,9 +3,9 @@
 #include <LX/ArgParser.hpp>
 #include <LX/AST.hpp>
 #include <LX/Builder.hpp>
+#include <LX/Context.hpp>
 #include <LX/Linker.hpp>
 #include <LX/Parser.hpp>
-#include <LX/Value.hpp>
 
 int main(const int argc, const char* const* argv)
 {
@@ -49,12 +49,11 @@ int main(const int argc, const char* const* argv)
 
         LX::Context ctx;
         LX::Builder builder(ctx, linker.IRContext(), filename);
-        LX::Parser::Parse(ctx, stream, filename, [&](LX::StmtPtr ptr)
+        LX::Parser::Parse(ctx, stream, filename, [&](LX::StmtPtr&& ptr)
         {
             // ptr->Print(std::cerr) << std::endl;
 
-            LX::Value ref;
-            ptr->GenIR(builder, ref);
+            ptr->GenIR(builder);
         });
         stream.close();
 

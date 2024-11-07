@@ -2,6 +2,8 @@
 #include <LX/Builder.hpp>
 #include <LX/Linker.hpp>
 
+#include "LX/Error.hpp"
+
 LX::Linker::Linker(const std::string& module_id)
 {
     m_IRContext = std::make_unique<llvm::LLVMContext>();
@@ -28,8 +30,10 @@ llvm::Linker& LX::Linker::IRLinker() const
 
 void LX::Linker::Link(Builder& builder) const
 {
+    const auto name = builder.IRModule().getModuleIdentifier();
     const auto src_filename = builder.IRModule().getSourceFileName();
-    IRLinker().linkInModule(builder.IRModulePtr());
+    if (IRLinker().linkInModule(builder.IRModulePtr()))
+        Error("failed to link module '{}'", name);
 
     const auto dst_filename = IRModule().getSourceFileName();
     IRModule().setSourceFileName(dst_filename.empty() ? src_filename : dst_filename + ',' + src_filename);

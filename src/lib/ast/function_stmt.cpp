@@ -6,13 +6,19 @@
 #include <LX/Type.hpp>
 #include <LX/Value.hpp>
 
-LX::FunctionStmt::FunctionStmt(TypePtr type, std::string name, std::vector<Parameter> params, ExprPtr body)
-    : Type(std::move(type)), Name(std::move(name)), Params(std::move(params)), Body(std::move(body))
+LX::FunctionStmt::FunctionStmt(
+    const bool export_,
+    TypePtr type,
+    std::string name,
+    std::vector<Parameter> params,
+    ExprPtr body)
+    : Export(export_), Type(std::move(type)), Name(std::move(name)), Params(std::move(params)), Body(std::move(body))
 {
 }
 
 std::ostream& LX::FunctionStmt::Print(std::ostream& os) const
 {
+    if (Export) os << "export ";
     os << Name << '(';
     for (size_t i = 0; i < Params.size(); ++i)
     {
@@ -24,22 +30,33 @@ std::ostream& LX::FunctionStmt::Print(std::ostream& os) const
     return os;
 }
 
-void LX::FunctionStmt::GenIR(Builder& builder, Value& ref) const
+LX::ValuePtr LX::FunctionStmt::GenIR(Builder& builder) const
 {
-    auto function = builder.IRModule().getFunction(Name);
-    if (!function)
+    llvm::Function* function;
+    ValuePtr result;
+
+    if (!builder.HasVar(Name))
     {
         const auto type = llvm::dyn_cast<llvm::FunctionType>(Type->GetIR(builder));
-        function = llvm::Function::Create(type, llvm::GlobalValue::ExternalLinkage, Name, builder.IRModule());
+        function = llvm::Function::Create(
+            type,
+            Export
+                ? llvm::GlobalValue::ExternalLinkage
+                : llvm::GlobalValue::InternalLinkage,
+            Name,
+            builder.IRModule());
+        result = RValue::Create(builder.Ctx().GetPointerType(Type), function);
+        builder.DefVar(Name) = result;
     }
-
+    else
     {
-        auto& [type, value_ir] = builder.DefVar(Name);
-        type = ref.Type = builder.Ctx().GetPointerType(Type);
-        value_ir = ref.ValueIR = function;
+        const auto var = builder.GetVar(Name);
+        const auto val = var->Load(builder);
+        function = llvm::dyn_cast<llvm::Function>(val);
+        result = var;
     }
 
-    if (!Body) return;
+    if (!Body) return result;
     if (!function->empty())
         Error("cannot redefine function '{}'", Name);
 
@@ -52,19 +69,23 @@ void LX::FunctionStmt::GenIR(Builder& builder, Value& ref) const
         const auto arg = function->getArg(i);
         arg->setName(param_name_);
 
-        auto& [type_, value_ir_] = builder.DefVar(param_name_);
-        type_ = param_type_;
-        value_ir_ = arg;
+        builder.DefVar(param_name_) =
+            param_type_->IsMutable()
+                ? LValue::Create(param_type_->Element(), arg)
+                : RValue::Create(param_type_, arg);
     }
 
-    Value value;
-    Body->GenIR(builder, value);
-    if (!value) Error("return value is null");
-    builder.Cast(value, Type->Result(), value);
-    builder.IRBuilder().CreateRet(value.ValueIR);
+    auto value = Body->GenIR(builder);
+    value = builder.Cast(value, Type->Result());
+    builder.IRBuilder().CreateRet(
+        Type->Result()->IsMutable()
+            ? value->Ptr()
+            : value->Load(builder));
     builder.IRBuilder().ClearInsertionPoint();
     builder.Pop();
 
     if (verifyFunction(*function, &llvm::errs()))
         Error("failed to verify function '{}'", Name);
+
+    return result;
 }

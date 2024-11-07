@@ -1,4 +1,7 @@
+#include <filesystem>
+#include <fstream>
 #include <LX/AST.hpp>
+#include <LX/Context.hpp>
 #include <LX/Parser.hpp>
 
 LX::StmtPtr LX::Parser::ParseStmt()
@@ -12,6 +15,14 @@ LX::StmtPtr LX::Parser::ParseStmt()
         return {};
     }
 
-    const auto name = Expect(TokenType_Symbol).StringValue;
-    return ParseFunction(name);
+    if (NextAt("import"))
+        return ParseImport();
+
+    if (m_IsImported && !At("export"))
+    {
+        Skip();
+        return {};
+    }
+
+    return ParseFunction();
 }

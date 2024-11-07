@@ -4,8 +4,8 @@
 #include <LX/Type.hpp>
 #include <LX/Value.hpp>
 
-LX::SubscriptExpr::SubscriptExpr(ExprPtr base, ExprPtr offset)
-    : Base(std::move(base)), Offset(std::move(offset))
+LX::SubscriptExpr::SubscriptExpr(TypePtr type, ExprPtr base, ExprPtr offset)
+    : Expr(std::move(type)), Base(std::move(base)), Offset(std::move(offset))
 {
 }
 
@@ -14,18 +14,14 @@ std::ostream& LX::SubscriptExpr::Print(std::ostream& os) const
     return Offset->Print(Base->Print(os) << '[') << ']';
 }
 
-void LX::SubscriptExpr::GenIR(Builder& builder, Value& ref) const
+LX::ValuePtr LX::SubscriptExpr::GenIR(Builder& builder) const
 {
-    Value base;
-    Base->GenIR(builder, base);
-    if (!base) Error("base is null");
+    const auto base = Base->GenIR(builder);
+    const auto offset = Offset->GenIR(builder);
 
-    Value offset;
-    Offset->GenIR(builder, offset);
-    if (!offset) Error("offset is null");
-
-    const auto element_ty = base.Type->Element();
-    const auto ptr = builder.IRBuilder().CreateGEP(element_ty->GetIR(builder), base.ValueIR, {offset.ValueIR});
-    ref.Type = element_ty;
-    ref.ValueIR = builder.IRBuilder().CreateLoad(ref.Type->GetIR(builder), ptr);
+    const auto gep = builder.IRBuilder().CreateGEP(
+        Type->GetIR(builder),
+        base->Load(builder),
+        {offset->Load(builder)});
+    return LValue::Create(Type, gep);
 }

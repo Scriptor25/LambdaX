@@ -8,7 +8,7 @@ std::string LX::PointerType::GetName(const TypePtr& element_type)
 }
 
 LX::PointerType::PointerType(TypePtr element_type)
-    : Type(GetName(element_type), 8), ElementType(std::move(element_type))
+    : Type(GetName(element_type), 64), ElementType(std::move(element_type))
 {
 }
 

@@ -3,27 +3,27 @@
 
 std::string LX::FunctionType::GetName(
     const TypePtr& result_type,
-    const std::vector<TypePtr>& param_types,
+    const std::vector<Parameter>& params,
     const bool vararg)
 {
     std::string name = "(";
-    for (size_t i = 0; i < param_types.size(); ++i)
+    for (size_t i = 0; i < params.size(); ++i)
     {
         if (i > 0) name += ", ";
-        name += param_types[i]->Name;
+        name += params[i].Type->Name;
     }
     if (vararg)
     {
-        if (!param_types.empty()) name += ", ";
+        if (!params.empty()) name += ", ";
         name += "...";
     }
     return name + ") => " + result_type->Name;
 }
 
-LX::FunctionType::FunctionType(TypePtr result_type, std::vector<TypePtr> param_types, const bool vararg)
-    : Type(GetName(result_type, param_types, vararg), 0),
+LX::FunctionType::FunctionType(TypePtr result_type, std::vector<Parameter> params, const bool vararg)
+    : Type(GetName(result_type, params, vararg), 0),
       ResultType(std::move(result_type)),
-      ParamTypes(std::move(param_types)),
+      Params(std::move(params)),
       VarArg(vararg)
 {
 }
@@ -40,12 +40,12 @@ LX::TypePtr LX::FunctionType::Result() const
 
 size_t LX::FunctionType::ParamCount() const
 {
-    return ParamTypes.size();
+    return Params.size();
 }
 
 LX::TypePtr LX::FunctionType::Param(const size_t index) const
 {
-    return ParamTypes[index];
+    return Params[index].Type;
 }
 
 bool LX::FunctionType::HasVarArg() const
@@ -56,8 +56,8 @@ bool LX::FunctionType::HasVarArg() const
 llvm::Type* LX::FunctionType::GenIR(Builder& builder) const
 {
     const auto result_type = ResultType->GetIR(builder);
-    std::vector<llvm::Type*> param_types(ParamTypes.size());
-    for (size_t i = 0; i < ParamTypes.size(); ++i)
-        param_types[i] = ParamTypes[i]->GetIR(builder);
+    std::vector<llvm::Type*> param_types(Params.size());
+    for (size_t i = 0; i < Params.size(); ++i)
+        param_types[i] = Params[i].Type->GetIR(builder);
     return llvm::FunctionType::get(result_type, param_types, VarArg);
 }

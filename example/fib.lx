@@ -1,7 +1,7 @@
 # fibonacci example
 
-fib(i32 n) => i32
-main() => i32 = fib(10)
+fib(i32) => i32
+export main() => i32 = fib(10)
 
 fib(i32 n) => i32
  = n <= 1

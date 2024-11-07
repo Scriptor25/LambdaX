@@ -1,0 +1,2 @@
+export printf([i8], ...) => i32
+export sqrt(f64) => f64

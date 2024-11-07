@@ -3,15 +3,20 @@
 #include <LX/Error.hpp>
 #include <LX/Parser.hpp>
 
-void LX::Parser::Parse(Context& ctx, std::istream& stream, const std::string& filename, const Consumer& consumer)
+void LX::Parser::Parse(
+    Context& ctx,
+    std::istream& stream,
+    const std::string& filename,
+    const Consumer& consumer,
+    const bool is_imported)
 {
-    for (Parser parser(ctx, stream, filename); !parser.AtEOF();)
+    for (Parser parser(ctx, stream, filename, is_imported); !parser.AtEOF();)
         if (auto ptr = parser.ParseStmt())
             consumer(std::move(ptr));
 }
 
-LX::Parser::Parser(Context& ctx, std::istream& stream, const std::string& filename)
-    : m_Ctx(ctx), m_Stream(stream), m_Where(filename)
+LX::Parser::Parser(Context& ctx, std::istream& stream, const std::string& filename, const bool is_imported)
+    : m_IsImported(is_imported), m_Ctx(ctx), m_Stream(stream), m_Where(filename)
 {
     m_Tok = m_Stream.get();
     Next();

@@ -58,6 +58,11 @@ bool LX::Type::IsFunction() const
     return false;
 }
 
+bool LX::Type::IsMutable() const
+{
+    return false;
+}
+
 LX::TypePtr LX::Type::Result() const
 {
     Error("type '{}' does not override Result", Name);

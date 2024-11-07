@@ -1,3 +1,4 @@
+#include <LX/Context.hpp>
 #include <LX/Error.hpp>
 #include <LX/Parameter.hpp>
 #include <LX/Parser.hpp>
@@ -17,8 +18,8 @@ LX::TypePtr& LX::Parser::ParseType()
 
     if (NextAt("("))
     {
-        std::vector<TypePtr> params;
-        const auto vararg = ParseTypeList(params, ")");
+        std::vector<Parameter> params;
+        const auto vararg = ParseParameterList(params, ")");
         Expect(")");
         Expect("=>");
         const auto result = ParseType();
@@ -33,6 +34,16 @@ LX::TypePtr& LX::Parser::ParseType()
         return m_Ctx.GetStructType(elements);
     }
 
+    if (NextAt("mut"))
+    {
+        const auto type = ParseType();
+        return m_Ctx.GetMutableType(type);
+    }
+
+    const auto where = m_Token.Where;
     const auto name = Expect(TokenType_Symbol).StringValue;
-    return m_Ctx.GetType(name);
+    if (auto& type = m_Ctx.GetType(name))
+        return type;
+
+    Error(where, "'{}' is not an existing type", name);
 }

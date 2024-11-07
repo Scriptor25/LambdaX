@@ -4,12 +4,12 @@
 #include <LX/Error.hpp>
 #include <LX/Type.hpp>
 
-LX::Value& LX::Builder::StackFrame::operator[](const std::string& name)
+LX::ValuePtr& LX::Builder::StackFrame::operator[](const std::string& name)
 {
     return Variables[name];
 }
 
-const LX::Value& LX::Builder::StackFrame::operator[](const std::string& name) const
+const LX::ValuePtr& LX::Builder::StackFrame::operator[](const std::string& name) const
 {
     return Variables.at(name);
 }
@@ -67,104 +67,109 @@ void LX::Builder::Pop()
     m_Stack.pop_back();
 }
 
-LX::Value& LX::Builder::DefVar(const std::string& name)
+LX::ValuePtr& LX::Builder::DefVar(const std::string& name)
 {
     if (m_Stack.back().contains(name))
         Error("cannot redefine variable '{}'", name);
     return m_Stack.back()[name];
 }
 
-const LX::Value& LX::Builder::GetVar(const std::string& name)
+bool LX::Builder::HasVar(const std::string& name)
+{
+    return std::ranges::any_of(
+        std::ranges::views::reverse(m_Stack),
+        [&](const auto& frame) { return frame.contains(name); });
+}
+
+const LX::ValuePtr& LX::Builder::GetVar(const std::string& name)
 {
     for (const auto& frame : std::ranges::views::reverse(m_Stack))
         if (frame.contains(name)) return frame[name];
     Error("undefined variable '{}'", name);
 }
 
-void LX::Builder::Cast(const Value& src, const TypePtr& dst_ty, Value& dst)
+LX::ValuePtr LX::Builder::Cast(const ValuePtr& src, const TypePtr& dst)
 {
     if (!src) Error("cannot cast null value");
-    if (!dst_ty) Error("cannot cast to null type");
+    if (!dst) Error("cannot cast to null type");
 
-    const auto src_ty = src.Type;
-    if (src_ty == dst_ty)
-    {
-        dst = src;
-        return;
-    }
+    const auto src_ty = src->Type();
+    if (src_ty == dst)
+        return src;
 
-    const auto src_val_ir = src.ValueIR;
-    const auto dst_ty_ir = dst_ty->GetIR(*this);
-    dst.Type = dst_ty;
+    const auto src_value = src->Load(*this);
+    const auto dst_type = dst->GetIR(*this);
 
     if (src_ty->IsInt())
     {
-        if (dst_ty->IsInt())
+        if (dst->IsInt())
         {
-            dst.ValueIR = IRBuilder().CreateIntCast(src_val_ir, dst_ty_ir, dst_ty->IsSigned());
-            return;
+            const auto value = IRBuilder().CreateIntCast(src_value, dst_type, dst->IsSigned());
+            return RValue::Create(dst, value);
         }
-        if (dst_ty->IsFloat())
+        if (dst->IsFloat())
         {
-            if (src_ty->IsSigned()) dst.ValueIR = IRBuilder().CreateSIToFP(src_val_ir, dst_ty_ir);
-            else dst.ValueIR = IRBuilder().CreateUIToFP(src_val_ir, dst_ty_ir);
-            return;
+            llvm::Value* value;
+            if (src_ty->IsSigned()) value = IRBuilder().CreateSIToFP(src_value, dst_type);
+            else value = IRBuilder().CreateUIToFP(src_value, dst_type);
+            return RValue::Create(dst, value);
         }
-        if (dst_ty->IsPointer())
+        if (dst->IsPointer())
         {
-            dst.ValueIR = IRBuilder().CreateIntToPtr(src_val_ir, dst_ty_ir);
-            return;
+            const auto value = IRBuilder().CreateIntToPtr(src_value, dst_type);
+            return RValue::Create(dst, value);
         }
     }
     else if (src_ty->IsFloat())
     {
-        if (dst_ty->IsInt())
+        if (dst->IsInt())
         {
-            if (dst_ty->IsSigned()) dst.ValueIR = IRBuilder().CreateFPToSI(src_val_ir, dst_ty_ir);
-            else dst.ValueIR = IRBuilder().CreateFPToUI(src_val_ir, dst_ty_ir);
-            return;
+            llvm::Value* value;
+            if (dst->IsSigned()) value = IRBuilder().CreateFPToSI(src_value, dst_type);
+            else value = IRBuilder().CreateFPToUI(src_value, dst_type);
+            return RValue::Create(dst, value);
         }
-        if (dst_ty->IsFloat())
+        if (dst->IsFloat())
         {
-            dst.ValueIR = IRBuilder().CreateFPCast(src_val_ir, dst_ty_ir);
-            return;
+            const auto value = IRBuilder().CreateFPCast(src_value, dst_type);
+            return RValue::Create(dst, value);
         }
     }
     else if (src_ty->IsPointer())
     {
-        if (dst_ty->IsInt())
+        if (dst->IsInt())
         {
-            dst.ValueIR = IRBuilder().CreatePtrToInt(src_val_ir, dst_ty_ir);
-            return;
+            const auto value = IRBuilder().CreatePtrToInt(src_value, dst_type);
+            return RValue::Create(dst, value);
         }
-        if (dst_ty->IsPointer())
+        if (dst->IsPointer())
         {
-            dst.ValueIR = src.ValueIR;
-            return;
+            const auto value = src_value;
+            return RValue::Create(dst, value);
         }
     }
 
-    Error("cannot cast value of type '{}' to type '{}'", src_ty, dst_ty);
+    Error("cannot cast value of type '{}' to type '{}'", src_ty, dst);
 }
 
-void LX::Builder::Equalize(Value& a, Value& b)
+void LX::Builder::Equalize(ValuePtr& a, ValuePtr& b)
 {
     if (!a || !b)
         Error("cannot equalize if one or more values are missing");
 
-    if (a.Type == b.Type)
+    if (a->Type() == b->Type())
         return;
 
-    const auto dst_ty = Type::Equalize(m_Ctx, a.Type, b.Type);
-    Cast(a, dst_ty, a);
-    Cast(b, dst_ty, b);
+    const auto dst = Type::Equalize(m_Ctx, a->Type(), b->Type());
+    a = Cast(a, dst);
+    b = Cast(b, dst);
 }
 
-llvm::Value* LX::Builder::CreateAlloca(llvm::Type* type) const
+llvm::Value* LX::Builder::CreateAlloca(llvm::Type* type, const std::string& name) const
 {
     const auto bkp = IRBuilder().GetInsertBlock();
     IRBuilder().SetInsertPointPastAllocas(bkp->getParent());
-    const auto ptr = IRBuilder().CreateAlloca(type);
+    const auto ptr = IRBuilder().CreateAlloca(type, {}, name);
     IRBuilder().SetInsertPoint(bkp);
     return ptr;
 }

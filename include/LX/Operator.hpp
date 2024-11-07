@@ -4,29 +4,41 @@
 
 namespace LX
 {
-    bool OperatorLOr(Builder&, const Value&, const Value&, Value&);
-    bool OperatorLXOr(Builder&, const Value&, const Value&, Value&);
-    bool OperatorLAnd(Builder&, const Value&, const Value&, Value&);
-    bool OperatorEQ(Builder&, const Value&, const Value&, Value&);
-    bool OperatorNE(Builder&, const Value&, const Value&, Value&);
-    bool OperatorLT(Builder&, const Value&, const Value&, Value&);
-    bool OperatorLE(Builder&, const Value&, const Value&, Value&);
-    bool OperatorGT(Builder&, const Value&, const Value&, Value&);
-    bool OperatorGE(Builder&, const Value&, const Value&, Value&);
-    bool OperatorAdd(Builder&, const Value&, const Value&, Value&);
-    bool OperatorSub(Builder&, const Value&, const Value&, Value&);
-    bool OperatorMul(Builder&, const Value&, const Value&, Value&);
-    bool OperatorDiv(Builder&, const Value&, const Value&, Value&);
-    bool OperatorRem(Builder&, const Value&, const Value&, Value&);
-    bool OperatorPow(Builder&, const Value&, const Value&, Value&);
-    bool OperatorRt(Builder&, const Value&, const Value&, Value&);
-    bool OperatorOr(Builder&, const Value&, const Value&, Value&);
-    bool OperatorXOr(Builder&, const Value&, const Value&, Value&);
-    bool OperatorAnd(Builder&, const Value&, const Value&, Value&);
-    bool OperatorShL(Builder&, const Value&, const Value&, Value&);
-    bool OperatorShR(Builder&, const Value&, const Value&, Value&);
+    ValuePtr OperatorLOr(Builder&, const ValuePtr&, const ValuePtr&);
+    ValuePtr OperatorLXOr(Builder&, const ValuePtr&, const ValuePtr&);
+    ValuePtr OperatorLAnd(Builder&, const ValuePtr&, const ValuePtr&);
+    TypePtr OperatorTypeLogical(Context&, const TypePtr&);
 
-    bool OperatorNeg(Builder&, const Value&, Value&);
-    bool OperatorNot(Builder&, const Value&, Value&);
-    bool OperatorLNot(Builder&, const Value&, Value&);
+    ValuePtr OperatorEQ(Builder&, const ValuePtr&, const ValuePtr&);
+    ValuePtr OperatorNE(Builder&, const ValuePtr&, const ValuePtr&);
+    ValuePtr OperatorLT(Builder&, const ValuePtr&, const ValuePtr&);
+    ValuePtr OperatorLE(Builder&, const ValuePtr&, const ValuePtr&);
+    ValuePtr OperatorGT(Builder&, const ValuePtr&, const ValuePtr&);
+    ValuePtr OperatorGE(Builder&, const ValuePtr&, const ValuePtr&);
+    TypePtr OperatorTypeCmp(Context&, const TypePtr&);
+
+    ValuePtr OperatorAdd(Builder&, const ValuePtr&, const ValuePtr&);
+    ValuePtr OperatorSub(Builder&, const ValuePtr&, const ValuePtr&);
+    ValuePtr OperatorMul(Builder&, const ValuePtr&, const ValuePtr&);
+    ValuePtr OperatorDiv(Builder&, const ValuePtr&, const ValuePtr&);
+    ValuePtr OperatorRem(Builder&, const ValuePtr&, const ValuePtr&);
+    TypePtr OperatorTypeArith(Context&, const TypePtr&);
+
+    ValuePtr OperatorPow(Builder&, const ValuePtr&, const ValuePtr&);
+    ValuePtr OperatorRt(Builder&, const ValuePtr&, const ValuePtr&);
+    TypePtr OperatorTypePow(Context&, const TypePtr&);
+
+    ValuePtr OperatorOr(Builder&, const ValuePtr&, const ValuePtr&);
+    ValuePtr OperatorXOr(Builder&, const ValuePtr&, const ValuePtr&);
+    ValuePtr OperatorAnd(Builder&, const ValuePtr&, const ValuePtr&);
+    ValuePtr OperatorShL(Builder&, const ValuePtr&, const ValuePtr&);
+    ValuePtr OperatorShR(Builder&, const ValuePtr&, const ValuePtr&);
+    TypePtr OperatorTypeBitwise(Context&, const TypePtr&);
+
+    ValuePtr OperatorNeg(Builder&, const ValuePtr&);
+    TypePtr OperatorTypeNeg(Context&, const TypePtr&);
+    ValuePtr OperatorNot(Builder&, const ValuePtr&);
+    TypePtr OperatorTypeNot(Context&, const TypePtr&);
+    ValuePtr OperatorLNot(Builder&, const ValuePtr&);
+    TypePtr OperatorTypeLNot(Context&, const TypePtr&);
 }

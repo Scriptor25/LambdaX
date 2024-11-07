@@ -3,22 +3,21 @@
 #include <functional>
 #include <string>
 #include <vector>
-#include <LX/Context.hpp>
 #include <LX/LX.hpp>
 #include <LX/SourceLocation.hpp>
 #include <LX/Token.hpp>
 
 namespace LX
 {
-    using Consumer = std::function<void(StmtPtr)>;
+    using Consumer = std::function<void(StmtPtr&&)>;
 
     class Parser
     {
     public:
-        static void Parse(Context&, std::istream&, const std::string&, const Consumer&);
+        static void Parse(Context&, std::istream&, const std::string&, const Consumer&, bool is_imported = false);
 
     private:
-        Parser(Context&, std::istream&, const std::string&);
+        Parser(Context&, std::istream&, const std::string&, bool is_imported);
 
         int Get();
         int GetNewLine();
@@ -43,7 +42,8 @@ namespace LX
         bool ParseParameterList(std::vector<Parameter>&, const std::string&);
 
         StmtPtr ParseStmt();
-        StmtPtr ParseFunction(const std::string&);
+        StmtPtr ParseImport();
+        StmtPtr ParseFunction();
 
         ExprPtr ParseExpr();
         void ParseExprList(std::vector<ExprPtr>&, const std::string&);
@@ -52,6 +52,7 @@ namespace LX
         ExprPtr ParseOperand();
         ExprPtr ParsePrimary();
 
+        bool m_IsImported;
         Context& m_Ctx;
         std::istream& m_Stream;
         SourceLocation m_Where;

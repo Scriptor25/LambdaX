@@ -13,11 +13,11 @@ namespace LX
     {
         struct StackFrame
         {
-            Value& operator[](const std::string&);
-            const Value& operator[](const std::string&) const;
+            ValuePtr& operator[](const std::string&);
+            const ValuePtr& operator[](const std::string&) const;
             [[nodiscard]] bool contains(const std::string&) const;
 
-            std::map<std::string, Value> Variables;
+            std::map<std::string, ValuePtr> Variables;
         };
 
     public:
@@ -33,13 +33,14 @@ namespace LX
         void Push();
         void Pop();
 
-        Value& DefVar(const std::string&);
-        const Value& GetVar(const std::string&);
+        ValuePtr& DefVar(const std::string&);
+        bool HasVar(const std::string&);
+        const ValuePtr& GetVar(const std::string&);
 
-        void Cast(const Value&, const TypePtr&, Value&);
-        void Equalize(Value&, Value&);
+        ValuePtr Cast(const ValuePtr&, const TypePtr&);
+        void Equalize(ValuePtr&, ValuePtr&);
 
-        llvm::Value* CreateAlloca(llvm::Type*) const;
+        llvm::Value* CreateAlloca(llvm::Type*, const std::string& = {}) const;
 
     private:
         Context& m_Ctx;

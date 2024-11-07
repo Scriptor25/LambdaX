@@ -1,0 +1,80 @@
+import "std.lx" as std
+import "vec3.lx" as vec3
+import "ray.lx" as ray
+import "record.lx" as record
+import "sphere.lx" as sphere
+import "ppm.lx" as ppm
+
+type camera = {
+    f64 focal_length,
+    f64 vp_height,
+    f64 vp_width,
+    point center,
+    vec3 vp_u,
+    vec3 vp_v,
+    vec3 pd_u,
+    vec3 pd_v,
+    point vp_ul,
+    point p00_loc,
+}
+
+mix_color(color a, color b, f64 t) => color = vec3.add(vec3.mul(a, 1 - t), vec3.mul(b, t))
+
+ray_color(ray r) => color = (
+    mut rec => record,
+    sphere.hit({ { 0.0, 0.0, -1.0 }, 0.5 }, r, 0.001, 1000.0, rec) ? (
+        vec3.mul({ rec.normal.x + 1, rec.normal.y + 1, rec.normal.z + 1 }, 0.5)
+    ) : (
+        a = r.direction.y * 0.5 + 0.5,
+        mix_color({ 1.0, 1.0, 1.0 }, { 0.5, 0.7, 1.0 }, a)
+    )
+)
+
+pixel_color(camera cam, i32 x, i32 y, i32 width, i32 height) => color = (
+    pc = vec3.add(cam.p00_loc, vec3.add(vec3.mul(cam.pd_u, x), vec3.mul(cam.pd_v, y))),
+    o = cam.center,
+    d = vec3.normalize(vec3.sub(pc, cam.center)),
+    ray_color({ o, d })
+)
+
+for_column(camera cam, i32 x, i32 y, i32 width, i32 height) => i32
+ = x < width
+ ? (
+    c = pixel_color(cam, x, y, width, height),
+    ppm.print_color(c),
+    for_column(cam, x + 1, y, width, height)
+ ) : 0
+
+for_row(camera cam, i32 x, i32 y, i32 width, i32 height) => i32
+ = y < height
+ ? (
+    for_column(cam, x, y, width, height),
+    for_row(cam, x, y + 1, width, height)
+ ) : 0
+
+export main(i32 argc, [[i8]] argv) => i32 = (
+    width = 1920, height = 1080,
+    ppm.print_header(width, height, 255),
+
+    focal_length = 1.0,
+
+    vp_height = 2.0,
+    vp_width = vp_height * width / height,
+
+    center = vec3.empty(),
+
+    vp_u = { vp_width, 0.0, 0.0 },
+    vp_v = { 0.0, -vp_height, 0.0 },
+
+    pd_u = vec3.div(vp_u, width),
+    pd_v = vec3.div(vp_v, height),
+
+    vp_ul = vec3.sub(vec3.sub(vec3.sub(center, { 0.0, 0.0, focal_length }), vec3.div(vp_u, 2)), vec3.div(vp_v, 2)),
+    p00_loc = vec3.add(vp_ul, vec3.mul(vec3.add(pd_u, pd_v), 0.5)),
+
+    cam = { focal_length, vp_height, vp_width, center, vp_u, vp_v, pd_u, pd_v, vp_ul, p00_loc, },
+
+    for_row(cam, 0, 0, width, height),
+
+    0
+)

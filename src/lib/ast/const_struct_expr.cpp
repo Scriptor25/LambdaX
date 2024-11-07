@@ -1,11 +1,9 @@
 #include <LX/AST.hpp>
+#include <LX/Builder.hpp>
 #include <LX/Type.hpp>
 
-#include "LX/Builder.hpp"
-#include "LX/Context.hpp"
-
-LX::ConstStructExpr::ConstStructExpr(std::vector<ExprPtr> elements, TypePtr type)
-    : Elements(std::move(elements)), Type(std::move(type))
+LX::ConstStructExpr::ConstStructExpr(TypePtr type, std::vector<ExprPtr> elements)
+    : Expr(std::move(type)), Elements(std::move(elements))
 {
 }
 
@@ -22,33 +20,30 @@ std::ostream& LX::ConstStructExpr::Print(std::ostream& os) const
     return os;
 }
 
-void LX::ConstStructExpr::GenIR(Builder& builder, Value& ref) const
+LX::ValuePtr LX::ConstStructExpr::GenIR(Builder& builder) const
 {
-    std::vector<Value> values;
-    std::vector<Parameter> elements;
+    std::vector<ValuePtr> values;
     std::vector<llvm::Constant*> constants;
+
     for (size_t i = 0; i < Elements.size(); ++i)
     {
         auto& value = values.emplace_back();
-        Elements[i]->GenIR(builder, value);
-        if (Type) builder.Cast(value, Type->Element(i), value);
-        auto& [type, name] = elements.emplace_back();
-        type = value.Type;
-        if (const auto c = llvm::dyn_cast<llvm::Constant>(value.ValueIR))
+        value = Elements[i]->GenIR(builder);
+        value = builder.Cast(value, Type->Element(i));
+        if (const auto c = llvm::dyn_cast<llvm::Constant>(value->Load(builder)))
             constants.push_back(c);
     }
 
-    const auto type = Type ? Type : builder.Ctx().GetStructType(elements);
-    const auto type_ir = type->GetIR(builder);
+    const auto type_ir = Type->GetIR(builder);
 
-    ref.Type = type;
     if (constants.size() == values.size())
     {
-        ref.ValueIR = llvm::ConstantStruct::get(llvm::dyn_cast<llvm::StructType>(type_ir), constants);
-        return;
+        const auto value = llvm::ConstantStruct::get(llvm::dyn_cast<llvm::StructType>(type_ir), constants);
+        return RValue::Create(Type, value);
     }
 
-    ref.ValueIR = llvm::UndefValue::get(type_ir);
+    llvm::Value* value = llvm::UndefValue::get(type_ir);
     for (size_t i = 0; i < values.size(); ++i)
-        ref.ValueIR = builder.IRBuilder().CreateInsertValue(ref.ValueIR, values[i].ValueIR, i);
+        value = builder.IRBuilder().CreateInsertValue(value, values[i]->Load(builder), i);
+    return RValue::Create(Type, value);
 }

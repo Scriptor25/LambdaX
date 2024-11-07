@@ -3,8 +3,8 @@
 #include <LX/Context.hpp>
 #include <LX/Value.hpp>
 
-LX::ConstStringExpr::ConstStringExpr(std::string value)
-    : Value(std::move(value))
+LX::ConstStringExpr::ConstStringExpr(TypePtr type, std::string value)
+    : Expr(std::move(type)), Value(std::move(value))
 {
 }
 
@@ -27,8 +27,8 @@ std::ostream& LX::ConstStringExpr::Print(std::ostream& os) const
     return os << '"' << value << '"';
 }
 
-void LX::ConstStringExpr::GenIR(Builder& builder, LX::Value& ref) const
+LX::ValuePtr LX::ConstStringExpr::GenIR(Builder& builder) const
 {
-    ref.Type = builder.Ctx().GetPointerType(builder.Ctx().GetIntType(8, true));
-    ref.ValueIR = builder.IRBuilder().CreateGlobalString(Value);
+    const auto value = builder.IRBuilder().CreateGlobalString(Value);
+    return RValue::Create(Type, value);
 }

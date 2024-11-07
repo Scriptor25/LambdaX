@@ -3,10 +3,8 @@
 #include <LX/Error.hpp>
 #include <LX/Value.hpp>
 
-#include "LX/Type.hpp"
-
-LX::TernaryExpr::TernaryExpr(ExprPtr condition, ExprPtr then, ExprPtr else_)
-    : Condition(std::move(condition)), Then(std::move(then)), Else(std::move(else_))
+LX::TernaryExpr::TernaryExpr(TypePtr type, ExprPtr condition, ExprPtr then, ExprPtr else_)
+    : Expr(std::move(type)), Condition(std::move(condition)), Then(std::move(then)), Else(std::move(else_))
 {
 }
 
@@ -15,43 +13,37 @@ std::ostream& LX::TernaryExpr::Print(std::ostream& os) const
     return Else->Print(Then->Print(Condition->Print(os) << " ? ") << " : ");
 }
 
-void LX::TernaryExpr::GenIR(Builder& builder, Value& ref) const
+LX::ValuePtr LX::TernaryExpr::GenIR(Builder& builder) const
 {
     const auto parent = builder.IRBuilder().GetInsertBlock()->getParent();
     auto then_bb = llvm::BasicBlock::Create(builder.IRContext(), "then", parent);
     auto else_bb = llvm::BasicBlock::Create(builder.IRContext(), "else", parent);
     const auto end_bb = llvm::BasicBlock::Create(builder.IRContext(), "end", parent);
 
-    Value condition;
-    Condition->GenIR(builder, condition);
-    if (!condition) Error("condition is null");
-    builder.IRBuilder().CreateCondBr(condition.ValueIR, then_bb, else_bb);
+    const auto condition = Condition->GenIR(builder);
+    builder.IRBuilder().CreateCondBr(condition->Load(builder), then_bb, else_bb);
 
     builder.IRBuilder().SetInsertPoint(then_bb);
-    Value then;
-    Then->GenIR(builder, then);
-    if (!then) Error("then is null");
+    auto then = Then->GenIR(builder);
     then_bb = builder.IRBuilder().GetInsertBlock();
     builder.IRBuilder().CreateBr(end_bb);
 
     builder.IRBuilder().SetInsertPoint(else_bb);
-    Value else_;
-    Else->GenIR(builder, else_);
-    if (!else_) Error("else is null");
+    auto else_ = Else->GenIR(builder);
     else_bb = builder.IRBuilder().GetInsertBlock();
     builder.IRBuilder().CreateBr(end_bb);
 
-    const auto dst_ty = Type::Equalize(builder.Ctx(), then.Type, else_.Type);
     builder.IRBuilder().SetInsertPoint(then_bb->getTerminator());
-    builder.Cast(then, dst_ty, then);
+    then = builder.Cast(then, Type);
+    const auto then_value = then->Load(builder);
     builder.IRBuilder().SetInsertPoint(else_bb->getTerminator());
-    builder.Cast(else_, dst_ty, else_);
+    else_ = builder.Cast(else_, Type);
+    const auto else_value = else_->Load(builder);
 
     builder.IRBuilder().SetInsertPoint(end_bb);
-    const auto phi = builder.IRBuilder().CreatePHI(then.ValueIR->getType(), 2);
-    phi->addIncoming(then.ValueIR, then_bb);
-    phi->addIncoming(else_.ValueIR, else_bb);
+    const auto phi = builder.IRBuilder().CreatePHI(then_value->getType(), 2);
+    phi->addIncoming(then_value, then_bb);
+    phi->addIncoming(else_value, else_bb);
 
-    ref.Type = then.Type;
-    ref.ValueIR = phi;
+    return RValue::Create(Type, phi);
 }

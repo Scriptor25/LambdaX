@@ -1,8 +1,8 @@
 #include <LX/AST.hpp>
 #include <LX/Builder.hpp>
 
-LX::SequenceExpr::SequenceExpr(std::vector<ExprPtr> children)
-    : Children(std::move(children))
+LX::SequenceExpr::SequenceExpr(TypePtr type, std::vector<ExprPtr> children)
+    : Expr(std::move(type)), Children(std::move(children))
 {
 }
 
@@ -30,10 +30,12 @@ std::ostream& LX::SequenceExpr::Print(std::ostream& os) const
     return os << std::endl << spacing() << ')';
 }
 
-void LX::SequenceExpr::GenIR(Builder& builder, Value& ref) const
+LX::ValuePtr LX::SequenceExpr::GenIR(Builder& builder) const
 {
     builder.Push();
+    ValuePtr value;
     for (const auto& child : Children)
-        child->GenIR(builder, ref);
+        value = child->GenIR(builder);
     builder.Pop();
+    return value;
 }
