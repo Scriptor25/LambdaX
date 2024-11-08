@@ -15,26 +15,35 @@ namespace LX
 
     struct FunctionStmt : Stmt
     {
-        FunctionStmt(bool, TypePtr, std::string, std::vector<Parameter>, ExprPtr);
+        FunctionStmt(bool, bool, TypePtr, std::string, std::vector<Parameter>, ExprPtr);
 
         std::ostream& Print(std::ostream&) const override;
         ValuePtr GenIR(Builder&) const override;
 
         bool Export;
+        bool Extern;
         TypePtr Type;
         std::string Name;
         std::vector<Parameter> Params;
         ExprPtr Body;
     };
 
+    struct FunctionImport
+    {
+        TypePtr Type;
+        std::string Name;
+        bool Extern;
+    };
+
     struct ImportStmt : Stmt
     {
-        ImportStmt(std::vector<Parameter>, std::string);
+        ImportStmt(std::vector<FunctionImport>, std::string, std::string);
 
         std::ostream& Print(std::ostream&) const override;
         ValuePtr GenIR(Builder&) const override;
 
-        std::vector<Parameter> Imports;
+        std::vector<FunctionImport> Imports;
+        std::string ModuleId;
         std::string Name;
     };
 
@@ -144,13 +153,14 @@ namespace LX
 
     struct MemberExpr : Expr
     {
-        MemberExpr(TypePtr, ExprPtr, std::string);
+        MemberExpr(TypePtr, ExprPtr, std::string, bool);
 
         std::ostream& Print(std::ostream&) const override;
         ValuePtr GenIR(Builder&) const override;
 
         ExprPtr Parent;
         std::string Member;
+        bool Deref;
     };
 
     struct MutableExpr : Expr

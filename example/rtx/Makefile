@@ -7,7 +7,7 @@ LX := lx
 BUILD := build
 SRC := $(wildcard *.lx)
 IR := $(patsubst %.lx,$(BUILD)/%.ll,$(SRC))
-SINGLE := $(BUILD)/a.ll
+SINGLE := $(BUILD)/a.bc
 OBJ := $(patsubst %.ll,%.o,$(IR))
 TARGET := $(BUILD)/a.exe
 

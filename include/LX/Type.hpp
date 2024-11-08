@@ -31,6 +31,7 @@ namespace LX
         [[nodiscard]] virtual size_t ParamCount() const;
         [[nodiscard]] virtual TypePtr Param(size_t) const;
         [[nodiscard]] virtual bool HasVarArg() const;
+        virtual void WithName(const std::string&);
         llvm::Type* GetIR(Builder&);
 
         std::string Name;
@@ -119,8 +120,10 @@ namespace LX
 
         [[nodiscard]] TypePtr Element(size_t) const override;
         [[nodiscard]] size_t IndexOf(const std::string&) const override;
+        void WithName(const std::string&) override;
         llvm::Type* GenIR(Builder&) const override;
 
+        std::string StructName;
         std::vector<Parameter> Elements;
     };
 }

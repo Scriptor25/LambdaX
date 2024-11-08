@@ -8,6 +8,7 @@
 LX::StmtPtr LX::Parser::ParseFunction()
 {
     const bool export_ = NextAt("export");
+    const bool extern_ = NextAt("extern");
     const auto name = Expect(TokenType_Symbol).StringValue;
 
     Expect("(");
@@ -33,5 +34,5 @@ LX::StmtPtr LX::Parser::ParseFunction()
         m_Ctx.Pop();
     }
 
-    return std::make_unique<FunctionStmt>(export_, type, name, params, std::move(body));
+    return std::make_unique<FunctionStmt>(export_, extern_, type, name, params, std::move(body));
 }

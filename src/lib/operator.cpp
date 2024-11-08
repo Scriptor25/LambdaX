@@ -436,3 +436,27 @@ LX::TypePtr LX::OperatorTypeLNot(Context& ctx, const TypePtr&)
 {
     return ctx.GetIntType(1, false);
 }
+
+LX::ValuePtr LX::OperatorRef(Builder& builder, const ValuePtr& val)
+{
+    return RValue::Create(builder.Ctx().GetPointerType(val->Type()), val->Ptr());
+}
+
+LX::TypePtr LX::OperatorTypeRef(Context& ctx, const TypePtr& type)
+{
+    return ctx.GetPointerType(type);
+}
+
+LX::ValuePtr LX::OperatorDeref(Builder& builder, const ValuePtr& val)
+{
+    if (val->Type()->IsPointer())
+        return LValue::Create(val->Type()->Element(), val->Load(builder));
+    return {};
+}
+
+LX::TypePtr LX::OperatorTypeDeref(Context& ctx, const TypePtr& type)
+{
+    if (type->IsPointer())
+        return type->Element();
+    return {};
+}

@@ -1,28 +1,18 @@
-import "std.lx" as std
-import "vec3.lx" as vec3
+import "camera.lx"
+import "hittable_list.lx" as hittable_list
+import "ppm.lx" as ppm
 import "ray.lx" as ray
 import "record.lx" as record
 import "sphere.lx" as sphere
-import "ppm.lx" as ppm
-
-type camera = {
-    f64 focal_length,
-    f64 vp_height,
-    f64 vp_width,
-    point center,
-    vec3 vp_u,
-    vec3 vp_v,
-    vec3 pd_u,
-    vec3 pd_v,
-    point vp_ul,
-    point p00_loc,
-}
+import "std.lx" as std
+import "vec3.lx" as vec3
 
 mix_color(color a, color b, f64 t) => color = vec3.add(vec3.mul(a, 1 - t), vec3.mul(b, t))
 
 ray_color(ray r) => color = (
     mut rec => record,
-    sphere.hit({ { 0.0, 0.0, -1.0 }, 0.5 }, r, 0.001, 1000.0, rec) ? (
+    mut sp = sphere.sphere({ 0.0, 0.0, -1.0 }, 0.5),
+    sp.hit(&sp, r, 0.001, 1000.0, rec) ? (
         vec3.mul({ rec.normal.x + 1, rec.normal.y + 1, rec.normal.z + 1 }, 0.5)
     ) : (
         a = r.direction.y * 0.5 + 0.5,
@@ -52,7 +42,7 @@ for_row(camera cam, i32 x, i32 y, i32 width, i32 height) => i32
     for_row(cam, x, y + 1, width, height)
  ) : 0
 
-export main(i32 argc, [[i8]] argv) => i32 = (
+extern main(i32 argc, [[i8]] argv) => i32 = (
     width = 1920, height = 1080,
     ppm.print_header(width, height, 255),
 

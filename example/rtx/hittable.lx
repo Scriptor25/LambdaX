@@ -1,0 +1,6 @@
+import "ray.lx"
+import "record.lx"
+
+type hittable {
+    [([], ray, f64, f64, mut record) => u1] hit,
+}

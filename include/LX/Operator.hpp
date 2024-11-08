@@ -41,4 +41,9 @@ namespace LX
     TypePtr OperatorTypeNot(Context&, const TypePtr&);
     ValuePtr OperatorLNot(Builder&, const ValuePtr&);
     TypePtr OperatorTypeLNot(Context&, const TypePtr&);
+
+    ValuePtr OperatorRef(Builder&, const ValuePtr&);
+    TypePtr OperatorTypeRef(Context&, const TypePtr&);
+    ValuePtr OperatorDeref(Builder&, const ValuePtr&);
+    TypePtr OperatorTypeDeref(Context&, const TypePtr&);
 }

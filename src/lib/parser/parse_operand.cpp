@@ -33,11 +33,15 @@ LX::ExprPtr LX::Parser::ParseOperand()
             continue;
         }
 
-        if (NextAt("."))
+        if (At(".") || At("!"))
         {
+            const auto deref = NextAt("!");
+            if (!deref) Expect(".");
             const auto member = Expect(TokenType_Symbol).StringValue;
-            const auto type = expr->Type->Element(expr->Type->IndexOf(member));
-            expr = std::make_unique<MemberExpr>(type, std::move(expr), member);
+            TypePtr struct_type = expr->Type;
+            if (deref) struct_type = struct_type->Element();
+            const auto type = struct_type->Element(struct_type->IndexOf(member));
+            expr = std::make_unique<MemberExpr>(type, std::move(expr), member, deref);
             continue;
         }
 

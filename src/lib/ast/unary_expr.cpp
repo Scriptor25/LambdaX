@@ -12,6 +12,8 @@ LX::TypePtr LX::UnaryExpr::GetType(Context& ctx, const std::string& operator_, c
         {"-", {OperatorTypeNeg}},
         {"~", {OperatorTypeNot}},
         {"!", {OperatorTypeLNot}},
+        {"&", {OperatorTypeRef}},
+        {"*", {OperatorTypeDeref}},
     };
 
     if (const auto& op = OPS[operator_]; op)
@@ -38,6 +40,8 @@ LX::ValuePtr LX::UnaryExpr::GenIR(Builder& builder) const
         {"-", {OperatorNeg}},
         {"~", {OperatorNot}},
         {"!", {OperatorLNot}},
+        {"&", {OperatorRef}},
+        {"*", {OperatorDeref}},
     };
 
     const auto operand = Operand->GenIR(builder);

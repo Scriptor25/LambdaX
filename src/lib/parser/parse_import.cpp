@@ -17,16 +17,26 @@ LX::StmtPtr LX::Parser::ParseImport()
     {
         const auto name = Expect(TokenType_Symbol).StringValue;
 
-        std::vector<Parameter> imports;
+        std::vector<FunctionImport> imports;
+        std::vector<Parameter> params;
+
         Parse(m_Ctx, stream, path.string(), [&](StmtPtr&& ptr)
         {
             if (const auto fun = dynamic_cast<FunctionStmt*>(ptr.get()); fun && fun->Export)
-                imports.emplace_back(m_Ctx.GetPointerType(fun->Type), fun->Name);
+            {
+                auto& [type_, name_, extern_] = imports.emplace_back();
+                type_ = m_Ctx.GetPointerType(fun->Type);
+                name_ = fun->Name;
+                extern_ = fun->Extern;
+                params.emplace_back(type_, name_);
+            }
         }, true);
         stream.close();
 
-        m_Ctx.DefVar(name) = m_Ctx.GetStructType(imports);
-        return std::make_unique<ImportStmt>(imports, name);
+        m_Ctx.DefVar(name) = m_Ctx.GetStructType(params);
+
+        const auto module_id = path.filename().replace_extension().string();
+        return std::make_unique<ImportStmt>(imports, module_id, name);
     }
 
     if (m_IsImported && NextAt("as"))

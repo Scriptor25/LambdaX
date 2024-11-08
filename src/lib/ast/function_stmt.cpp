@@ -8,17 +8,24 @@
 
 LX::FunctionStmt::FunctionStmt(
     const bool export_,
+    const bool extern_,
     TypePtr type,
     std::string name,
     std::vector<Parameter> params,
     ExprPtr body)
-    : Export(export_), Type(std::move(type)), Name(std::move(name)), Params(std::move(params)), Body(std::move(body))
+    : Export(export_),
+      Extern(extern_),
+      Type(std::move(type)),
+      Name(std::move(name)),
+      Params(std::move(params)),
+      Body(std::move(body))
 {
 }
 
 std::ostream& LX::FunctionStmt::Print(std::ostream& os) const
 {
     if (Export) os << "export ";
+    if (Extern) os << "extern ";
     os << Name << '(';
     for (size_t i = 0; i < Params.size(); ++i)
     {
@@ -38,12 +45,14 @@ LX::ValuePtr LX::FunctionStmt::GenIR(Builder& builder) const
     if (!builder.HasVar(Name))
     {
         const auto type = llvm::dyn_cast<llvm::FunctionType>(Type->GetIR(builder));
+        const auto name = Export && !Extern ? builder.ModuleId() + '.' + Name : Name;
+
         function = llvm::Function::Create(
             type,
-            Export
+            Export || Extern
                 ? llvm::GlobalValue::ExternalLinkage
                 : llvm::GlobalValue::InternalLinkage,
-            Name,
+            name,
             builder.IRModule());
         result = RValue::Create(builder.Ctx().GetPointerType(Type), function);
         builder.DefVar(Name) = result;

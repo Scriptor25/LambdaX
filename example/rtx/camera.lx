@@ -1,0 +1,14 @@
+import "vec3.lx"
+
+type camera {
+    f64 focal_length,
+    f64 vp_height,
+    f64 vp_width,
+    point center,
+    vec3 vp_u,
+    vec3 vp_v,
+    vec3 pd_u,
+    vec3 pd_v,
+    point vp_ul,
+    point p00_loc,
+}

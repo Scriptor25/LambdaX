@@ -3,16 +3,18 @@ import "vec3.lx" as vec3
 import "ray.lx" as ray
 import "record.lx" as record
 
-type sphere = {
+type sphere {
+    [([], ray, f64, f64, mut record) => u1] hit,
+
     point center,
     f64 radius,
 }
 
-export hit(sphere s, ray r, f64 t_min, f64 t_max, mut record rec) => u1 = (
-    oc = vec3.sub(s.center, r.origin),
+export hit(sphere self, ray r, f64 t_min, f64 t_max, mut record rec) => u1 = (
+    oc = vec3.sub(self.center, r.origin),
     a = vec3.length_squared(r.direction),
     b = vec3.dot(r.direction, oc),
-    c = vec3.length_squared(oc) - s.radius * s.radius,
+    c = vec3.length_squared(oc) - self.radius * self.radius,
     discriminant = b * b - a * c,
     discriminant < 0 ? 0 : (
         sqrtd = std.sqrt(discriminant),
@@ -23,9 +25,16 @@ export hit(sphere s, ray r, f64 t_min, f64 t_max, mut record rec) => u1 = (
         v1 && v2 ? 0 : (
             rec.t = v1 ? t2 : t1,
             rec.p = ray.at(r, rec.t),
-            on = vec3.div(vec3.sub(rec.p, s.center), s.radius),
+            on = vec3.div(vec3.sub(rec.p, self.center), self.radius),
             record.set_normal(rec, r, on),
             1
         )
     )
 )
+
+export sphere(point center, f64 radius) => sphere = {
+    $([] ptr, ray r, f64 t_min, f64 t_max, mut record rec) => u1 = hit(*(ptr as [sphere]), r, t_min, t_max, rec),
+
+    center,
+    radius,
+}

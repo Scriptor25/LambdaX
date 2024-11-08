@@ -1,7 +1,7 @@
 import "vec3.lx" as vec3
 import "ray.lx"
 
-type record = {
+type record {
     point p,
     vec3 normal,
     f64 t,

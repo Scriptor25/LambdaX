@@ -83,6 +83,11 @@ bool LX::Type::HasVarArg() const
     Error("type '{}' does not override HasVarArg", Name);
 }
 
+void LX::Type::WithName(const std::string&)
+{
+    Error("type '{}' does not override WithName", Name);
+}
+
 llvm::Type* LX::Type::GetIR(Builder& builder)
 {
     if (IR) return IR;

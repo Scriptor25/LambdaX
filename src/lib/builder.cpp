@@ -22,14 +22,19 @@ bool LX::Builder::StackFrame::contains(const std::string& name) const
 LX::Builder::Builder(Context& ctx, llvm::LLVMContext& context, const std::string& filename)
     : m_Ctx(ctx), m_IRContext(context)
 {
-    const auto module_id = std::filesystem::path(filename).filename().string();
+    m_Id = std::filesystem::path(filename).filename().replace_extension().string();
 
-    m_IRModule = std::make_unique<llvm::Module>(module_id, IRContext());
+    m_IRModule = std::make_unique<llvm::Module>(m_Id, IRContext());
     m_IRBuilder = std::make_unique<llvm::IRBuilder<>>(IRContext());
 
     IRModule().setSourceFileName(filename);
 
     Push();
+}
+
+const std::string& LX::Builder::ModuleId() const
+{
+    return m_Id;
 }
 
 LX::Context& LX::Builder::Ctx() const
@@ -65,6 +70,16 @@ void LX::Builder::Push()
 void LX::Builder::Pop()
 {
     m_Stack.pop_back();
+}
+
+LX::FunctionRef& LX::Builder::GetFunction(const std::string& name)
+{
+    return m_Functions[m_Id][name];
+}
+
+LX::FunctionRef& LX::Builder::GetFunction(const std::string& module_id, const std::string& name)
+{
+    return m_Functions[module_id][name];
 }
 
 LX::ValuePtr& LX::Builder::DefVar(const std::string& name)

@@ -41,10 +41,30 @@ size_t LX::StructType::IndexOf(const std::string& name) const
     Error("no element '{}' in type {}", name, Name);
 }
 
+void LX::StructType::WithName(const std::string& name)
+{
+    StructName = name;
+}
+
 llvm::Type* LX::StructType::GenIR(Builder& builder) const
 {
     std::vector<llvm::Type*> elements(Elements.size());
     for (size_t i = 0; i < Elements.size(); ++i)
         elements[i] = Elements[i].Type->GetIR(builder);
-    return llvm::StructType::get(builder.IRContext(), elements);
+
+    if (StructName.empty())
+        return llvm::StructType::get(builder.IRContext(), elements);
+
+    if (const auto type = llvm::StructType::getTypeByName(builder.IRContext(), StructName))
+    {
+        if (elements.empty()) return type;
+        if (!type->isOpaque()) Error("cannot redefine struct type with name '{}'", StructName);
+        type->setBody(elements);
+        return type;
+    }
+
+    if (elements.empty())
+        return llvm::StructType::create(builder.IRContext(), StructName);
+
+    return llvm::StructType::create(builder.IRContext(), elements, StructName);
 }

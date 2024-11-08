@@ -1,0 +1,39 @@
+import "hittable.lx"
+import "std.lx" as std
+
+type hittable_list {
+    [([], ray, f64, f64, mut record) => u1] hit,
+
+    [[hittable]] objects,
+    u64 count,
+}
+
+for_objects(u64 i) => u1
+
+export hit(hittable_list self, ray r, f64 t_min, f64 t_max, mut record rec) => u1 = (
+    mut tmp => record,
+    mut any => u1 = 0,
+    mut closest = t_max,
+
+    0
+)
+
+export clear(mut hittable_list self) => u1 = (
+    self.count = 0,
+    self.objects = std.realloc(self.objects, 0),
+    0
+)
+
+export add(mut hittable_list self, [hittable] object) => u1 = (
+    self.count = self.count + 1,
+    self.objects = std.realloc(self.objects, self.count),
+    self.objects[self.count - 1] = object,
+    0
+)
+
+export hittable_list() => hittable_list = {
+    $([] ptr, ray r, f64 t_min, f64 t_max, mut record rec) => u1 = hit(*(ptr as [hittable_list]), r, t_min, t_max, rec),
+
+    0 as [[hittable]],
+    0,
+}
