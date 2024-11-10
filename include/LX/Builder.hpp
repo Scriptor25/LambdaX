@@ -3,8 +3,12 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <llvm/Analysis/CGSCCPassManager.h>
+#include <llvm/Analysis/LoopAnalysisManager.h>
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/Module.h>
+#include <llvm/IR/PassManager.h>
+#include <llvm/Passes/StandardInstrumentations.h>
 #include <LX/Value.hpp>
 
 namespace LX
@@ -39,9 +43,6 @@ namespace LX
         void Push();
         void Pop();
 
-        FunctionRef& GetFunction(const std::string&);
-        FunctionRef& GetFunction(const std::string&, const std::string&);
-
         ValuePtr& DefVar(const SourceLocation& where, const std::string& name);
         const ValuePtr& GetVar(const SourceLocation& where, const std::string& name);
         bool HasVar(const std::string&);
@@ -50,6 +51,9 @@ namespace LX
         void Equalize(const SourceLocation& where, ValuePtr& a, ValuePtr& b);
 
         llvm::Value* CreateAlloca(llvm::Type*, const std::string& = {}) const;
+
+        bool RunPasses(llvm::Function&) const;
+        bool RunPasses(llvm::Module&) const;
 
     private:
         std::string m_Id;
@@ -60,8 +64,15 @@ namespace LX
         std::unique_ptr<llvm::Module> m_IRModule;
         std::unique_ptr<llvm::IRBuilder<>> m_IRBuilder;
 
-        std::vector<StackFrame> m_Stack;
+        std::unique_ptr<llvm::FunctionPassManager> m_FPM;
+        std::unique_ptr<llvm::ModulePassManager> m_MPM;
+        std::unique_ptr<llvm::LoopAnalysisManager> m_LAM;
+        std::unique_ptr<llvm::FunctionAnalysisManager> m_FAM;
+        std::unique_ptr<llvm::CGSCCAnalysisManager> m_CGAM;
+        std::unique_ptr<llvm::ModuleAnalysisManager> m_MAM;
+        std::unique_ptr<llvm::PassInstrumentationCallbacks> m_PIC;
+        std::unique_ptr<llvm::StandardInstrumentations> m_SI;
 
-        std::map<std::string, std::map<std::string, FunctionRef>> m_Functions;
+        std::vector<StackFrame> m_Stack;
     };
 }

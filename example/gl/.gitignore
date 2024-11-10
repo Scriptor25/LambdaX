@@ -1,3 +1,2 @@
-*.ll
-*.o
-*.exe
+/bin/
+.ninja_log

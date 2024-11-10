@@ -1,5 +1,10 @@
 #include <filesystem>
 #include <ranges>
+#include <llvm/IR/Verifier.h>
+#include <llvm/Passes/PassBuilder.h>
+#include <llvm/Transforms/InstCombine/InstCombine.h>
+#include <llvm/Transforms/Scalar/SimplifyCFG.h>
+#include <llvm/Transforms/Scalar/TailRecursionElimination.h>
 #include <LX/Builder.hpp>
 #include <LX/Error.hpp>
 #include <LX/Type.hpp>
@@ -28,6 +33,31 @@ LX::Builder::Builder(Context& ctx, llvm::LLVMContext& context, const std::string
     m_IRBuilder = std::make_unique<llvm::IRBuilder<>>(IRContext());
 
     IRModule().setSourceFileName(filename);
+
+    m_FPM = std::make_unique<llvm::FunctionPassManager>();
+    m_MPM = std::make_unique<llvm::ModulePassManager>();
+    m_LAM = std::make_unique<llvm::LoopAnalysisManager>();
+    m_FAM = std::make_unique<llvm::FunctionAnalysisManager>();
+    m_CGAM = std::make_unique<llvm::CGSCCAnalysisManager>();
+    m_MAM = std::make_unique<llvm::ModuleAnalysisManager>();
+    m_PIC = std::make_unique<llvm::PassInstrumentationCallbacks>();
+    m_SI = std::make_unique<llvm::StandardInstrumentations>(IRContext(), true);
+
+    m_SI->registerCallbacks(*m_PIC, m_MAM.get());
+
+    m_FPM->addPass(llvm::InstCombinePass());
+    m_FPM->addPass(llvm::SimplifyCFGPass());
+    m_FPM->addPass(llvm::TailCallElimPass());
+    m_FPM->addPass(llvm::VerifierPass());
+
+    m_MPM->addPass(llvm::VerifierPass());
+
+    llvm::PassBuilder pb;
+    pb.registerLoopAnalyses(*m_LAM);
+    pb.registerFunctionAnalyses(*m_FAM);
+    pb.registerCGSCCAnalyses(*m_CGAM);
+    pb.registerModuleAnalyses(*m_MAM);
+    pb.crossRegisterProxies(*m_LAM, *m_FAM, *m_CGAM, *m_MAM);
 
     Push();
 }
@@ -70,16 +100,6 @@ void LX::Builder::Push()
 void LX::Builder::Pop()
 {
     m_Stack.pop_back();
-}
-
-LX::FunctionRef& LX::Builder::GetFunction(const std::string& name)
-{
-    return m_Functions[m_Id][name];
-}
-
-LX::FunctionRef& LX::Builder::GetFunction(const std::string& module_id, const std::string& name)
-{
-    return m_Functions[module_id][name];
 }
 
 LX::ValuePtr& LX::Builder::DefVar(const SourceLocation& where, const std::string& name)
@@ -181,4 +201,14 @@ llvm::Value* LX::Builder::CreateAlloca(llvm::Type* type, const std::string& name
     const auto ptr = IRBuilder().CreateAlloca(type, {}, name);
     IRBuilder().SetInsertPoint(bkp);
     return ptr;
+}
+
+bool LX::Builder::RunPasses(llvm::Function& function) const
+{
+    return m_FPM->run(function, *m_FAM).areAllPreserved();
+}
+
+bool LX::Builder::RunPasses(llvm::Module& module) const
+{
+    return m_MPM->run(module, *m_MAM).areAllPreserved();
 }

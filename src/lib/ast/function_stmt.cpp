@@ -88,15 +88,16 @@ LX::ValuePtr LX::FunctionStmt::GenIR(Builder& builder) const
 
     auto value = Body->GenIR(builder);
     value = builder.Cast(Where, value, Type->Result());
-    builder.IRBuilder().CreateRet(
-        Type->Result()->IsMutable()
-            ? value->Ptr()
-            : value->Load(builder));
+    if (Type->Result()->IsVoid())
+        builder.IRBuilder().CreateRetVoid();
+    else
+        builder.IRBuilder().CreateRet(
+            Type->Result()->IsMutable()
+                ? value->Ptr()
+                : value->Load(builder));
     builder.IRBuilder().ClearInsertionPoint();
     builder.Pop();
 
-    if (verifyFunction(*function, &llvm::errs()))
-        Error(Where, "failed to verify function '{}'", Name);
-
+    builder.RunPasses(*function);
     return result;
 }

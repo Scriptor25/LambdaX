@@ -26,11 +26,5 @@ LX::StmtPtr LX::Parser::ParseStmt()
     if (At("import"))
         return ParseImport();
 
-    if (m_IsImported && !At("export"))
-    {
-        Skip();
-        return {};
-    }
-
     return ParseFunction();
 }

@@ -1,0 +1,675 @@
+export VERSION_MAJOR() => u64    = 3
+export VERSION_MINOR() => u64    = 5
+export VERSION_REVISION() => u64 = 0
+
+export TRUE() => u64  = 1
+export FALSE() => u64 = 0
+
+export RELEASE() => u64 = 0
+export PRESS() => u64   = 1
+export REPEAT() => u64  = 2
+
+export HAT_CENTERED() => u64   = 0
+export HAT_UP() => u64         = 1
+export HAT_RIGHT() => u64      = 2
+export HAT_DOWN() => u64       = 4
+export HAT_LEFT() => u64       = 8
+export HAT_RIGHT_UP() => u64   = (HAT_RIGHT() | HAT_UP())
+export HAT_RIGHT_DOWN() => u64 = (HAT_RIGHT() | HAT_DOWN())
+export HAT_LEFT_UP() => u64    = (HAT_LEFT()  | HAT_UP())
+export HAT_LEFT_DOWN() => u64  = (HAT_LEFT()  | HAT_DOWN())
+
+export KEY_UNKNOWN() => i64 = -1
+
+export KEY_SPACE() => u64         = 32
+export KEY_APOSTROPHE() => u64    = 39
+export KEY_COMMA() => u64         = 44
+export KEY_MINUS() => u64         = 45
+export KEY_PERIOD() => u64        = 46
+export KEY_SLASH() => u64         = 47
+export KEY_0() => u64             = 48
+export KEY_1() => u64             = 49
+export KEY_2() => u64             = 50
+export KEY_3() => u64             = 51
+export KEY_4() => u64             = 52
+export KEY_5() => u64             = 53
+export KEY_6() => u64             = 54
+export KEY_7() => u64             = 55
+export KEY_8() => u64             = 56
+export KEY_9() => u64             = 57
+export KEY_SEMICOLON() => u64     = 59
+export KEY_EQUAL() => u64         = 61
+export KEY_A() => u64             = 65
+export KEY_B() => u64             = 66
+export KEY_C() => u64             = 67
+export KEY_D() => u64             = 68
+export KEY_E() => u64             = 69
+export KEY_F() => u64             = 70
+export KEY_G() => u64             = 71
+export KEY_H() => u64             = 72
+export KEY_I() => u64             = 73
+export KEY_J() => u64             = 74
+export KEY_K() => u64             = 75
+export KEY_L() => u64             = 76
+export KEY_M() => u64             = 77
+export KEY_N() => u64             = 78
+export KEY_O() => u64             = 79
+export KEY_P() => u64             = 80
+export KEY_Q() => u64             = 81
+export KEY_R() => u64             = 82
+export KEY_S() => u64             = 83
+export KEY_T() => u64             = 84
+export KEY_U() => u64             = 85
+export KEY_V() => u64             = 86
+export KEY_W() => u64             = 87
+export KEY_X() => u64             = 88
+export KEY_Y() => u64             = 89
+export KEY_Z() => u64             = 90
+export KEY_LEFT_BRACKET() => u64  = 91
+export KEY_BACKSLASH() => u64     = 92
+export KEY_RIGHT_BRACKET() => u64 = 93
+export KEY_GRAVE_ACCENT() => u64  = 96
+export KEY_WORLD_1() => u64       = 161
+export KEY_WORLD_2() => u64       = 162
+
+export KEY_ESCAPE() => u64        = 256
+export KEY_ENTER() => u64         = 257
+export KEY_TAB() => u64           = 258
+export KEY_BACKSPACE() => u64     = 259
+export KEY_INSERT() => u64        = 260
+export KEY_DELETE() => u64        = 261
+export KEY_RIGHT() => u64         = 262
+export KEY_LEFT() => u64          = 263
+export KEY_DOWN() => u64          = 264
+export KEY_UP() => u64            = 265
+export KEY_PAGE_UP() => u64       = 266
+export KEY_PAGE_DOWN() => u64     = 267
+export KEY_HOME() => u64          = 268
+export KEY_END() => u64           = 269
+export KEY_CAPS_LOCK() => u64     = 280
+export KEY_SCROLL_LOCK() => u64   = 281
+export KEY_NUM_LOCK() => u64      = 282
+export KEY_PRINT_SCREEN() => u64  = 283
+export KEY_PAUSE() => u64         = 284
+export KEY_F1() => u64            = 290
+export KEY_F2() => u64            = 291
+export KEY_F3() => u64            = 292
+export KEY_F4() => u64            = 293
+export KEY_F5() => u64            = 294
+export KEY_F6() => u64            = 295
+export KEY_F7() => u64            = 296
+export KEY_F8() => u64            = 297
+export KEY_F9() => u64            = 298
+export KEY_F10() => u64           = 299
+export KEY_F11() => u64           = 300
+export KEY_F12() => u64           = 301
+export KEY_F13() => u64           = 302
+export KEY_F14() => u64           = 303
+export KEY_F15() => u64           = 304
+export KEY_F16() => u64           = 305
+export KEY_F17() => u64           = 306
+export KEY_F18() => u64           = 307
+export KEY_F19() => u64           = 308
+export KEY_F20() => u64           = 309
+export KEY_F21() => u64           = 310
+export KEY_F22() => u64           = 311
+export KEY_F23() => u64           = 312
+export KEY_F24() => u64           = 313
+export KEY_F25() => u64           = 314
+export KEY_KP_0() => u64          = 320
+export KEY_KP_1() => u64          = 321
+export KEY_KP_2() => u64          = 322
+export KEY_KP_3() => u64          = 323
+export KEY_KP_4() => u64          = 324
+export KEY_KP_5() => u64          = 325
+export KEY_KP_6() => u64          = 326
+export KEY_KP_7() => u64          = 327
+export KEY_KP_8() => u64          = 328
+export KEY_KP_9() => u64          = 329
+export KEY_KP_DECIMAL() => u64    = 330
+export KEY_KP_DIVIDE() => u64     = 331
+export KEY_KP_MULTIPLY() => u64   = 332
+export KEY_KP_SUBTRACT() => u64   = 333
+export KEY_KP_ADD() => u64        = 334
+export KEY_KP_ENTER() => u64      = 335
+export KEY_KP_EQUAL() => u64      = 336
+export KEY_LEFT_SHIFT() => u64    = 340
+export KEY_LEFT_CONTROL() => u64  = 341
+export KEY_LEFT_ALT() => u64      = 342
+export KEY_LEFT_SUPER() => u64    = 343
+export KEY_RIGHT_SHIFT() => u64   = 344
+export KEY_RIGHT_CONTROL() => u64 = 345
+export KEY_RIGHT_ALT() => u64     = 346
+export KEY_RIGHT_SUPER() => u64   = 347
+export KEY_MENU() => u64          = 348
+
+export KEY_LAST() => u64 = KEY_MENU()
+
+export MOD_SHIFT() => u64     = 0x0001
+export MOD_CONTROL() => u64   = 0x0002
+export MOD_ALT() => u64       = 0x0004
+export MOD_SUPER() => u64     = 0x0008
+export MOD_CAPS_LOCK() => u64 = 0x0010
+export MOD_NUM_LOCK() => u64  = 0x0020
+
+export MOUSE_BUTTON_1() => u64      = 0
+export MOUSE_BUTTON_2() => u64      = 1
+export MOUSE_BUTTON_3() => u64      = 2
+export MOUSE_BUTTON_4() => u64      = 3
+export MOUSE_BUTTON_5() => u64      = 4
+export MOUSE_BUTTON_6() => u64      = 5
+export MOUSE_BUTTON_7() => u64      = 6
+export MOUSE_BUTTON_8() => u64      = 7
+export MOUSE_BUTTON_LAST() => u64   = MOUSE_BUTTON_8()
+export MOUSE_BUTTON_LEFT() => u64   = MOUSE_BUTTON_1()
+export MOUSE_BUTTON_RIGHT() => u64  = MOUSE_BUTTON_2()
+export MOUSE_BUTTON_MIDDLE() => u64 = MOUSE_BUTTON_3()
+
+export JOYSTICK_1() => u64    = 0
+export JOYSTICK_2() => u64    = 1
+export JOYSTICK_3() => u64    = 2
+export JOYSTICK_4() => u64    = 3
+export JOYSTICK_5() => u64    = 4
+export JOYSTICK_6() => u64    = 5
+export JOYSTICK_7() => u64    = 6
+export JOYSTICK_8() => u64    = 7
+export JOYSTICK_9() => u64    = 8
+export JOYSTICK_10() => u64   = 9
+export JOYSTICK_11() => u64   = 10
+export JOYSTICK_12() => u64   = 11
+export JOYSTICK_13() => u64   = 12
+export JOYSTICK_14() => u64   = 13
+export JOYSTICK_15() => u64   = 14
+export JOYSTICK_16() => u64   = 15
+export JOYSTICK_LAST() => u64 = JOYSTICK_16()
+
+export GAMEPAD_BUTTON_A() => u64            = 0
+export GAMEPAD_BUTTON_B() => u64            = 1
+export GAMEPAD_BUTTON_X() => u64            = 2
+export GAMEPAD_BUTTON_Y() => u64            = 3
+export GAMEPAD_BUTTON_LEFT_BUMPER() => u64  = 4
+export GAMEPAD_BUTTON_RIGHT_BUMPER() => u64 = 5
+export GAMEPAD_BUTTON_BACK() => u64         = 6
+export GAMEPAD_BUTTON_START() => u64        = 7
+export GAMEPAD_BUTTON_GUIDE() => u64        = 8
+export GAMEPAD_BUTTON_LEFT_THUMB() => u64   = 9
+export GAMEPAD_BUTTON_RIGHT_THUMB() => u64  = 10
+export GAMEPAD_BUTTON_DPAD_UP() => u64      = 11
+export GAMEPAD_BUTTON_DPAD_RIGHT() => u64   = 12
+export GAMEPAD_BUTTON_DPAD_DOWN() => u64    = 13
+export GAMEPAD_BUTTON_DPAD_LEFT() => u64    = 14
+export GAMEPAD_BUTTON_LAST() => u64         = GAMEPAD_BUTTON_DPAD_LEFT()
+
+export GAMEPAD_BUTTON_CROSS() => u64    = GAMEPAD_BUTTON_A()
+export GAMEPAD_BUTTON_CIRCLE() => u64   = GAMEPAD_BUTTON_B()
+export GAMEPAD_BUTTON_SQUARE() => u64   = GAMEPAD_BUTTON_X()
+export GAMEPAD_BUTTON_TRIANGLE() => u64 = GAMEPAD_BUTTON_Y()
+
+export GAMEPAD_AXIS_LEFT_X() => u64        = 0
+export GAMEPAD_AXIS_LEFT_Y() => u64        = 1
+export GAMEPAD_AXIS_RIGHT_X() => u64       = 2
+export GAMEPAD_AXIS_RIGHT_Y() => u64       = 3
+export GAMEPAD_AXIS_LEFT_TRIGGER() => u64  = 4
+export GAMEPAD_AXIS_RIGHT_TRIGGER() => u64 = 5
+export GAMEPAD_AXIS_LAST() => u64          = GAMEPAD_AXIS_RIGHT_TRIGGER()
+
+export NO_ERROR() => u64              = 0
+export NOT_INITIALIZED() => u64       = 0x00010001
+export NO_CURRENT_CONTEXT() => u64    = 0x00010002
+export INVALID_ENUM() => u64          = 0x00010003
+export INVALID_VALUE() => u64         = 0x00010004
+export OUT_OF_MEMORY() => u64         = 0x00010005
+export API_UNAVAILABLE() => u64       = 0x00010006
+export VERSION_UNAVAILABLE() => u64   = 0x00010007
+export PLATFORM_ERROR() => u64        = 0x00010008
+export FORMAT_UNAVAILABLE() => u64    = 0x00010009
+export NO_WINDOW_CONTEXT() => u64     = 0x0001000A
+export CURSOR_UNAVAILABLE() => u64    = 0x0001000B
+export FEATURE_UNAVAILABLE() => u64   = 0x0001000C
+export FEATURE_UNIMPLEMENTED() => u64 = 0x0001000D
+export PLATFORM_UNAVAILABLE() => u64  = 0x0001000E
+
+export FOCUSED() => u64                 = 0x00020001
+export ICONIFIED() => u64               = 0x00020002
+export RESIZABLE() => u64               = 0x00020003
+export VISIBLE() => u64                 = 0x00020004
+export DECORATED() => u64               = 0x00020005
+export AUTO_ICONIFY() => u64            = 0x00020006
+export FLOATING() => u64                = 0x00020007
+export MAXIMIZED() => u64               = 0x00020008
+export CENTER_CURSOR() => u64           = 0x00020009
+export TRANSPARENT_FRAMEBUFFER() => u64 = 0x0002000A
+export HOVERED() => u64                 = 0x0002000B
+export FOCUS_ON_SHOW() => u64           = 0x0002000C
+export MOUSE_PASSTHROUGH() => u64       = 0x0002000D
+export POSITION_X() => u64              = 0x0002000E
+export POSITION_Y() => u64              = 0x0002000F
+export RED_BITS() => u64                = 0x00021001
+export GREEN_BITS() => u64              = 0x00021002
+export BLUE_BITS() => u64               = 0x00021003
+export ALPHA_BITS() => u64              = 0x00021004
+export DEPTH_BITS() => u64              = 0x00021005
+export STENCIL_BITS() => u64            = 0x00021006
+export ACCUM_RED_BITS() => u64          = 0x00021007
+export ACCUM_GREEN_BITS() => u64        = 0x00021008
+export ACCUM_BLUE_BITS() => u64         = 0x00021009
+export ACCUM_ALPHA_BITS() => u64        = 0x0002100A
+export AUX_BUFFERS() => u64             = 0x0002100B
+export STEREO() => u64                  = 0x0002100C
+export SAMPLES() => u64                 = 0x0002100D
+export SRGB_CAPABLE() => u64            = 0x0002100E
+export REFRESH_RATE() => u64            = 0x0002100F
+export DOUBLEBUFFER() => u64            = 0x00021010
+
+export CLIENT_API() => u64               = 0x00022001
+export CONTEXT_VERSION_MAJOR() => u64    = 0x00022002
+export CONTEXT_VERSION_MINOR() => u64    = 0x00022003
+export CONTEXT_REVISION() => u64         = 0x00022004
+export CONTEXT_ROBUSTNESS() => u64       = 0x00022005
+export OPENGL_FORWARD_COMPAT() => u64    = 0x00022006
+export CONTEXT_DEBUG() => u64            = 0x00022007
+export OPENGL_DEBUG_CONTEXT() => u64     = CONTEXT_DEBUG()
+export OPENGL_PROFILE() => u64           = 0x00022008
+export CONTEXT_RELEASE_BEHAVIOR() => u64 = 0x00022009
+export CONTEXT_NO_ERROR() => u64         = 0x0002200A
+export CONTEXT_CREATION_API() => u64     = 0x0002200B
+export SCALE_TO_MONITOR() => u64         = 0x0002200C
+export SCALE_FRAMEBUFFER() => u64        = 0x0002200D
+
+export COCOA_RETINA_FRAMEBUFFER() => u64 = 0x00023001
+export COCOA_FRAME_NAME() => u64         = 0x00023002
+export COCOA_GRAPHICS_SWITCHING() => u64 = 0x00023003
+
+export X11_CLASS_NAME() => u64         = 0x00024001
+export X11_INSTANCE_NAME() => u64      = 0x00024002
+
+export WIN32_KEYBOARD_MENU() => u64    = 0x00025001
+export WIN32_SHOWDEFAULT() => u64      = 0x00025002
+
+export WAYLAND_APP_ID() => u64         = 0x00026001
+
+export NO_API() => u64                 = 0
+export OPENGL_API() => u64             = 0x00030001
+export OPENGL_ES_API() => u64          = 0x00030002
+
+export NO_ROBUSTNESS() => u64          = 0
+export NO_RESET_NOTIFICATION() => u64  = 0x00031001
+export LOSE_CONTEXT_ON_RESET() => u64  = 0x00031002
+
+export OPENGL_ANY_PROFILE() => u64     = 0
+export OPENGL_CORE_PROFILE() => u64    = 0x00032001
+export OPENGL_COMPAT_PROFILE() => u64  = 0x00032002
+
+export CURSOR() => u64                  = 0x00033001
+export STICKY_KEYS() => u64             = 0x00033002
+export STICKY_MOUSE_BUTTONS() => u64    = 0x00033003
+export LOCK_KEY_MODS() => u64           = 0x00033004
+export RAW_MOUSE_MOTION() => u64        = 0x00033005
+export UNLIMITED_MOUSE_BUTTONS() => u64 = 0x00033006
+
+export CURSOR_NORMAL() => u64          = 0x00034001
+export CURSOR_HIDDEN() => u64          = 0x00034002
+export CURSOR_DISABLED() => u64        = 0x00034003
+export CURSOR_CAPTURED() => u64        = 0x00034004
+
+export ANY_RELEASE_BEHAVIOR() => u64   = 0
+export RELEASE_BEHAVIOR_FLUSH() => u64 = 0x00035001
+export RELEASE_BEHAVIOR_NONE() => u64  = 0x00035002
+
+export NATIVE_CONTEXT_API() => u64     = 0x00036001
+export EGL_CONTEXT_API() => u64        = 0x00036002
+export OSMESA_CONTEXT_API() => u64     = 0x00036003
+
+export ANGLE_PLATFORM_TYPE_NONE() => u64     = 0x00037001
+export ANGLE_PLATFORM_TYPE_OPENGL() => u64   = 0x00037002
+export ANGLE_PLATFORM_TYPE_OPENGLES() => u64 = 0x00037003
+export ANGLE_PLATFORM_TYPE_D3D9() => u64     = 0x00037004
+export ANGLE_PLATFORM_TYPE_D3D11() => u64    = 0x00037005
+export ANGLE_PLATFORM_TYPE_VULKAN() => u64   = 0x00037007
+export ANGLE_PLATFORM_TYPE_METAL() => u64    = 0x00037008
+
+export WAYLAND_PREFER_LIBDECOR() => u64    = 0x00038001
+export WAYLAND_DISABLE_LIBDECOR() => u64   = 0x00038002
+
+export ANY_POSITION() => u64           = 0x80000000
+
+export ARROW_CURSOR() => u64           = 0x00036001
+export IBEAM_CURSOR() => u64           = 0x00036002
+export CROSSHAIR_CURSOR() => u64       = 0x00036003
+export POINTING_HAND_CURSOR() => u64   = 0x00036004
+export RESIZE_EW_CURSOR() => u64       = 0x00036005
+export RESIZE_NS_CURSOR() => u64       = 0x00036006
+export RESIZE_NWSE_CURSOR() => u64     = 0x00036007
+export RESIZE_NESW_CURSOR() => u64     = 0x00036008
+export RESIZE_ALL_CURSOR() => u64      = 0x00036009
+export NOT_ALLOWED_CURSOR() => u64     = 0x0003600A
+export HRESIZE_CURSOR() => u64         = RESIZE_EW_CURSOR()
+export VRESIZE_CURSOR() => u64         = RESIZE_NS_CURSOR()
+export HAND_CURSOR() => u64            = POINTING_HAND_CURSOR()
+
+export CONNECTED() => u64              = 0x00040001
+export DISCONNECTED() => u64           = 0x00040002
+
+export JOYSTICK_HAT_BUTTONS() => u64   = 0x00050001
+export ANGLE_PLATFORM_TYPE() => u64    = 0x00050002
+export PLATFORM() => u64               = 0x00050003
+export COCOA_CHDIR_RESOURCES() => u64  = 0x00051001
+export COCOA_MENUBAR() => u64          = 0x00051002
+export X11_XCB_VULKAN_SURFACE() => u64 = 0x00052001
+export WAYLAND_LIBDECOR() => u64       = 0x00053001
+
+export ANY_PLATFORM() => u64           = 0x00060000
+export PLATFORM_WIN32() => u64         = 0x00060001
+export PLATFORM_COCOA() => u64         = 0x00060002
+export PLATFORM_WAYLAND() => u64       = 0x00060003
+export PLATFORM_X11() => u64           = 0x00060004
+export PLATFORM_NULL() => u64          = 0x00060005
+
+export DONT_CARE() => i64              = -1
+
+type GLFWglproc = [()]
+type GLFWvkproc = [()]
+
+type GLFWmonitor {}
+type GLFWwindow {}
+type GLFWcursor {}
+
+type GLFWallocatefun = [(u64 size, [] user) => []]
+type GLFWreallocatefun = [([] block, u64 size, [] user) => []]
+type GLFWdeallocatefun = [([] block, [] user)]
+type GLFWerrorfun = [(i32 error, [i8] description)]
+type GLFWwindowposfun = [([GLFWwindow] window, i32 xpos, i32 ypos)]
+type GLFWwindowsizefun = [([GLFWwindow] window, i32 width, i32 height)]
+type GLFWwindowclosefun = [([GLFWwindow] window)]
+type GLFWwindowrefreshfun = [([GLFWwindow] window)]
+type GLFWwindowfocusfun = [([GLFWwindow] window, i32 focused)]
+type GLFWwindowiconifyfun = [([GLFWwindow] window, i32 iconified)]
+type GLFWwindowmaximizefun = [([GLFWwindow] window, i32 maximized)]
+type GLFWframebuffersizefun = [([GLFWwindow] window, i32 width, i32 height)]
+type GLFWwindowcontentscalefun = [([GLFWwindow] window, f32 xscale, f32 yscale)]
+type GLFWmousebuttonfun = [([GLFWwindow] window, i32 button, i32 action, i32 mods)]
+type GLFWcursorposfun = [([GLFWwindow] window, f64 xpos, f64 ypos)]
+type GLFWcursorenterfun = [([GLFWwindow] window, i32 entered)]
+type GLFWscrollfun = [([GLFWwindow] window, f64 xoffset, f64 yoffset)]
+type GLFWkeyfun = [([GLFWwindow] window, i32 key, i32 scancode, i32 action, i32 mods)]
+type GLFWcharfun = [([GLFWwindow] window, u32 codepoint)]
+type GLFWcharmodsfun = [([GLFWwindow] window, u32 codepoint, i32 mods)]
+type GLFWdropfun = [([GLFWwindow] window, i32 path_count, [[i8]] paths)]
+type GLFWmonitorfun = [([GLFWmonitor] monitor, i32 event)]
+type GLFWjoystickfun = [(i32 jid, i32 event)]
+
+type GLFWvidmode {
+    i32 width,
+    i32 height,
+    i32 redBits,
+    i32 greenBits,
+    i32 blueBits,
+    i32 refreshRate,
+}
+
+type GLFWgammaramp {
+    [u16] red,
+    [u16] green,
+    [u16] blue,
+    u32 size,
+}
+
+type GLFWimage {
+    i32 width,
+    i32 height,
+    [u8] pixels,
+}
+
+type GLFWgamepadstate {
+    u8[15] buttons,
+    f32[6] axes,
+}
+
+type GLFWallocator {
+    GLFWallocatefun allocate,
+    GLFWreallocatefun reallocate,
+    GLFWdeallocatefun deallocate,
+    [] user,
+}
+
+extern glfwInit() => i32
+extern glfwTerminate()
+extern glfwInitHint(i32 hint, i32 value)
+extern glfwInitAllocator([GLFWallocator] allocator)
+extern glfwGetVersion([i32] major, [i32] minor, [i32] rev)
+extern glfwGetVersionString() => [i8]
+extern glfwGetError([[i8]] description) => i32
+extern glfwSetErrorCallback(GLFWerrorfun callback) => GLFWerrorfun
+extern glfwGetPlatform() => i32
+extern glfwPlatformSupported(i32 platform) => i32
+extern glfwGetMonitors([i32] count) => [[GLFWmonitor]]
+extern glfwGetPrimaryMonitor() => [GLFWmonitor]
+extern glfwGetMonitorPos([GLFWmonitor] monitor, [i32] xpos, [i32] ypos)
+extern glfwGetMonitorWorkarea([GLFWmonitor] monitor, [i32] xpos, [i32] ypos, [i32] width, [i32] height)
+extern glfwGetMonitorPhysicalSize([GLFWmonitor] monitor, [i32] widthMM, [i32] heightMM)
+extern glfwGetMonitorContentScale([GLFWmonitor] monitor, [f32] xscale, [f32] yscale)
+extern glfwGetMonitorName([GLFWmonitor] monitor) => [i8]
+extern glfwSetMonitorUserPointer([GLFWmonitor] monitor, [] pointer)
+extern glfwGetMonitorUserPointer([GLFWmonitor] monitor) => []
+extern glfwSetMonitorCallback(GLFWmonitorfun callback) => GLFWmonitorfun
+extern glfwGetVideoModes([GLFWmonitor] monitor, [i32] count) => [GLFWvidmode]
+extern glfwGetVideoMode([GLFWmonitor] monitor) => [GLFWvidmode]
+extern glfwSetGamma([GLFWmonitor] monitor, f32 gamma)
+extern glfwGetGammaRamp([GLFWmonitor] monitor) => [GLFWgammaramp]
+extern glfwSetGammaRamp([GLFWmonitor] monitor, [GLFWgammaramp] ramp)
+extern glfwDefaultWindowHints()
+extern glfwWindowHint(i32 hint, i32 value)
+extern glfwWindowHintString(i32 hint, [i8] value)
+extern glfwCreateWindow(i32 width, i32 height, [i8] title, [GLFWmonitor] monitor, [GLFWwindow] share) => [GLFWwindow]
+extern glfwDestroyWindow([GLFWwindow] window)
+extern glfwWindowShouldClose([GLFWwindow] window) => i32
+extern glfwSetWindowShouldClose([GLFWwindow] window, i32 value)
+extern glfwGetWindowTitle([GLFWwindow] window) => [i8]
+extern glfwSetWindowTitle([GLFWwindow] window, [i8] title)
+extern glfwSetWindowIcon([GLFWwindow] window, i32 count, [GLFWimage] images)
+extern glfwGetWindowPos([GLFWwindow] window, [i32] xpos, [i32] ypos)
+extern glfwSetWindowPos([GLFWwindow] window, i32 xpos, i32 ypos)
+extern glfwGetWindowSize([GLFWwindow] window, [i32] width, [i32] height)
+extern glfwSetWindowSizeLimits([GLFWwindow] window, i32 minwidth, i32 minheight, i32 maxwidth, i32 maxheight)
+extern glfwSetWindowAspectRatio([GLFWwindow] window, i32 numer, i32 denom)
+extern glfwSetWindowSize([GLFWwindow] window, i32 width, i32 height)
+extern glfwGetFramebufferSize([GLFWwindow] window, [i32] width, [i32] height)
+extern glfwGetWindowFrameSize([GLFWwindow] window, [i32] left, [i32] top, [i32] right, [i32] bottom)
+extern glfwGetWindowContentScale([GLFWwindow] window, [f32] xscale, [f32] yscale)
+extern glfwGetWindowOpacity([GLFWwindow] window) => f32
+extern glfwSetWindowOpacity([GLFWwindow] window, f32 opacity)
+extern glfwIconifyWindow([GLFWwindow] window)
+extern glfwRestoreWindow([GLFWwindow] window)
+extern glfwMaximizeWindow([GLFWwindow] window)
+extern glfwShowWindow([GLFWwindow] window)
+extern glfwHideWindow([GLFWwindow] window)
+extern glfwFocusWindow([GLFWwindow] window)
+extern glfwRequestWindowAttention([GLFWwindow] window)
+extern glfwGetWindowMonitor([GLFWwindow] window) => [GLFWmonitor]
+extern glfwSetWindowMonitor([GLFWwindow] window, [GLFWmonitor] monitor, i32 xpos, i32 ypos, i32 width, i32 height, i32 refreshRate)
+extern glfwGetWindowAttrib([GLFWwindow] window, i32 attrib) => i32
+extern glfwSetWindowAttrib([GLFWwindow] window, i32 attrib, i32 value)
+extern glfwSetWindowUserPointer([GLFWwindow] window, [] pointer)
+extern glfwGetWindowUserPointer([GLFWwindow] window) => []
+extern glfwSetWindowPosCallback([GLFWwindow] window, GLFWwindowposfun callback) => GLFWwindowposfun
+extern glfwSetWindowSizeCallback([GLFWwindow] window, GLFWwindowsizefun callback) => GLFWwindowsizefun
+extern glfwSetWindowCloseCallback([GLFWwindow] window, GLFWwindowclosefun callback) => GLFWwindowclosefun
+extern glfwSetWindowRefreshCallback([GLFWwindow] window, GLFWwindowrefreshfun callback) => GLFWwindowrefreshfun
+extern glfwSetWindowFocusCallback([GLFWwindow] window, GLFWwindowfocusfun callback) => GLFWwindowfocusfun
+extern glfwSetWindowIconifyCallback([GLFWwindow] window, GLFWwindowiconifyfun callback) => GLFWwindowiconifyfun
+extern glfwSetWindowMaximizeCallback([GLFWwindow] window, GLFWwindowmaximizefun callback) => GLFWwindowmaximizefun
+extern glfwSetFramebufferSizeCallback([GLFWwindow] window, GLFWframebuffersizefun callback) => GLFWframebuffersizefun
+extern glfwSetWindowContentScaleCallback([GLFWwindow] window, GLFWwindowcontentscalefun callback) => GLFWwindowcontentscalefun
+extern glfwPollEvents()
+extern glfwWaitEvents()
+extern glfwWaitEventsTimeout(f64 timeout)
+extern glfwPostEmptyEvent()
+extern glfwGetInputMode([GLFWwindow] window, i32 mode) => i32
+extern glfwSetInputMode([GLFWwindow] window, i32 mode, i32 value)
+extern glfwRawMouseMotionSupported() => i32
+extern glfwGetKeyName(i32 key, i32 scancode) => [i8]
+extern glfwGetKeyScancode(i32 key) => i32
+extern glfwGetKey([GLFWwindow] window, i32 key) => i32
+extern glfwGetMouseButton([GLFWwindow] window, i32 button) => i32
+extern glfwGetCursorPos([GLFWwindow] window, [f64] xpos, [f64] ypos)
+extern glfwSetCursorPos([GLFWwindow] window, f64 xpos, f64 ypos)
+extern glfwCreateCursor([GLFWimage] image, i32 xhot, i32 yhot) => [GLFWcursor]
+extern glfwCreateStandardCursor(i32 shape) => [GLFWcursor]
+extern glfwDestroyCursor([GLFWcursor] cursor)
+extern glfwSetCursor([GLFWwindow] window, [GLFWcursor] cursor)
+extern glfwSetKeyCallback([GLFWwindow] window, GLFWkeyfun callback) => GLFWkeyfun
+extern glfwSetCharCallback([GLFWwindow] window, GLFWcharfun callback) => GLFWcharfun
+extern glfwSetCharModsCallback([GLFWwindow] window, GLFWcharmodsfun callback) => GLFWcharmodsfun
+extern glfwSetMouseButtonCallback([GLFWwindow] window, GLFWmousebuttonfun callback) => GLFWmousebuttonfun
+extern glfwSetCursorPosCallback([GLFWwindow] window, GLFWcursorposfun callback) => GLFWcursorposfun
+extern glfwSetCursorEnterCallback([GLFWwindow] window, GLFWcursorenterfun callback) => GLFWcursorenterfun
+extern glfwSetScrollCallback([GLFWwindow] window, GLFWscrollfun callback) => GLFWscrollfun
+extern glfwSetDropCallback([GLFWwindow] window, GLFWdropfun callback) => GLFWdropfun
+extern glfwJoystickPresent(i32 jid) => i32
+extern glfwGetJoystickAxes(i32 jid, [i32] count) => [f32]
+extern glfwGetJoystickButtons(i32 jid, [i32] count) => [u8]
+extern glfwGetJoystickHats(i32 jid, [i32] count) => [u8]
+extern glfwGetJoystickName(i32 jid) => [i8]
+extern glfwGetJoystickGUID(i32 jid) => [i8]
+extern glfwSetJoystickUserPointer(i32 jid, [] pointer)
+extern glfwGetJoystickUserPointer(i32 jid) => []
+extern glfwJoystickIsGamepad(i32 jid) => i32
+extern glfwSetJoystickCallback(GLFWjoystickfun callback) => GLFWjoystickfun
+extern glfwUpdateGamepadMappings([i8] string) => i32
+extern glfwGetGamepadName(i32 jid) => [i8]
+extern glfwGetGamepadState(i32 jid, [GLFWgamepadstate] state) => i32
+extern glfwSetClipboardString([GLFWwindow] window, [i8] string)
+extern glfwGetClipboardString([GLFWwindow] window) => [i8]
+extern glfwGetTime() => f64
+extern glfwSetTime(f64 time)
+extern glfwGetTimerValue() => u64
+extern glfwGetTimerFrequency() => u64
+extern glfwMakeContextCurrent([GLFWwindow] window)
+extern glfwGetCurrentContext() => [GLFWwindow]
+extern glfwSwapBuffers([GLFWwindow] window)
+extern glfwSwapInterval(i32 interval)
+extern glfwExtensionSupported([i8] extension) => i32
+extern glfwGetProcAddress([i8] procname) => GLFWglproc
+extern glfwVulkanSupported() => i32
+extern glfwGetRequiredInstanceExtensions([u32] count) => [[i8]]
+
+export init() => i32 = glfwInit()
+export terminate() = glfwTerminate()
+export initHint(i32 hint, i32 value) = glfwInitHint(hint, value)
+export initAllocator([GLFWallocator] allocator) = glfwInitAllocator(allocator)
+export getVersion([i32] major, [i32] minor, [i32] rev) = glfwGetVersion(major, minor, rev)
+export getVersionString() => [i8] = glfwGetVersionString()
+export getError([[i8]] description) => i32 = glfwGetError(description)
+export setErrorCallback(GLFWerrorfun callback) => GLFWerrorfun = glfwSetErrorCallback(callback)
+export getPlatform() => i32 = glfwGetPlatform()
+export platformSupported(i32 platform) => i32 = glfwPlatformSupported(platform)
+export getMonitors([i32] count) => [[GLFWmonitor]] = glfwGetMonitors(count)
+export getPrimaryMonitor() => [GLFWmonitor] = glfwGetPrimaryMonitor()
+export getMonitorPos([GLFWmonitor] monitor, [i32] xpos, [i32] ypos) = glfwGetMonitorPos(monitor, xpos, ypos)
+export getMonitorWorkarea([GLFWmonitor] monitor, [i32] xpos, [i32] ypos, [i32] width, [i32] height) = glfwGetMonitorWorkarea(monitor, xpos, ypos, width, height)
+export getMonitorPhysicalSize([GLFWmonitor] monitor, [i32] widthMM, [i32] heightMM) = glfwGetMonitorPhysicalSize(monitor, widthMM, heightMM)
+export getMonitorContentScale([GLFWmonitor] monitor, [f32] xscale, [f32] yscale) = glfwGetMonitorContentScale(monitor, xscale, yscale)
+export getMonitorName([GLFWmonitor] monitor) => [i8] = glfwGetMonitorName(monitor)
+export setMonitorUserPointer([GLFWmonitor] monitor, [] pointer) = glfwSetMonitorUserPointer(monitor, pointer)
+export getMonitorUserPointer([GLFWmonitor] monitor) => [] = glfwGetMonitorUserPointer(monitor)
+export setMonitorCallback(GLFWmonitorfun callback) => GLFWmonitorfun = glfwSetMonitorCallback(callback)
+export getVideoModes([GLFWmonitor] monitor, [i32] count) => [GLFWvidmode] = glfwGetVideoModes(monitor, count)
+export getVideoMode([GLFWmonitor] monitor) => [GLFWvidmode] = glfwGetVideoMode(monitor)
+export setGamma([GLFWmonitor] monitor, f32 gamma) = glfwSetGamma(monitor, gamma)
+export getGammaRamp([GLFWmonitor] monitor) => [GLFWgammaramp] = glfwGetGammaRamp(monitor)
+export setGammaRamp([GLFWmonitor] monitor, [GLFWgammaramp] ramp) = glfwSetGammaRamp(monitor, ramp)
+export defaultWindowHints() = glfwDefaultWindowHints()
+export windowHint(i32 hint, i32 value) = glfwWindowHint(hint, value)
+export windowHintString(i32 hint, [i8] value) = glfwWindowHintString(hint, value)
+export createWindow(i32 width, i32 height, [i8] title, [GLFWmonitor] monitor, [GLFWwindow] share) => [GLFWwindow] = glfwCreateWindow(width, height, title, monitor, share)
+export destroyWindow([GLFWwindow] window) = glfwDestroyWindow(window)
+export windowShouldClose([GLFWwindow] window) => i32 = glfwWindowShouldClose(window)
+export setWindowShouldClose([GLFWwindow] window, i32 value) = glfwSetWindowShouldClose(window, value)
+export getWindowTitle([GLFWwindow] window) => [i8] = glfwGetWindowTitle(window)
+export setWindowTitle([GLFWwindow] window, [i8] title) = glfwSetWindowTitle(window, title)
+export setWindowIcon([GLFWwindow] window, i32 count, [GLFWimage] images) = glfwSetWindowIcon(window, count, images)
+export getWindowPos([GLFWwindow] window, [i32] xpos, [i32] ypos) = glfwGetWindowPos(window, xpos, ypos)
+export setWindowPos([GLFWwindow] window, i32 xpos, i32 ypos) = glfwSetWindowPos(window, xpos, ypos)
+export getWindowSize([GLFWwindow] window, [i32] width, [i32] height) = glfwGetWindowSize(window, width, height)
+export setWindowSizeLimits([GLFWwindow] window, i32 minwidth, i32 minheight, i32 maxwidth, i32 maxheight) = glfwSetWindowSizeLimits(window, minwidth, minheight, maxwidth, maxheight)
+export setWindowAspectRatio([GLFWwindow] window, i32 numer, i32 denom) = glfwSetWindowAspectRatio(window, numer, denom)
+export setWindowSize([GLFWwindow] window, i32 width, i32 height) = glfwSetWindowSize(window, width, height)
+export getFramebufferSize([GLFWwindow] window, [i32] width, [i32] height) = glfwGetFramebufferSize(window, width, height)
+export getWindowFrameSize([GLFWwindow] window, [i32] left, [i32] top, [i32] right, [i32] bottom) = glfwGetWindowFrameSize(window, left, top, right, bottom)
+export getWindowContentScale([GLFWwindow] window, [f32] xscale, [f32] yscale) = glfwGetWindowContentScale(window, xscale, yscale)
+export getWindowOpacity([GLFWwindow] window) => f32 = glfwGetWindowOpacity(window)
+export setWindowOpacity([GLFWwindow] window, f32 opacity) = glfwSetWindowOpacity(window, opacity)
+export iconifyWindow([GLFWwindow] window) = glfwIconifyWindow(window)
+export restoreWindow([GLFWwindow] window) = glfwRestoreWindow(window)
+export maximizeWindow([GLFWwindow] window) = glfwMaximizeWindow(window)
+export showWindow([GLFWwindow] window) = glfwShowWindow(window)
+export hideWindow([GLFWwindow] window) = glfwHideWindow(window)
+export focusWindow([GLFWwindow] window) = glfwFocusWindow(window)
+export requestWindowAttention([GLFWwindow] window) = glfwRequestWindowAttention(window)
+export getWindowMonitor([GLFWwindow] window) => [GLFWmonitor] = glfwGetWindowMonitor(window)
+export setWindowMonitor([GLFWwindow] window, [GLFWmonitor] monitor, i32 xpos, i32 ypos, i32 width, i32 height, i32 refreshRate) = glfwSetWindowMonitor(window, monitor, xpos, ypos, width, height, refreshRate)
+export getWindowAttrib([GLFWwindow] window, i32 attrib) => i32 = glfwGetWindowAttrib(window, attrib)
+export setWindowAttrib([GLFWwindow] window, i32 attrib, i32 value) = glfwSetWindowAttrib(window, attrib, value)
+export setWindowUserPointer([GLFWwindow] window, [] pointer) = glfwSetWindowUserPointer(window, pointer)
+export getWindowUserPointer([GLFWwindow] window) => [] = glfwGetWindowUserPointer(window)
+export setWindowPosCallback([GLFWwindow] window, GLFWwindowposfun callback) => GLFWwindowposfun = glfwSetWindowPosCallback(window, callback)
+export setWindowSizeCallback([GLFWwindow] window, GLFWwindowsizefun callback) => GLFWwindowsizefun = glfwSetWindowSizeCallback(window, callback)
+export setWindowCloseCallback([GLFWwindow] window, GLFWwindowclosefun callback) => GLFWwindowclosefun = glfwSetWindowCloseCallback(window, callback)
+export setWindowRefreshCallback([GLFWwindow] window, GLFWwindowrefreshfun callback) => GLFWwindowrefreshfun = glfwSetWindowRefreshCallback(window, callback)
+export setWindowFocusCallback([GLFWwindow] window, GLFWwindowfocusfun callback) => GLFWwindowfocusfun = glfwSetWindowFocusCallback(window, callback)
+export setWindowIconifyCallback([GLFWwindow] window, GLFWwindowiconifyfun callback) => GLFWwindowiconifyfun = glfwSetWindowIconifyCallback(window, callback)
+export setWindowMaximizeCallback([GLFWwindow] window, GLFWwindowmaximizefun callback) => GLFWwindowmaximizefun = glfwSetWindowMaximizeCallback(window, callback)
+export setFramebufferSizeCallback([GLFWwindow] window, GLFWframebuffersizefun callback) => GLFWframebuffersizefun = glfwSetFramebufferSizeCallback(window, callback)
+export setWindowContentScaleCallback([GLFWwindow] window, GLFWwindowcontentscalefun callback) => GLFWwindowcontentscalefun = glfwSetWindowContentScaleCallback(window, callback)
+export pollEvents() = glfwPollEvents()
+export waitEvents() = glfwWaitEvents()
+export waitEventsTimeout(f64 timeout) = glfwWaitEventsTimeout(timeout)
+export postEmptyEvent() = glfwPostEmptyEvent()
+export getInputMode([GLFWwindow] window, i32 mode) => i32 = glfwGetInputMode(window, mode)
+export setInputMode([GLFWwindow] window, i32 mode, i32 value) = glfwSetInputMode(window, mode, value)
+export rawMouseMotionSupported() => i32 = glfwRawMouseMotionSupported()
+export getKeyName(i32 key, i32 scancode) => [i8] = glfwGetKeyName(key, scancode)
+export getKeyScancode(i32 key) => i32 = glfwGetKeyScancode(key)
+export getKey([GLFWwindow] window, i32 key) => i32 = glfwGetKey(window, key)
+export getMouseButton([GLFWwindow] window, i32 button) => i32 = glfwGetMouseButton(window, button)
+export getCursorPos([GLFWwindow] window, [f64] xpos, [f64] ypos) = glfwGetCursorPos(window, xpos, ypos)
+export setCursorPos([GLFWwindow] window, f64 xpos, f64 ypos) = glfwSetCursorPos(window, xpos, ypos)
+export createCursor([GLFWimage] image, i32 xhot, i32 yhot) => [GLFWcursor] = glfwCreateCursor(image, xhot, yhot)
+export createStandardCursor(i32 shape) => [GLFWcursor] = glfwCreateStandardCursor(shape)
+export destroyCursor([GLFWcursor] cursor) = glfwDestroyCursor(cursor)
+export setCursor([GLFWwindow] window, [GLFWcursor] cursor) = glfwSetCursor(window, cursor)
+export setKeyCallback([GLFWwindow] window, GLFWkeyfun callback) => GLFWkeyfun = glfwSetKeyCallback(window, callback)
+export setCharCallback([GLFWwindow] window, GLFWcharfun callback) => GLFWcharfun = glfwSetCharCallback(window, callback)
+export setCharModsCallback([GLFWwindow] window, GLFWcharmodsfun callback) => GLFWcharmodsfun = glfwSetCharModsCallback(window, callback)
+export setMouseButtonCallback([GLFWwindow] window, GLFWmousebuttonfun callback) => GLFWmousebuttonfun = glfwSetMouseButtonCallback(window, callback)
+export setCursorPosCallback([GLFWwindow] window, GLFWcursorposfun callback) => GLFWcursorposfun = glfwSetCursorPosCallback(window, callback)
+export setCursorEnterCallback([GLFWwindow] window, GLFWcursorenterfun callback) => GLFWcursorenterfun = glfwSetCursorEnterCallback(window, callback)
+export setScrollCallback([GLFWwindow] window, GLFWscrollfun callback) => GLFWscrollfun = glfwSetScrollCallback(window, callback)
+export setDropCallback([GLFWwindow] window, GLFWdropfun callback) => GLFWdropfun = glfwSetDropCallback(window, callback)
+export joystickPresent(i32 jid) => i32 = glfwJoystickPresent(jid)
+export getJoystickAxes(i32 jid, [i32] count) => [f32] = glfwGetJoystickAxes(jid, count)
+export getJoystickButtons(i32 jid, [i32] count) => [u8] = glfwGetJoystickButtons(jid, count)
+export getJoystickHats(i32 jid, [i32] count) => [u8] = glfwGetJoystickHats(jid, count)
+export getJoystickName(i32 jid) => [i8] = glfwGetJoystickName(jid)
+export getJoystickGUID(i32 jid) => [i8] = glfwGetJoystickGUID(jid)
+export setJoystickUserPointer(i32 jid, [] pointer) = glfwSetJoystickUserPointer(jid, pointer)
+export getJoystickUserPointer(i32 jid) => [] = glfwGetJoystickUserPointer(jid)
+export joystickIsGamepad(i32 jid) => i32 = glfwJoystickIsGamepad(jid)
+export setJoystickCallback(GLFWjoystickfun callback) => GLFWjoystickfun = glfwSetJoystickCallback(callback)
+export updateGamepadMappings([i8] string) => i32 = glfwUpdateGamepadMappings(string)
+export getGamepadName(i32 jid) => [i8] = glfwGetGamepadName(jid)
+export getGamepadState(i32 jid, [GLFWgamepadstate] state) => i32 = glfwGetGamepadState(jid, state)
+export setClipboardString([GLFWwindow] window, [i8] string) = glfwSetClipboardString(window, string)
+export getClipboardString([GLFWwindow] window) => [i8] = glfwGetClipboardString(window)
+export getTime() => f64 = glfwGetTime()
+export setTime(f64 time) = glfwSetTime(time)
+export getTimerValue() => u64 = glfwGetTimerValue()
+export getTimerFrequency() => u64 = glfwGetTimerFrequency()
+export makeContextCurrent([GLFWwindow] window) = glfwMakeContextCurrent(window)
+export getCurrentContext() => [GLFWwindow] = glfwGetCurrentContext()
+export swapBuffers([GLFWwindow] window) = glfwSwapBuffers(window)
+export swapInterval(i32 interval) = glfwSwapInterval(interval)
+export extensionSupported([i8] extension) => i32 = glfwExtensionSupported(extension)
+export getProcAddress([i8] procname) => GLFWglproc = glfwGetProcAddress(procname)
+export vulkanSupported() => i32 = glfwVulkanSupported()
+export getRequiredInstanceExtensions([u32] count) => [[i8]] = glfwGetRequiredInstanceExtensions(count)

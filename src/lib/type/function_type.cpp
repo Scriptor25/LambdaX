@@ -1,4 +1,5 @@
 #include <llvm/IR/DerivedTypes.h>
+#include <LX/Builder.hpp>
 #include <LX/Type.hpp>
 
 std::string LX::FunctionType::GetName(
@@ -17,7 +18,9 @@ std::string LX::FunctionType::GetName(
         if (!params.empty()) name += ", ";
         name += "...";
     }
-    return name + ") => " + result_type->Name;
+    name += ')';
+    if (!result_type->IsVoid()) name += " => " + result_type->Name;
+    return name;
 }
 
 LX::FunctionType::FunctionType(TypePtr result_type, std::vector<Parameter> params, const bool vararg)

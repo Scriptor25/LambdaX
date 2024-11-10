@@ -17,6 +17,7 @@ static bool is_compound_operator(const int c)
         {'&', true},
         {'|', true},
         {'^', true},
+        {'?', true},
     };
     return compound_operators[c];
 }

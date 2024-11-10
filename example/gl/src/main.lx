@@ -1,0 +1,30 @@
+import "gl.lx" as GL
+import "glfw.lx" as GLFW
+
+extern printf([i8], ...) => i32
+
+on_key([GLFWwindow] window, i32 key, i32 scancode, i32 action, i32 mods)
+ = key == GLFW.KEY_ESCAPE() && action == GLFW.RELEASE() ?? GLFW.setWindowShouldClose(window, GLFW.TRUE())
+
+await_close([GLFWwindow] window, [([GLFWwindow])] fn)
+ = !GLFW.windowShouldClose(window) ?? (fn(window), await_close(window, fn))
+
+extern main() => i32 = (
+    GLFW.init(),
+    window = GLFW.createWindow(640, 480, "LambdaX GLFW", 0, 0),
+    GLFW.setKeyCallback(window, on_key),
+    GLFW.makeContextCurrent(window),
+    GL.clearColor(0.1, 0.2, 0.9, 1.0),
+    await_close(window, $([GLFWwindow] window) = (
+        mut width => i32, mut height => i32,
+        GLFW.getFramebufferSize(window, &width, &height),
+        GL.viewport(0, 0, width, height),
+        GL.clear(GL.COLOR_BUFFER_BIT() | GL.DEPTH_BUFFER_BIT()),
+
+        GLFW.swapBuffers(window),
+        GLFW.pollEvents(),
+    )),
+    GLFW.destroyWindow(window),
+    GLFW.terminate(),
+    0
+)

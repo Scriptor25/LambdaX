@@ -18,6 +18,7 @@ namespace LX
 
         std::ostream& Print(std::ostream&) const;
 
+        [[nodiscard]] virtual bool IsVoid() const;
         [[nodiscard]] virtual bool IsInt() const;
         [[nodiscard]] virtual bool IsSigned() const;
         [[nodiscard]] virtual bool IsFloat() const;
@@ -40,6 +41,14 @@ namespace LX
 
     private:
         virtual llvm::Type* GenIR(Builder&) const = 0;
+    };
+
+    struct VoidType : Type
+    {
+        VoidType();
+
+        [[nodiscard]] bool IsVoid() const override;
+        llvm::Type* GenIR(Builder&) const override;
     };
 
     struct IntType : Type
@@ -91,6 +100,18 @@ namespace LX
         llvm::Type* GenIR(Builder&) const override;
 
         TypePtr ElementType;
+    };
+
+    struct ArrayType : Type
+    {
+        static std::string GetName(const TypePtr& element_type, size_t size);
+
+        ArrayType(TypePtr element_type, size_t size);
+
+        llvm::Type* GenIR(Builder&) const override;
+
+        TypePtr ElementType;
+        size_t Size;
     };
 
     struct FunctionType : Type

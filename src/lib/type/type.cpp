@@ -38,6 +38,11 @@ std::ostream& LX::Type::Print(std::ostream& os) const
     return os << Name;
 }
 
+bool LX::Type::IsVoid() const
+{
+    return false;
+}
+
 bool LX::Type::IsInt() const
 {
     return false;

@@ -74,8 +74,10 @@ LX::ExprPtr LX::Parser::ParsePrimary()
             Expect(")");
         }
 
-        Expect("=>");
-        const auto result_type = ParseType();
+        TypePtr result_type;
+        if (NextAt("=>"))
+            result_type = ParseType();
+        else result_type = m_Ctx.GetVoidType();
 
         const auto type = m_Ctx.GetFunPtrType(result_type, params, vararg);
 

@@ -1,4 +1,5 @@
 #include <ranges>
+#include <llvm/IR/DerivedTypes.h>
 #include <LX/Context.hpp>
 #include <LX/Error.hpp>
 #include <LX/Type.hpp>
@@ -27,6 +28,13 @@ LX::TypePtr& LX::Context::GetType(const std::string& name)
     return m_Types[name];
 }
 
+LX::TypePtr& LX::Context::GetVoidType()
+{
+    auto& type = GetType("");
+    if (type) return type;
+    return type = std::make_shared<VoidType>();
+}
+
 LX::TypePtr& LX::Context::GetIntType(const unsigned bits, const bool sign)
 {
     auto& type = GetType(IntType::GetName(bits, sign));
@@ -48,18 +56,25 @@ LX::TypePtr& LX::Context::GetStructType(const std::vector<Parameter>& elements)
     return type = std::make_shared<StructType>(elements);
 }
 
-LX::TypePtr& LX::Context::GetPointerType(const TypePtr& base)
+LX::TypePtr& LX::Context::GetPointerType(const TypePtr& element)
 {
-    auto& type = GetType(PointerType::GetName(base));
+    auto& type = GetType(PointerType::GetName(element));
     if (type) return type;
-    return type = std::make_shared<PointerType>(base);
+    return type = std::make_shared<PointerType>(element);
 }
 
-LX::TypePtr& LX::Context::GetMutableType(const TypePtr& element_type)
+LX::TypePtr& LX::Context::GetMutableType(const TypePtr& element)
 {
-    auto& type = GetType(MutableType::GetName(element_type));
+    auto& type = GetType(MutableType::GetName(element));
     if (type) return type;
-    return type = std::make_shared<MutableType>(element_type);
+    return type = std::make_shared<MutableType>(element);
+}
+
+LX::TypePtr& LX::Context::GetArrayType(const TypePtr& element, const size_t size)
+{
+    auto& type = GetType(ArrayType::GetName(element, size));
+    if (type) return type;
+    return type = std::make_shared<ArrayType>(element, size);
 }
 
 LX::TypePtr& LX::Context::GetFunctionType(

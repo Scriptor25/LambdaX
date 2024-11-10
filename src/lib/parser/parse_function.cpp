@@ -8,7 +8,6 @@
 LX::StmtPtr LX::Parser::ParseFunction()
 {
     const auto where = m_Token.Where;
-
     const bool export_ = NextAt("export");
     const bool extern_ = NextAt("extern");
     const auto name = Expect(TokenType_Symbol).StringValue;
@@ -18,16 +17,18 @@ LX::StmtPtr LX::Parser::ParseFunction()
     const auto vararg = ParseParameterList(params, ")");
     Expect(")");
 
-    Expect("=>");
-    const auto result_type = ParseType();
+    TypePtr result_type;
+    if (NextAt("=>"))
+        result_type = ParseType();
+    else result_type = m_Ctx.GetVoidType();
 
     const auto type = m_Ctx.GetFunctionType(result_type, params, vararg);
 
-    if (!m_IsImported && !m_Ctx.HasVar(name))
+    if (!m_Ctx.HasVar(name))
         m_Ctx.DefVar(where, name) = m_Ctx.GetPointerType(type);
 
     ExprPtr body;
-    if (!m_IsImported && NextAt("="))
+    if (NextAt("="))
     {
         m_Ctx.Push();
         for (const auto& [type_, name_] : params)

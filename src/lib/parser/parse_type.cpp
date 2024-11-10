@@ -3,47 +3,59 @@
 #include <LX/Parameter.hpp>
 #include <LX/Parser.hpp>
 
-LX::TypePtr& LX::Parser::ParseType()
+LX::TypePtr LX::Parser::ParseType()
 {
+    TypePtr type;
+
     if (NextAt("["))
     {
-        TypePtr base;
+        TypePtr element;
         if (!NextAt("]"))
         {
-            base = ParseType();
+            element = ParseType();
             Expect("]");
         }
-        return m_Ctx.GetPointerType(base);
+        else element = m_Ctx.GetVoidType();
+        type = m_Ctx.GetPointerType(element);
     }
-
-    if (NextAt("("))
+    else if (NextAt("("))
     {
         std::vector<Parameter> params;
         const auto vararg = ParseParameterList(params, ")");
         Expect(")");
-        Expect("=>");
-        const auto result = ParseType();
-        return m_Ctx.GetFunctionType(result, params, vararg);
+        TypePtr result;
+        if (NextAt("=>"))
+            result = ParseType();
+        else result = m_Ctx.GetVoidType();
+        type = m_Ctx.GetFunctionType(result, params, vararg);
     }
-
-    if (NextAt("{"))
+    else if (NextAt("{"))
     {
         std::vector<Parameter> elements;
         ParseParameterList(elements, "}");
         Expect("}");
-        return m_Ctx.GetStructType(elements);
+        type = m_Ctx.GetStructType(elements);
     }
-
-    if (NextAt("mut"))
+    else if (NextAt("mut"))
     {
-        const auto type = ParseType();
-        return m_Ctx.GetMutableType(type);
+        const auto element = ParseType();
+        type = m_Ctx.GetMutableType(element);
+    }
+    else
+    {
+        const auto where = m_Token.Where;
+        const auto name = Expect(TokenType_Symbol).StringValue;
+        type = m_Ctx.GetType(name);
+        if (!type)
+            Error(where, "'{}' is not an existing type", name);
     }
 
-    const auto where = m_Token.Where;
-    const auto name = Expect(TokenType_Symbol).StringValue;
-    if (auto& type = m_Ctx.GetType(name))
-        return type;
+    while (NextAt("["))
+    {
+        const auto size = Expect(TokenType_Int).IntegerValue;
+        Expect("]");
+        type = m_Ctx.GetArrayType(type, size);
+    }
 
-    Error(where, "'{}' is not an existing type", name);
+    return type;
 }

@@ -59,15 +59,16 @@ LX::ValuePtr LX::ConstFunctionExpr::GenIR(Builder& builder) const
 
     auto value = Body->GenIR(builder);
     value = builder.Cast(Where, value, Type->Element()->Result());
-    builder.IRBuilder().CreateRet(
-        Type->Element()->Result()->IsMutable()
-            ? value->Ptr()
-            : value->Load(builder));
+    if (Type->Element()->Result()->IsVoid())
+        builder.IRBuilder().CreateRetVoid();
+    else
+        builder.IRBuilder().CreateRet(
+            Type->Element()->Result()->IsMutable()
+                ? value->Ptr()
+                : value->Load(builder));
     builder.IRBuilder().SetInsertPoint(bkp);
     builder.Pop();
 
-    if (verifyFunction(*function, &llvm::errs()))
-        Error(Where, "failed to verify lambda function");
-
+    builder.RunPasses(*function);
     return RValue::Create(Type, function);
 }

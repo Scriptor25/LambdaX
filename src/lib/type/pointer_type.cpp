@@ -3,7 +3,6 @@
 
 std::string LX::PointerType::GetName(const TypePtr& element_type)
 {
-    if (!element_type) return "[]";
     return '[' + element_type->Name + ']';
 }
 

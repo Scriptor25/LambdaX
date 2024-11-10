@@ -10,6 +10,7 @@ LX::ExprPtr LX::Parser::ParseBinary(ExprPtr left, const unsigned min_pre)
         {"=", 0},
 
         {"?", 1},
+        {"??", 1},
 
         {"||", 2},
 
@@ -78,6 +79,16 @@ LX::ExprPtr LX::Parser::ParseBinary(ExprPtr left, const unsigned min_pre)
                 std::move(left),
                 std::move(right),
                 std::move(else_));
+        }
+        else if (operator_ == "??")
+        {
+            const auto type = right->Type;
+            left = std::make_unique<TernaryExpr>(
+                where_,
+                type,
+                std::move(left),
+                std::move(right),
+                nullptr);
         }
         else
         {
