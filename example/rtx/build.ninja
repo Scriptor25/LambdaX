@@ -1,0 +1,39 @@
+lx = ../../build/lx
+llc = llc
+cc = gcc
+
+src = src
+bin = bin
+
+rule lx
+ command = $lx -o $out $in
+rule ll
+ command = $llc -o $out --filetype=obj $in
+rule link
+ command = $cc -o $out $in -lm
+
+build $bin/camera.ll: lx $src/camera.lx
+build $bin/hittable.ll: lx $src/hittable.lx
+build $bin/hittable_list.ll: lx $src/hittable_list.lx
+build $bin/main.ll: lx $src/main.lx
+build $bin/ppm.ll: lx $src/ppm.lx
+build $bin/ray.ll: lx $src/ray.lx
+build $bin/record.ll: lx $src/record.lx
+build $bin/sphere.ll: lx $src/sphere.lx
+build $bin/std.ll: lx $src/std.lx
+build $bin/util.ll: lx $src/util.lx
+build $bin/vec3.ll: lx $src/vec3.lx
+
+build $bin/camera.o: ll $bin/camera.ll
+build $bin/hittable.o: ll $bin/hittable.ll
+build $bin/hittable_list.o: ll $bin/hittable_list.ll
+build $bin/main.o: ll $bin/main.ll
+build $bin/ppm.o: ll $bin/ppm.ll
+build $bin/ray.o: ll $bin/ray.ll
+build $bin/record.o: ll $bin/record.ll
+build $bin/sphere.o: ll $bin/sphere.ll
+build $bin/std.o: ll $bin/std.ll
+build $bin/util.o: ll $bin/util.ll
+build $bin/vec3.o: ll $bin/vec3.ll
+
+build $bin/out.exe: link $bin/camera.o $bin/hittable.o $bin/hittable_list.o $bin/main.o $bin/ppm.o $bin/ray.o $bin/record.o $bin/sphere.o $bin/std.o $bin/util.o $bin/vec3.o
