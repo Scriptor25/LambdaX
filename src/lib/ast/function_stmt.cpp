@@ -7,13 +7,15 @@
 #include <LX/Value.hpp>
 
 LX::FunctionStmt::FunctionStmt(
+    SourceLocation where,
     const bool export_,
     const bool extern_,
     TypePtr type,
     std::string name,
     std::vector<Parameter> params,
     ExprPtr body)
-    : Export(export_),
+    : Stmt(std::move(where)),
+      Export(export_),
       Extern(extern_),
       Type(std::move(type)),
       Name(std::move(name)),
@@ -55,11 +57,11 @@ LX::ValuePtr LX::FunctionStmt::GenIR(Builder& builder) const
             name,
             builder.IRModule());
         result = RValue::Create(builder.Ctx().GetPointerType(Type), function);
-        builder.DefVar(Name) = result;
+        builder.DefVar(Where, Name) = result;
     }
     else
     {
-        const auto var = builder.GetVar(Name);
+        const auto var = builder.GetVar(Where, Name);
         const auto val = var->Load(builder);
         function = llvm::dyn_cast<llvm::Function>(val);
         result = var;
@@ -67,7 +69,7 @@ LX::ValuePtr LX::FunctionStmt::GenIR(Builder& builder) const
 
     if (!Body) return result;
     if (!function->empty())
-        Error("cannot redefine function '{}'", Name);
+        Error(Where, "cannot redefine function '{}'", Name);
 
     builder.Push();
     builder.IRBuilder().SetInsertPoint(llvm::BasicBlock::Create(builder.IRContext(), "entry", function));
@@ -78,14 +80,14 @@ LX::ValuePtr LX::FunctionStmt::GenIR(Builder& builder) const
         const auto arg = function->getArg(i);
         arg->setName(param_name_);
 
-        builder.DefVar(param_name_) =
+        builder.DefVar(Where, param_name_) =
             param_type_->IsMutable()
                 ? LValue::Create(param_type_->Element(), arg)
                 : RValue::Create(param_type_, arg);
     }
 
     auto value = Body->GenIR(builder);
-    value = builder.Cast(value, Type->Result());
+    value = builder.Cast(Where, value, Type->Result());
     builder.IRBuilder().CreateRet(
         Type->Result()->IsMutable()
             ? value->Ptr()
@@ -94,7 +96,7 @@ LX::ValuePtr LX::FunctionStmt::GenIR(Builder& builder) const
     builder.Pop();
 
     if (verifyFunction(*function, &llvm::errs()))
-        Error("failed to verify function '{}'", Name);
+        Error(Where, "failed to verify function '{}'", Name);
 
     return result;
 }

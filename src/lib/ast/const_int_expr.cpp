@@ -3,8 +3,8 @@
 #include <LX/Context.hpp>
 #include <LX/Value.hpp>
 
-LX::ConstIntExpr::ConstIntExpr(TypePtr type, const size_t value)
-    : Expr(std::move(type)), Value(value)
+LX::ConstIntExpr::ConstIntExpr(SourceLocation where, TypePtr type, const size_t value)
+    : Expr(std::move(where), std::move(type)), Value(value)
 {
 }
 

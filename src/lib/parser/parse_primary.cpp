@@ -5,9 +5,12 @@
 
 LX::ExprPtr LX::Parser::ParsePrimary()
 {
-    if (NextAt("("))
+    if (At("("))
     {
+        const auto where = Skip().Where;
+
         m_Ctx.Push();
+
         std::vector<ExprPtr> children;
         do
         {
@@ -16,14 +19,19 @@ LX::ExprPtr LX::Parser::ParsePrimary()
                 Expect(",");
         }
         while (!(At(")") || AtEOF()));
-        m_Ctx.Pop();
         Expect(")");
+
+        m_Ctx.Pop();
+
         const auto type = children.back()->Type;
-        return std::make_unique<SequenceExpr>(type, std::move(children));
+
+        return std::make_unique<SequenceExpr>(where, type, std::move(children));
     }
 
-    if (NextAt("{"))
+    if (At("{"))
     {
+        const auto where = Skip().Where;
+
         std::vector<ExprPtr> elements;
         while (!(At("}") || AtEOF()))
         {
@@ -47,11 +55,13 @@ LX::ExprPtr LX::Parser::ParsePrimary()
             type = m_Ctx.GetStructType(params);
         }
 
-        return std::make_unique<ConstStructExpr>(type, std::move(elements));
+        return std::make_unique<ConstStructExpr>(where, type, std::move(elements));
     }
 
-    if (NextAt("$"))
+    if (At("$"))
     {
+        const auto where = Skip().Where;
+
         m_Ctx.Push();
 
         std::vector<Parameter> params;
@@ -60,7 +70,7 @@ LX::ExprPtr LX::Parser::ParsePrimary()
         {
             vararg = ParseParameterList(params, ")");
             for (const auto& [type_, name_] : params)
-                m_Ctx.DefVar(name_) = type_;
+                m_Ctx.DefVar(where, name_) = type_;
             Expect(")");
         }
 
@@ -74,11 +84,13 @@ LX::ExprPtr LX::Parser::ParsePrimary()
 
         m_Ctx.Pop();
 
-        return std::make_unique<ConstFunctionExpr>(type, params, std::move(body));
+        return std::make_unique<ConstFunctionExpr>(where, type, params, std::move(body));
     }
 
-    if (NextAt("mut"))
+    if (At("mut"))
     {
+        const auto where = Skip().Where;
+
         const auto name = Expect(TokenType_Symbol).StringValue;
 
         TypePtr type;
@@ -92,45 +104,64 @@ LX::ExprPtr LX::Parser::ParsePrimary()
             if (!type) type = init->Type;
         }
 
-        m_Ctx.DefVar(name) = type;
+        m_Ctx.DefVar(where, name) = type;
 
-        return std::make_unique<MutableExpr>(name, type, std::move(init));
+        return std::make_unique<MutableExpr>(where, type, name, std::move(init));
     }
 
     if (At(TokenType_Operator))
     {
-        const auto op = Skip().StringValue;
+        const auto [
+            where_,
+            type_,
+            operator_,
+            int_,
+            float_
+        ] = Skip();
+
         auto operand = ParseOperand();
-        const auto type = UnaryExpr::GetType(m_Ctx, op, operand->Type);
-        return std::make_unique<UnaryExpr>(type, op, std::move(operand));
+
+        const auto type = UnaryExpr::GetType(where_, m_Ctx, operator_, operand->Type);
+
+        return std::make_unique<UnaryExpr>(where_, type, operator_, std::move(operand));
     }
 
     if (At(TokenType_Symbol))
     {
-        const auto name = Skip().StringValue;
-        if (m_Ctx.HasVar(name))
+        const auto [
+            where_,
+            type_,
+            name_,
+            int_,
+            float_
+        ] = Skip();
+
+        if (m_Ctx.HasVar(name_))
         {
-            const auto type = m_Ctx.GetVar(name);
-            return std::make_unique<SymbolExpr>(type, name);
+            const auto type = m_Ctx.GetVar(where_, name_);
+            return std::make_unique<SymbolExpr>(where_, type, name_);
         }
 
         Expect("=");
         auto init = ParseExpr();
         const auto type = init->Type;
 
-        m_Ctx.DefVar(name) = type;
+        m_Ctx.DefVar(where_, name_) = type;
 
-        return std::make_unique<ImmutableExpr>(name, type, std::move(init));
+        return std::make_unique<ImmutableExpr>(where_, type, name_, std::move(init));
     }
 
     if (At(TokenType_Int))
-        return std::make_unique<ConstIntExpr>(m_Ctx.GetIntType(64, false), Skip().IntegerValue);
+        return std::make_unique<ConstIntExpr>(m_Token.Where, m_Ctx.GetIntType(64, false), Skip().IntegerValue);
 
     if (At(TokenType_Float))
-        return std::make_unique<ConstFloatExpr>(m_Ctx.GetFloatType(64), Skip().FloatValue);
+        return std::make_unique<ConstFloatExpr>(m_Token.Where, m_Ctx.GetFloatType(64), Skip().FloatValue);
 
     if (At(TokenType_String))
-        return std::make_unique<ConstStringExpr>(m_Ctx.GetPointerType(m_Ctx.GetIntType(8, true)), Skip().StringValue);
+        return std::make_unique<ConstStringExpr>(
+            m_Token.Where,
+            m_Ctx.GetPointerType(m_Ctx.GetIntType(8, true)),
+            Skip().StringValue);
 
     Error(m_Token.Where, "unhandled token '{}'", m_Token);
 }

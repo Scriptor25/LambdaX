@@ -3,8 +3,15 @@
 #include <LX/Context.hpp>
 #include <LX/Type.hpp>
 
-LX::ImportStmt::ImportStmt(std::vector<FunctionImport> imports, std::string module_id, std::string name)
-    : Imports(std::move(imports)), ModuleId(std::move(module_id)), Name(std::move(name))
+LX::ImportStmt::ImportStmt(
+    SourceLocation where,
+    std::vector<FunctionImport> imports,
+    std::string module_id,
+    std::string name)
+    : Stmt(std::move(where)),
+      Imports(std::move(imports)),
+      ModuleId(std::move(module_id)),
+      Name(std::move(name))
 {
 }
 
@@ -36,5 +43,5 @@ LX::ValuePtr LX::ImportStmt::GenIR(Builder& builder) const
     const auto type = builder.Ctx().GetStructType(params);
     const auto struct_type = llvm::dyn_cast<llvm::StructType>(type->GetIR(builder));
     const auto value = llvm::ConstantStruct::get(struct_type, elements);
-    return builder.DefVar(Name) = RValue::Create(type, value);
+    return builder.DefVar(Where, Name) = RValue::Create(type, value);
 }

@@ -3,8 +3,8 @@
 #include <LX/Context.hpp>
 #include <LX/Value.hpp>
 
-LX::ConstFloatExpr::ConstFloatExpr(TypePtr type, const double value)
-    : Expr(std::move(type)), Value(value)
+LX::ConstFloatExpr::ConstFloatExpr(SourceLocation where, TypePtr type, const double value)
+    : Expr(std::move(where), std::move(type)), Value(value)
 {
 }
 

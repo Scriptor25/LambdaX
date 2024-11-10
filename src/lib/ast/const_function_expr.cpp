@@ -7,8 +7,12 @@
 #include <LX/Error.hpp>
 #include <LX/Type.hpp>
 
-LX::ConstFunctionExpr::ConstFunctionExpr(TypePtr type, std::vector<Parameter> params, ExprPtr body)
-    : Expr(std::move(type)), Params(std::move(params)), Body(std::move(body))
+LX::ConstFunctionExpr::ConstFunctionExpr(
+    SourceLocation where,
+    TypePtr type,
+    std::vector<Parameter> params,
+    ExprPtr body)
+    : Expr(std::move(where), std::move(type)), Params(std::move(params)), Body(std::move(body))
 {
 }
 
@@ -47,14 +51,14 @@ LX::ValuePtr LX::ConstFunctionExpr::GenIR(Builder& builder) const
         const auto arg = function->getArg(i);
         arg->setName(param_name_);
 
-        builder.DefVar(param_name_) =
+        builder.DefVar(Where, param_name_) =
             param_type_->IsMutable()
                 ? LValue::Create(param_type_->Element(), arg)
                 : RValue::Create(param_type_, arg);
     }
 
     auto value = Body->GenIR(builder);
-    value = builder.Cast(value, Type->Element()->Result());
+    value = builder.Cast(Where, value, Type->Element()->Result());
     builder.IRBuilder().CreateRet(
         Type->Element()->Result()->IsMutable()
             ? value->Ptr()
@@ -63,7 +67,7 @@ LX::ValuePtr LX::ConstFunctionExpr::GenIR(Builder& builder) const
     builder.Pop();
 
     if (verifyFunction(*function, &llvm::errs()))
-        Error("failed to verify lambda function");
+        Error(Where, "failed to verify lambda function");
 
     return RValue::Create(Type, function);
 }

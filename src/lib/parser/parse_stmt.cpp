@@ -23,7 +23,7 @@ LX::StmtPtr LX::Parser::ParseStmt()
         return {};
     }
 
-    if (NextAt("import"))
+    if (At("import"))
         return ParseImport();
 
     if (m_IsImported && !At("export"))

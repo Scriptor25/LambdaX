@@ -3,8 +3,8 @@
 #include <LX/Error.hpp>
 #include <LX/Type.hpp>
 
-LX::MutableExpr::MutableExpr(std::string name, TypePtr type, ExprPtr init)
-    : Expr(std::move(type)), Name(std::move(name)), Init(std::move(init))
+LX::MutableExpr::MutableExpr(SourceLocation where, TypePtr type, std::string name, ExprPtr init)
+    : Expr(std::move(where), std::move(type)), Name(std::move(name)), Init(std::move(init))
 {
 }
 
@@ -23,9 +23,9 @@ LX::ValuePtr LX::MutableExpr::GenIR(Builder& builder) const
     const auto ptr = builder.CreateAlloca(Type->GetIR(builder), Name);
     if (init)
     {
-        init = builder.Cast(init, Type);
+        init = builder.Cast(Where, init, Type);
         builder.IRBuilder().CreateStore(init->Load(builder), ptr);
     }
 
-    return builder.DefVar(Name) = LValue::Create(Type, ptr);
+    return builder.DefVar(Where, Name) = LValue::Create(Type, ptr);
 }

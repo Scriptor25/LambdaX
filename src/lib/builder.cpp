@@ -82,10 +82,10 @@ LX::FunctionRef& LX::Builder::GetFunction(const std::string& module_id, const st
     return m_Functions[module_id][name];
 }
 
-LX::ValuePtr& LX::Builder::DefVar(const std::string& name)
+LX::ValuePtr& LX::Builder::DefVar(const SourceLocation& where, const std::string& name)
 {
     if (m_Stack.back().contains(name))
-        Error("cannot redefine variable '{}'", name);
+        Error(where, "cannot redefine variable '{}'", name);
     return m_Stack.back()[name];
 }
 
@@ -96,14 +96,14 @@ bool LX::Builder::HasVar(const std::string& name)
         [&](const auto& frame) { return frame.contains(name); });
 }
 
-const LX::ValuePtr& LX::Builder::GetVar(const std::string& name)
+const LX::ValuePtr& LX::Builder::GetVar(const SourceLocation& where, const std::string& name)
 {
     for (const auto& frame : std::ranges::views::reverse(m_Stack))
         if (frame.contains(name)) return frame[name];
-    Error("undefined variable '{}'", name);
+    Error(where, "undefined variable '{}'", name);
 }
 
-LX::ValuePtr LX::Builder::Cast(const ValuePtr& src, const TypePtr& dst)
+LX::ValuePtr LX::Builder::Cast(const SourceLocation& where, const ValuePtr& src, const TypePtr& dst)
 {
     const auto src_ty = src->Type();
     if (src_ty == dst)
@@ -161,17 +161,17 @@ LX::ValuePtr LX::Builder::Cast(const ValuePtr& src, const TypePtr& dst)
         }
     }
 
-    Error("cannot cast value of type '{}' to type '{}'", src_ty, dst);
+    Error(where, "cannot cast value of type '{}' to type '{}'", src_ty, dst);
 }
 
-void LX::Builder::Equalize(ValuePtr& a, ValuePtr& b)
+void LX::Builder::Equalize(const SourceLocation& where, ValuePtr& a, ValuePtr& b)
 {
     if (a->Type() == b->Type())
         return;
 
-    const auto dst = Type::Equalize(m_Ctx, a->Type(), b->Type());
-    a = Cast(a, dst);
-    b = Cast(b, dst);
+    const auto dst = Type::Equalize(where, m_Ctx, a->Type(), b->Type());
+    a = Cast(where, a, dst);
+    b = Cast(where, b, dst);
 }
 
 llvm::Value* LX::Builder::CreateAlloca(llvm::Type* type, const std::string& name) const

@@ -90,18 +90,18 @@ void LX::Context::Pop()
     m_Stack.pop_back();
 }
 
-LX::TypePtr& LX::Context::DefVar(const std::string& name)
+LX::TypePtr& LX::Context::DefVar(const SourceLocation& where, const std::string& name)
 {
     if (m_Stack.back().contains(name))
-        Error("cannot redefine symbol with name '{}'", name);
+        Error(where, "cannot redefine symbol with name '{}'", name);
     return m_Stack.back()[name];
 }
 
-LX::TypePtr LX::Context::GetVar(const std::string& name)
+LX::TypePtr LX::Context::GetVar(const SourceLocation& where, const std::string& name)
 {
     for (const auto& frame : std::ranges::views::reverse(m_Stack))
         if (frame.contains(name)) return frame.at(name);
-    Error("no symbol with name '{}'", name);
+    Error(where, "no symbol with name '{}'", name);
 }
 
 bool LX::Context::HasVar(const std::string& name)

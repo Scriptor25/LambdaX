@@ -2,8 +2,8 @@
 #include <LX/Builder.hpp>
 #include <LX/Type.hpp>
 
-LX::ConstStructExpr::ConstStructExpr(TypePtr type, std::vector<ExprPtr> elements)
-    : Expr(std::move(type)), Elements(std::move(elements))
+LX::ConstStructExpr::ConstStructExpr(SourceLocation where, TypePtr type, std::vector<ExprPtr> elements)
+    : Expr(std::move(where), std::move(type)), Elements(std::move(elements))
 {
 }
 
@@ -29,7 +29,7 @@ LX::ValuePtr LX::ConstStructExpr::GenIR(Builder& builder) const
     {
         auto& value = values.emplace_back();
         value = Elements[i]->GenIR(builder);
-        value = builder.Cast(value, Type->Element(i));
+        value = builder.Cast(Where, value, Type->Element(i));
         if (const auto c = llvm::dyn_cast<llvm::Constant>(value->Load(builder)))
             constants.push_back(c);
     }

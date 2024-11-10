@@ -3,9 +3,9 @@
 #include <LX/Parser.hpp>
 #include <LX/Type.hpp>
 
-LX::ExprPtr LX::Parser::ParseBinary(ExprPtr lhs, const unsigned min_pre)
+LX::ExprPtr LX::Parser::ParseBinary(ExprPtr left, const unsigned min_pre)
 {
-    static std::map<std::string, unsigned> pre
+    static std::map<std::string, unsigned> PRE
     {
         {"=", 0},
 
@@ -47,31 +47,44 @@ LX::ExprPtr LX::Parser::ParseBinary(ExprPtr lhs, const unsigned min_pre)
 
     auto get_pre = [&]
     {
-        return pre[m_Token.StringValue];
+        return PRE[m_Token.StringValue];
     };
 
     while (At(TokenType_Operator) && get_pre() >= min_pre)
     {
-        const auto op = Skip().StringValue;
-        const auto op_pre = pre[op];
+        const auto [
+            where_,
+            type_,
+            string_value_,
+            integer_value_,
+            float_value_
+        ] = Skip();
 
-        auto rhs = ParseOperand();
+        const auto operator_ = string_value_;
+        const auto op_pre = PRE[operator_];
+
+        auto right = ParseOperand();
         while (At(TokenType_Operator) && (get_pre() > op_pre || !get_pre()))
-            rhs = ParseBinary(std::move(rhs), op_pre + (get_pre() ? 1 : 0));
+            right = ParseBinary(std::move(right), op_pre + (get_pre() ? 1 : 0));
 
-        if (op == "?")
+        if (operator_ == "?")
         {
             Expect(":");
             auto else_ = ParseExpr();
-            const auto type = Type::Equalize(m_Ctx, rhs->Type, else_->Type);
-            lhs = std::make_unique<TernaryExpr>(type, std::move(lhs), std::move(rhs), std::move(else_));
+            const auto type = Type::Equalize(where_, m_Ctx, right->Type, else_->Type);
+            left = std::make_unique<TernaryExpr>(
+                where_,
+                type,
+                std::move(left),
+                std::move(right),
+                std::move(else_));
         }
         else
         {
-            const auto type = BinaryExpr::GetType(m_Ctx, op, lhs->Type, rhs->Type);
-            lhs = std::make_unique<BinaryExpr>(type, op, std::move(lhs), std::move(rhs));
+            const auto type = BinaryExpr::GetType(where_, m_Ctx, operator_, left->Type, right->Type);
+            left = std::make_unique<BinaryExpr>(where_, type, operator_, std::move(left), std::move(right));
         }
     }
 
-    return lhs;
+    return left;
 }

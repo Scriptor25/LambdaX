@@ -4,8 +4,8 @@
 #include <LX/Type.hpp>
 #include <LX/Value.hpp>
 
-LX::SubscriptExpr::SubscriptExpr(TypePtr type, ExprPtr base, ExprPtr offset)
-    : Expr(std::move(type)), Base(std::move(base)), Offset(std::move(offset))
+LX::SubscriptExpr::SubscriptExpr(SourceLocation where, TypePtr type, ExprPtr base, ExprPtr offset)
+    : Expr(std::move(where), std::move(type)), Base(std::move(base)), Offset(std::move(offset))
 {
 }
 

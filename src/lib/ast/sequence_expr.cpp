@@ -1,8 +1,8 @@
 #include <LX/AST.hpp>
 #include <LX/Builder.hpp>
 
-LX::SequenceExpr::SequenceExpr(TypePtr type, std::vector<ExprPtr> children)
-    : Expr(std::move(type)), Children(std::move(children))
+LX::SequenceExpr::SequenceExpr(SourceLocation where, TypePtr type, std::vector<ExprPtr> children)
+    : Expr(std::move(where), std::move(type)), Children(std::move(children))
 {
 }
 

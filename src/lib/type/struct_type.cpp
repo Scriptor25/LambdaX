@@ -38,7 +38,7 @@ size_t LX::StructType::IndexOf(const std::string& name) const
     for (size_t i = 0; i < Elements.size(); ++i)
         if (Elements[i].Name == name)
             return i;
-    Error("no element '{}' in type {}", name, Name);
+    Error("no element '{}' in struct type {}", name, Name);
 }
 
 void LX::StructType::WithName(const std::string& name)

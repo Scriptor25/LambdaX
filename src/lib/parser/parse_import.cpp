@@ -6,6 +6,8 @@
 
 LX::StmtPtr LX::Parser::ParseImport()
 {
+    const auto where = Expect("import").Where;
+
     const auto filename = Expect(TokenType_String).StringValue;
     auto path = std::filesystem::path(filename);
     if (path.is_relative())
@@ -33,10 +35,10 @@ LX::StmtPtr LX::Parser::ParseImport()
         }, true);
         stream.close();
 
-        m_Ctx.DefVar(name) = m_Ctx.GetStructType(params);
+        m_Ctx.DefVar(where, name) = m_Ctx.GetStructType(params);
 
         const auto module_id = path.filename().replace_extension().string();
-        return std::make_unique<ImportStmt>(imports, module_id, name);
+        return std::make_unique<ImportStmt>(where, imports, module_id, name);
     }
 
     if (m_IsImported && NextAt("as"))

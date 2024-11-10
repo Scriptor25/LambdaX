@@ -3,8 +3,8 @@
 #include <LX/Context.hpp>
 #include <LX/Type.hpp>
 
-LX::SymbolExpr::SymbolExpr(TypePtr type, std::string name)
-    : Expr(std::move(type)), Name(std::move(name))
+LX::SymbolExpr::SymbolExpr(SourceLocation where, TypePtr type, std::string name)
+    : Expr(std::move(where), std::move(type)), Name(std::move(name))
 {
 }
 
@@ -15,5 +15,5 @@ std::ostream& LX::SymbolExpr::Print(std::ostream& os) const
 
 LX::ValuePtr LX::SymbolExpr::GenIR(Builder& builder) const
 {
-    return builder.GetVar(Name);
+    return builder.GetVar(Where, Name);
 }

@@ -1,6 +1,6 @@
 #include <LX/AST.hpp>
 
-LX::Expr::Expr(TypePtr type)
-    : Type(std::move(type))
+LX::Expr::Expr(SourceLocation where, TypePtr type)
+    : Stmt(std::move(where)), Type(std::move(type))
 {
 }

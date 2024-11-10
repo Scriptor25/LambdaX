@@ -4,8 +4,8 @@
 #include <LX/Type.hpp>
 #include <LX/Value.hpp>
 
-LX::CallExpr::CallExpr(TypePtr type, ExprPtr callee, std::vector<ExprPtr> args)
-    : Expr(std::move(type)), Callee(std::move(callee)), Args(std::move(args))
+LX::CallExpr::CallExpr(SourceLocation where, TypePtr type, ExprPtr callee, std::vector<ExprPtr> args)
+    : Expr(std::move(where), std::move(type)), Callee(std::move(callee)), Args(std::move(args))
 {
 }
 
@@ -23,12 +23,12 @@ std::ostream& LX::CallExpr::Print(std::ostream& os) const
 LX::ValuePtr LX::CallExpr::GenIR(Builder& builder) const
 {
     const auto callee = Callee->GenIR(builder);
-    if (!callee->Type()->IsPointer()) Error("callee is not a pointer");
+    if (!callee->Type()->IsPointer()) Error(Where, "callee is not a pointer");
     const auto callee_type = callee->Type()->Element();
-    if (!callee_type) Error("cannot create call on opaque pointer");
-    if (!callee_type->IsFunction()) Error("callee is not a function pointer");
-    if (Args.size() < callee_type->ParamCount()) Error("not enough arguments");
-    if (!callee_type->HasVarArg() && Args.size() > callee_type->ParamCount()) Error("too many arguments");
+    if (!callee_type) Error(Where, "cannot create call on opaque pointer");
+    if (!callee_type->IsFunction()) Error(Where, "callee is not a function pointer");
+    if (Args.size() < callee_type->ParamCount()) Error(Where, "not enough arguments");
+    if (!callee_type->HasVarArg() && Args.size() > callee_type->ParamCount()) Error(Where, "too many arguments");
 
     std::vector<llvm::Value*> args(Args.size());
     for (size_t i = 0; i < Args.size(); ++i)
@@ -41,12 +41,12 @@ LX::ValuePtr LX::CallExpr::GenIR(Builder& builder) const
                 : nullptr;
 
         if (param && !param->IsMutable() && arg->Type() != param)
-            arg = builder.Cast(arg, param);
+            arg = builder.Cast(Where, arg, param);
 
         if (param && param->IsMutable())
         {
             if (param->Element() != arg->Type())
-                Error("cannot assign value of type {} to mutable arg of type {}", arg->Type(), param);
+                Error(Where, "cannot assign value of type {} to mutable arg of type {}", arg->Type(), param);
             args[i] = arg->Ptr();
         }
         else args[i] = arg->Load(builder);

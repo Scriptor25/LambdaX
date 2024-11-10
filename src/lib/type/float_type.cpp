@@ -24,6 +24,6 @@ llvm::Type* LX::FloatType::GenIR(Builder& builder) const
     case 16: return builder.IRBuilder().getHalfTy();
     case 32: return builder.IRBuilder().getFloatTy();
     case 64: return builder.IRBuilder().getDoubleTy();
-    default: Error("undefined bit-sized float type");
+    default: Error("undefined float type with {} bits", Bits);
     }
 }

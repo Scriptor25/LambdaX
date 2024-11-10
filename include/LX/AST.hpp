@@ -3,19 +3,31 @@
 #include <vector>
 #include <LX/LX.hpp>
 #include <LX/Parameter.hpp>
+#include <LX/SourceLocation.hpp>
 
 namespace LX
 {
     struct Stmt
     {
+        explicit Stmt(SourceLocation);
+
         virtual ~Stmt() = default;
         virtual std::ostream& Print(std::ostream&) const = 0;
         virtual ValuePtr GenIR(Builder&) const = 0;
+
+        SourceLocation Where;
     };
 
     struct FunctionStmt : Stmt
     {
-        FunctionStmt(bool, bool, TypePtr, std::string, std::vector<Parameter>, ExprPtr);
+        FunctionStmt(
+            SourceLocation where,
+            bool export_,
+            bool extern_,
+            TypePtr type,
+            std::string name,
+            std::vector<Parameter> params,
+            ExprPtr body);
 
         std::ostream& Print(std::ostream&) const override;
         ValuePtr GenIR(Builder&) const override;
@@ -37,7 +49,7 @@ namespace LX
 
     struct ImportStmt : Stmt
     {
-        ImportStmt(std::vector<FunctionImport>, std::string, std::string);
+        ImportStmt(SourceLocation where, std::vector<FunctionImport> imports, std::string module_id, std::string name);
 
         std::ostream& Print(std::ostream&) const override;
         ValuePtr GenIR(Builder&) const override;
@@ -49,28 +61,33 @@ namespace LX
 
     struct Expr : Stmt
     {
-        explicit Expr(TypePtr);
+        Expr(SourceLocation where, TypePtr type);
 
         TypePtr Type;
     };
 
     struct BinaryExpr : Expr
     {
-        static TypePtr GetType(Context&, const std::string&, const TypePtr&, const TypePtr&);
+        static TypePtr GetType(
+            const SourceLocation& where,
+            Context& ctx,
+            const std::string& operator_,
+            const TypePtr& left,
+            const TypePtr& right);
 
-        BinaryExpr(TypePtr, std::string, ExprPtr, ExprPtr);
+        BinaryExpr(SourceLocation where, TypePtr type, std::string operator_, ExprPtr left, ExprPtr right);
 
         std::ostream& Print(std::ostream&) const override;
         ValuePtr GenIR(Builder&) const override;
 
-        std::string Op;
-        ExprPtr Lhs;
-        ExprPtr Rhs;
+        std::string Operator;
+        ExprPtr Left;
+        ExprPtr Right;
     };
 
     struct CallExpr : Expr
     {
-        CallExpr(TypePtr, ExprPtr, std::vector<ExprPtr>);
+        CallExpr(SourceLocation where, TypePtr type, ExprPtr callee, std::vector<ExprPtr> args);
 
         std::ostream& Print(std::ostream&) const override;
         ValuePtr GenIR(Builder&) const override;
@@ -81,17 +98,17 @@ namespace LX
 
     struct CastExpr : Expr
     {
-        CastExpr(TypePtr, ExprPtr);
+        CastExpr(SourceLocation where, TypePtr type, ExprPtr source);
 
         std::ostream& Print(std::ostream&) const override;
         ValuePtr GenIR(Builder&) const override;
 
-        ExprPtr Src;
+        ExprPtr Source;
     };
 
     struct ConstFloatExpr : Expr
     {
-        ConstFloatExpr(TypePtr, double);
+        ConstFloatExpr(SourceLocation where, TypePtr type, double value);
 
         std::ostream& Print(std::ostream&) const override;
         ValuePtr GenIR(Builder&) const override;
@@ -101,7 +118,7 @@ namespace LX
 
     struct ConstFunctionExpr : Expr
     {
-        ConstFunctionExpr(TypePtr, std::vector<Parameter>, ExprPtr);
+        ConstFunctionExpr(SourceLocation where, TypePtr type, std::vector<Parameter> params, ExprPtr body);
 
         std::ostream& Print(std::ostream&) const override;
         ValuePtr GenIR(Builder&) const override;
@@ -112,7 +129,7 @@ namespace LX
 
     struct ConstIntExpr : Expr
     {
-        ConstIntExpr(TypePtr, size_t);
+        ConstIntExpr(SourceLocation where, TypePtr type, size_t value);
 
         std::ostream& Print(std::ostream&) const override;
         ValuePtr GenIR(Builder&) const override;
@@ -122,7 +139,7 @@ namespace LX
 
     struct ConstStringExpr : Expr
     {
-        ConstStringExpr(TypePtr, std::string);
+        ConstStringExpr(SourceLocation where, TypePtr type, std::string value);
 
         std::ostream& Print(std::ostream&) const override;
         ValuePtr GenIR(Builder&) const override;
@@ -132,7 +149,7 @@ namespace LX
 
     struct ConstStructExpr : Expr
     {
-        ConstStructExpr(TypePtr, std::vector<ExprPtr>);
+        ConstStructExpr(SourceLocation where, TypePtr type, std::vector<ExprPtr> elements);
 
         std::ostream& Print(std::ostream&) const override;
         ValuePtr GenIR(Builder&) const override;
@@ -142,7 +159,7 @@ namespace LX
 
     struct ImmutableExpr : Expr
     {
-        ImmutableExpr(std::string, TypePtr, ExprPtr);
+        ImmutableExpr(SourceLocation where, TypePtr type, std::string name, ExprPtr init);
 
         std::ostream& Print(std::ostream&) const override;
         ValuePtr GenIR(Builder&) const override;
@@ -153,7 +170,7 @@ namespace LX
 
     struct MemberExpr : Expr
     {
-        MemberExpr(TypePtr, ExprPtr, std::string, bool);
+        MemberExpr(SourceLocation where, TypePtr type, ExprPtr parent, std::string member, bool deref);
 
         std::ostream& Print(std::ostream&) const override;
         ValuePtr GenIR(Builder&) const override;
@@ -165,7 +182,7 @@ namespace LX
 
     struct MutableExpr : Expr
     {
-        MutableExpr(std::string, TypePtr, ExprPtr);
+        MutableExpr(SourceLocation where, TypePtr type, std::string name, ExprPtr init);
 
         std::ostream& Print(std::ostream&) const override;
         ValuePtr GenIR(Builder&) const override;
@@ -176,7 +193,7 @@ namespace LX
 
     struct SequenceExpr : Expr
     {
-        SequenceExpr(TypePtr, std::vector<ExprPtr>);
+        SequenceExpr(SourceLocation where, TypePtr type, std::vector<ExprPtr> children);
 
         std::ostream& Print(std::ostream&) const override;
         ValuePtr GenIR(Builder&) const override;
@@ -186,7 +203,7 @@ namespace LX
 
     struct SubscriptExpr : Expr
     {
-        SubscriptExpr(TypePtr, ExprPtr, ExprPtr);
+        SubscriptExpr(SourceLocation where, TypePtr type, ExprPtr base, ExprPtr offset);
 
         std::ostream& Print(std::ostream&) const override;
         ValuePtr GenIR(Builder&) const override;
@@ -197,7 +214,7 @@ namespace LX
 
     struct SymbolExpr : Expr
     {
-        SymbolExpr(TypePtr, std::string);
+        SymbolExpr(SourceLocation where, TypePtr type, std::string name);
 
         std::ostream& Print(std::ostream&) const override;
         ValuePtr GenIR(Builder&) const override;
@@ -207,7 +224,7 @@ namespace LX
 
     struct TernaryExpr : Expr
     {
-        TernaryExpr(TypePtr, ExprPtr, ExprPtr, ExprPtr);
+        TernaryExpr(SourceLocation where, TypePtr type, ExprPtr condition, ExprPtr then, ExprPtr else_);
 
         std::ostream& Print(std::ostream&) const override;
         ValuePtr GenIR(Builder&) const override;
@@ -219,9 +236,13 @@ namespace LX
 
     struct UnaryExpr : Expr
     {
-        static TypePtr GetType(Context&, const std::string&, const TypePtr&);
+        static TypePtr GetType(
+            const SourceLocation& where,
+            Context& ctx,
+            const std::string& operator_,
+            const TypePtr& operand);
 
-        UnaryExpr(TypePtr, std::string, ExprPtr);
+        UnaryExpr(SourceLocation where, TypePtr type, std::string operator_, ExprPtr operand);
 
         std::ostream& Print(std::ostream&) const override;
         ValuePtr GenIR(Builder&) const override;

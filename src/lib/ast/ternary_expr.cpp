@@ -3,8 +3,11 @@
 #include <LX/Error.hpp>
 #include <LX/Value.hpp>
 
-LX::TernaryExpr::TernaryExpr(TypePtr type, ExprPtr condition, ExprPtr then, ExprPtr else_)
-    : Expr(std::move(type)), Condition(std::move(condition)), Then(std::move(then)), Else(std::move(else_))
+LX::TernaryExpr::TernaryExpr(SourceLocation where, TypePtr type, ExprPtr condition, ExprPtr then, ExprPtr else_)
+    : Expr(std::move(where), std::move(type)),
+      Condition(std::move(condition)),
+      Then(std::move(then)),
+      Else(std::move(else_))
 {
 }
 
@@ -34,10 +37,10 @@ LX::ValuePtr LX::TernaryExpr::GenIR(Builder& builder) const
     builder.IRBuilder().CreateBr(end_bb);
 
     builder.IRBuilder().SetInsertPoint(then_bb->getTerminator());
-    then = builder.Cast(then, Type);
+    then = builder.Cast(Where, then, Type);
     const auto then_value = then->Load(builder);
     builder.IRBuilder().SetInsertPoint(else_bb->getTerminator());
-    else_ = builder.Cast(else_, Type);
+    else_ = builder.Cast(Where, else_, Type);
     const auto else_value = else_->Load(builder);
 
     builder.IRBuilder().SetInsertPoint(end_bb);

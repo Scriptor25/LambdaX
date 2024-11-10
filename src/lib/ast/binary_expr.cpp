@@ -6,7 +6,12 @@
 #include <LX/Type.hpp>
 #include <LX/Value.hpp>
 
-LX::TypePtr LX::BinaryExpr::GetType(Context& ctx, const std::string& operator_, const TypePtr& lhs, const TypePtr& rhs)
+LX::TypePtr LX::BinaryExpr::GetType(
+    const SourceLocation& where,
+    Context& ctx,
+    const std::string& operator_,
+    const TypePtr& left,
+    const TypePtr& right)
 {
     static std::map<std::string, std::function<TypePtr(Context&, const TypePtr&)>> OPS
     {
@@ -38,25 +43,28 @@ LX::TypePtr LX::BinaryExpr::GetType(Context& ctx, const std::string& operator_, 
     };
 
     if (operator_ == "=")
-        return lhs;
+        return left;
 
-    const auto equ = Type::Equalize(ctx, lhs, rhs);
+    const auto equ = Type::Equalize(where, ctx, left, right);
 
     if (const auto& op = OPS[operator_]; op)
         if (const auto type = op(ctx, equ))
             return type;
 
-    Error("undefined binary operator '{} {} {}'", lhs, operator_, rhs);
+    Error(where, "undefined binary operator '{} {} {}'", left, operator_, right);
 }
 
-LX::BinaryExpr::BinaryExpr(TypePtr type, std::string op, ExprPtr lhs, ExprPtr rhs)
-    : Expr(std::move(type)), Op(std::move(op)), Lhs(std::move(lhs)), Rhs(std::move(rhs))
+LX::BinaryExpr::BinaryExpr(SourceLocation where, TypePtr type, std::string operator_, ExprPtr left, ExprPtr right)
+    : Expr(std::move(where), std::move(type)),
+      Operator(std::move(operator_)),
+      Left(std::move(left)),
+      Right(std::move(right))
 {
 }
 
 std::ostream& LX::BinaryExpr::Print(std::ostream& os) const
 {
-    return Rhs->Print(Lhs->Print(os) << ' ' << Op << ' ');
+    return Right->Print(Left->Print(os) << ' ' << Operator << ' ');
 }
 
 LX::ValuePtr LX::BinaryExpr::GenIR(Builder& builder) const
@@ -90,20 +98,20 @@ LX::ValuePtr LX::BinaryExpr::GenIR(Builder& builder) const
         {">>", OperatorShR},
     };
 
-    auto lhs = Lhs->GenIR(builder);
-    auto rhs = Rhs->GenIR(builder);
+    auto lhs = Left->GenIR(builder);
+    auto rhs = Right->GenIR(builder);
 
-    if (Op == "=")
+    if (Operator == "=")
     {
         lhs->Store(builder, rhs->Load(builder));
         return lhs;
     }
 
-    builder.Equalize(lhs, rhs);
+    builder.Equalize(Where, lhs, rhs);
 
-    if (const auto& op = OPS[Op]; op)
+    if (const auto& op = OPS[Operator]; op)
         if (const auto value = op(builder, lhs, rhs))
             return value;
 
-    Error("undefined binary operator '{} {} {}'", lhs->Type(), Op, rhs->Type());
+    Error(Where, "undefined binary operator '{} {} {}'", lhs->Type(), Operator, rhs->Type());
 }

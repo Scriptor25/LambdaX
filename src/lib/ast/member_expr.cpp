@@ -3,8 +3,8 @@
 #include <LX/Type.hpp>
 #include <LX/Value.hpp>
 
-LX::MemberExpr::MemberExpr(TypePtr type, ExprPtr parent, std::string member, const bool deref)
-    : Expr(std::move(type)), Parent(std::move(parent)), Member(std::move(member)), Deref(deref)
+LX::MemberExpr::MemberExpr(SourceLocation where, TypePtr type, ExprPtr parent, std::string member, const bool deref)
+    : Expr(std::move(where), std::move(type)), Parent(std::move(parent)), Member(std::move(member)), Deref(deref)
 {
 }
 

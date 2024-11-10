@@ -5,7 +5,11 @@
 #include <LX/Type.hpp>
 #include <LX/Value.hpp>
 
-LX::TypePtr LX::UnaryExpr::GetType(Context& ctx, const std::string& operator_, const TypePtr& operand)
+LX::TypePtr LX::UnaryExpr::GetType(
+    const SourceLocation& where,
+    Context& ctx,
+    const std::string& operator_,
+    const TypePtr& operand)
 {
     static std::map<std::string, std::function<TypePtr(Context&, const TypePtr&)>> OPS
     {
@@ -20,11 +24,11 @@ LX::TypePtr LX::UnaryExpr::GetType(Context& ctx, const std::string& operator_, c
         if (const auto type = op(ctx, operand))
             return type;
 
-    Error("undefined unary operator '{}{}'", operator_, operand);
+    Error(where, "undefined unary operator '{}{}'", operator_, operand);
 }
 
-LX::UnaryExpr::UnaryExpr(TypePtr type, std::string op, ExprPtr operand)
-    : Expr(std::move(type)), Operator(std::move(op)), Operand(std::move(operand))
+LX::UnaryExpr::UnaryExpr(SourceLocation where, TypePtr type, std::string operator_, ExprPtr operand)
+    : Expr(std::move(where), std::move(type)), Operator(std::move(operator_)), Operand(std::move(operand))
 {
 }
 
@@ -50,5 +54,5 @@ LX::ValuePtr LX::UnaryExpr::GenIR(Builder& builder) const
         if (const auto value = op(builder, operand))
             return value;
 
-    Error("undefined unary operator '{}{}'", Operator, operand->Type());
+    Error(Where, "undefined unary operator '{}{}'", Operator, operand->Type());
 }

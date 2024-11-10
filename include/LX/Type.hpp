@@ -11,7 +11,7 @@ namespace LX
 {
     struct Type
     {
-        static TypePtr Equalize(Context&, const TypePtr&, const TypePtr&);
+        static TypePtr Equalize(const SourceLocation& where, Context& ctx, const TypePtr& a, const TypePtr& b);
 
         Type(std::string name, unsigned bits);
         virtual ~Type() = default;

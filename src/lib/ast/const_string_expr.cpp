@@ -3,8 +3,8 @@
 #include <LX/Context.hpp>
 #include <LX/Value.hpp>
 
-LX::ConstStringExpr::ConstStringExpr(TypePtr type, std::string value)
-    : Expr(std::move(type)), Value(std::move(value))
+LX::ConstStringExpr::ConstStringExpr(SourceLocation where, TypePtr type, std::string value)
+    : Expr(std::move(where), std::move(type)), Value(std::move(value))
 {
 }
 

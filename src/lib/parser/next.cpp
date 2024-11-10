@@ -238,7 +238,7 @@ LX::Token& LX::Parser::Next()
             if (m_Tok == '.')
             {
                 if (is_float)
-                    Error("only one floating point per token is permitted");
+                    Error(m_Where, "only one floating point per token is permitted");
                 is_float = true;
             }
             value += static_cast<char>(m_Tok);

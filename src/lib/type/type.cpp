@@ -2,7 +2,7 @@
 #include <LX/Error.hpp>
 #include <LX/Type.hpp>
 
-LX::TypePtr LX::Type::Equalize(Context& ctx, const TypePtr& a, const TypePtr& b)
+LX::TypePtr LX::Type::Equalize(const SourceLocation& where, Context& ctx, const TypePtr& a, const TypePtr& b)
 {
     if (a == b)
         return a;
@@ -20,7 +20,12 @@ LX::TypePtr LX::Type::Equalize(Context& ctx, const TypePtr& a, const TypePtr& b)
         return ctx.GetFloatType(bits);
     }
 
-    return {};
+    if (a->IsPointer() && b->IsInt())
+        return ctx.GetIntType(a->Bits, b->IsSigned());
+    if (a->IsInt() && b->IsPointer())
+        return ctx.GetIntType(b->Bits, a->IsSigned());
+
+    Error(where, "cannot equalize types {} and {}", a, b);
 }
 
 LX::Type::Type(std::string name, const unsigned bits)
@@ -65,27 +70,27 @@ bool LX::Type::IsMutable() const
 
 LX::TypePtr LX::Type::Result() const
 {
-    Error("type '{}' does not override Result", Name);
+    Error("{} is not a function type; cannot provide result type", Name);
 }
 
 size_t LX::Type::ParamCount() const
 {
-    Error("type '{}' does not override ParamCount", Name);
+    Error("{} is not a function type; cannot provide parameter count", Name);
 }
 
-LX::TypePtr LX::Type::Param(size_t) const
+LX::TypePtr LX::Type::Param(const size_t i) const
 {
-    Error("type '{}' does not override Param", Name);
+    Error("{} is not a function type; cannot provide parameter at {}", Name, i);
 }
 
 bool LX::Type::HasVarArg() const
 {
-    Error("type '{}' does not override HasVarArg", Name);
+    Error("{} is not a function type; cannot tell if it has variadic args", Name);
 }
 
-void LX::Type::WithName(const std::string&)
+void LX::Type::WithName(const std::string& name)
 {
-    Error("type '{}' does not override WithName", Name);
+    Error("{} is not a struct type; cannot set struct name to '{}'", Name, name);
 }
 
 llvm::Type* LX::Type::GetIR(Builder& builder)
@@ -96,15 +101,15 @@ llvm::Type* LX::Type::GetIR(Builder& builder)
 
 LX::TypePtr LX::Type::Element() const
 {
-    Error("type '{}' does not override Element", Name);
+    Error("{} is not a pointer or mutable type; cannot get element type", Name);
 }
 
-LX::TypePtr LX::Type::Element(size_t) const
+LX::TypePtr LX::Type::Element(const size_t i) const
 {
-    Error("type '{}' does not override Element", Name);
+    Error("{} is not a struct type; cannot get element type at {}", Name, i);
 }
 
-size_t LX::Type::IndexOf(const std::string&) const
+size_t LX::Type::IndexOf(const std::string& name) const
 {
-    Error("type '{}' does not override IndexOf", Name);
+    Error("{} is not a struct type; cannot get index of named element '{}'", Name, name);
 }

@@ -7,6 +7,8 @@
 
 LX::StmtPtr LX::Parser::ParseFunction()
 {
+    const auto where = m_Token.Where;
+
     const bool export_ = NextAt("export");
     const bool extern_ = NextAt("extern");
     const auto name = Expect(TokenType_Symbol).StringValue;
@@ -22,17 +24,17 @@ LX::StmtPtr LX::Parser::ParseFunction()
     const auto type = m_Ctx.GetFunctionType(result_type, params, vararg);
 
     if (!m_IsImported && !m_Ctx.HasVar(name))
-        m_Ctx.DefVar(name) = m_Ctx.GetPointerType(type);
+        m_Ctx.DefVar(where, name) = m_Ctx.GetPointerType(type);
 
     ExprPtr body;
     if (!m_IsImported && NextAt("="))
     {
         m_Ctx.Push();
         for (const auto& [type_, name_] : params)
-            m_Ctx.DefVar(name_) = type_;
+            m_Ctx.DefVar(where, name_) = type_;
         body = ParseExpr();
         m_Ctx.Pop();
     }
 
-    return std::make_unique<FunctionStmt>(export_, extern_, type, name, params, std::move(body));
+    return std::make_unique<FunctionStmt>(where, export_, extern_, type, name, params, std::move(body));
 }

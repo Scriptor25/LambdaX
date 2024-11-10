@@ -23,9 +23,10 @@ namespace LX
 
         void Push();
         void Pop();
-        TypePtr& DefVar(const std::string&);
-        TypePtr GetVar(const std::string&);
-        bool HasVar(const std::string&);
+
+        TypePtr& DefVar(const SourceLocation& where, const std::string& name);
+        TypePtr GetVar(const SourceLocation& where, const std::string& name);
+        bool HasVar(const std::string& name);
 
     private:
         std::map<std::string, TypePtr> m_Types;

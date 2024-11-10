@@ -42,12 +42,12 @@ namespace LX
         FunctionRef& GetFunction(const std::string&);
         FunctionRef& GetFunction(const std::string&, const std::string&);
 
-        ValuePtr& DefVar(const std::string&);
+        ValuePtr& DefVar(const SourceLocation& where, const std::string& name);
+        const ValuePtr& GetVar(const SourceLocation& where, const std::string& name);
         bool HasVar(const std::string&);
-        const ValuePtr& GetVar(const std::string&);
 
-        ValuePtr Cast(const ValuePtr&, const TypePtr&);
-        void Equalize(ValuePtr&, ValuePtr&);
+        ValuePtr Cast(const SourceLocation& where, const ValuePtr& src, const TypePtr& dst);
+        void Equalize(const SourceLocation& where, ValuePtr& a, ValuePtr& b);
 
         llvm::Value* CreateAlloca(llvm::Type*, const std::string& = {}) const;
 
