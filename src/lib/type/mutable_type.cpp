@@ -35,3 +35,8 @@ llvm::Type* LX::MutableType::GenIR(Builder& builder) const
 {
     return builder.IRBuilder().getPtrTy();
 }
+
+llvm::DIType* LX::MutableType::GenDI(Builder& builder) const
+{
+    return builder.DIBuilder().createReferenceType(0, ElementType->GenDI(builder));
+}

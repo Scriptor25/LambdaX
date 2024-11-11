@@ -153,6 +153,11 @@ LX::Token& LX::Parser::Next()
                 where = m_Where;
                 value += static_cast<char>(m_Tok);
                 m_Tok = Get();
+                if (value == ":" && m_Tok == '=')
+                {
+                    value += static_cast<char>(m_Tok);
+                    m_Tok = Get();
+                }
                 return m_Token = {where, TokenType_Other, value};
 
             case '0':
@@ -230,7 +235,7 @@ LX::Token& LX::Parser::Next()
             break;
 
         case State_Dec:
-            if (!isdigit(m_Tok) && m_Tok != '.')
+            if (!isdigit(m_Tok) && m_Tok != '.' && m_Tok != 'e' && m_Tok != 'E')
             {
                 if (is_float)
                     return m_Token = {where, TokenType_Float, value, 0, std::stod(value)};
@@ -241,6 +246,17 @@ LX::Token& LX::Parser::Next()
                 if (is_float)
                     Error(m_Where, "only one floating point per token is permitted");
                 is_float = true;
+            }
+            if (m_Tok == 'e' || m_Tok == 'E')
+            {
+                value += static_cast<char>(m_Tok);
+                m_Tok = Get();
+                if (m_Tok == '-')
+                {
+                    if (is_float)
+                        Error(m_Where, "only one floating point per token is permitted");
+                    is_float = true;
+                }
             }
             value += static_cast<char>(m_Tok);
             break;

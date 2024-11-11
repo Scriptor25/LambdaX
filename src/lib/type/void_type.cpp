@@ -15,3 +15,8 @@ llvm::Type* LX::VoidType::GenIR(Builder& builder) const
 {
     return builder.IRBuilder().getVoidTy();
 }
+
+llvm::DIType* LX::VoidType::GenDI(Builder& builder) const
+{
+    return builder.DIBuilder().createBasicType("void", 0, 0);
+}

@@ -4,8 +4,8 @@
 #include <LX/Type.hpp>
 #include <LX/Value.hpp>
 
-LX::SubscriptExpr::SubscriptExpr(SourceLocation where, TypePtr type, ExprPtr base, ExprPtr offset)
-    : Expr(std::move(where), std::move(type)), Base(std::move(base)), Offset(std::move(offset))
+LX::SubscriptExpr::SubscriptExpr(SourceLocation where, ExprPtr base, ExprPtr offset)
+    : Expr(std::move(where)), Base(std::move(base)), Offset(std::move(offset))
 {
 }
 
@@ -18,10 +18,13 @@ LX::ValuePtr LX::SubscriptExpr::GenIR(Builder& builder) const
 {
     const auto base = Base->GenIR(builder);
     const auto offset = Offset->GenIR(builder);
+    const auto type = base->Type()->Element();
+
+    Where.EmitDI(builder);
 
     const auto gep = builder.IRBuilder().CreateGEP(
-        Type->GetIR(builder),
+        type->GenIR(builder),
         base->Load(builder),
         {offset->Load(builder)});
-    return LValue::Create(Type, gep);
+    return LValue::Create(type, gep);
 }

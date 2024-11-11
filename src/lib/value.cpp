@@ -50,7 +50,7 @@ LX::ValuePtr LX::LValue::Create(const TypePtr& type, llvm::Value* ptr)
 
 llvm::Value* LX::LValue::Load(Builder& builder) const
 {
-    return builder.IRBuilder().CreateLoad(m_Type->GetIR(builder), m_Ptr);
+    return builder.IRBuilder().CreateLoad(m_Type->GenIR(builder), m_Ptr);
 }
 
 void LX::LValue::Store(Builder& builder, llvm::Value* value) const

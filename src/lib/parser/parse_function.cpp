@@ -1,41 +1,37 @@
-#include <vector>
 #include <LX/AST.hpp>
 #include <LX/Context.hpp>
-#include <LX/Parameter.hpp>
 #include <LX/Parser.hpp>
 #include <LX/Type.hpp>
+
+void LX::Parser::ParseFunction(const SourceLocation& where, Function& fun)
+{
+    bool vararg = false;
+    if (NextAt("("))
+    {
+        vararg = ParseParameterList(fun.Params, ")");
+        Expect(")");
+    }
+
+    TypePtr result;
+    if (NextAt("=>"))
+        result = ParseType();
+    else result = m_Ctx.GetVoidType();
+
+    fun.Type = m_Ctx.GetFunctionType(result, fun.Params, vararg);
+
+    if (NextAt("="))
+        fun.Body = ParseExpr();
+}
 
 LX::StmtPtr LX::Parser::ParseFunction()
 {
     const auto where = m_Token.Where;
-    const bool export_ = NextAt("export");
-    const bool extern_ = NextAt("extern");
-    const auto name = Expect(TokenType_Symbol).StringValue;
 
-    Expect("(");
-    std::vector<Parameter> params;
-    const auto vararg = ParseParameterList(params, ")");
-    Expect(")");
+    Function fun;
+    fun.Export = NextAt("export");
+    fun.Extern = NextAt("extern");
+    fun.Name = Expect(TokenType_Symbol).StringValue;
+    ParseFunction(where, fun);
 
-    TypePtr result_type;
-    if (NextAt("=>"))
-        result_type = ParseType();
-    else result_type = m_Ctx.GetVoidType();
-
-    const auto type = m_Ctx.GetFunctionType(result_type, params, vararg);
-
-    if (!m_Ctx.HasVar(name))
-        m_Ctx.DefVar(where, name) = m_Ctx.GetPointerType(type);
-
-    ExprPtr body;
-    if (NextAt("="))
-    {
-        m_Ctx.Push();
-        for (const auto& [type_, name_] : params)
-            m_Ctx.DefVar(where, name_) = type_;
-        body = ParseExpr();
-        m_Ctx.Pop();
-    }
-
-    return std::make_unique<FunctionStmt>(where, export_, extern_, type, name, params, std::move(body));
+    return std::make_unique<FunctionStmt>(where, std::move(fun));
 }

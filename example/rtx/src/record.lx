@@ -1,9 +1,12 @@
-import "vec3.lx" as vec3
 import "ray.lx"
+import "vec3.lx" as vec3
+
+type material {}
 
 type record {
     point p,
     vec3 normal,
+    [material] mat,
     f64 t,
     u1 front_face,
 }

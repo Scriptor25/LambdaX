@@ -11,7 +11,7 @@ void LX::Parser::Parse(
     const bool is_imported)
 {
     for (Parser parser(ctx, stream, filename, is_imported); !parser.AtEOF();)
-        if (auto ptr = parser.ParseStmt())
+        if (auto ptr = parser.Parse())
             consumer(std::move(ptr));
 }
 

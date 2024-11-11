@@ -1,8 +1,8 @@
 #include <LX/AST.hpp>
 #include <LX/Builder.hpp>
 
-LX::SequenceExpr::SequenceExpr(SourceLocation where, TypePtr type, std::vector<ExprPtr> children)
-    : Expr(std::move(where), std::move(type)), Children(std::move(children))
+LX::SequenceExpr::SequenceExpr(SourceLocation where, std::vector<ExprPtr> children)
+    : Expr(std::move(where)), Children(std::move(children))
 {
 }
 
@@ -32,6 +32,8 @@ std::ostream& LX::SequenceExpr::Print(std::ostream& os) const
 
 LX::ValuePtr LX::SequenceExpr::GenIR(Builder& builder) const
 {
+    Where.EmitDI(builder);
+
     builder.Push();
     ValuePtr value;
     for (const auto& child : Children)

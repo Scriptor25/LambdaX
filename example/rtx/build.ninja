@@ -13,9 +13,14 @@ rule link
  command = $cc -o $out $in -lm
 
 build $bin/camera.ll: lx $src/camera.lx
+build $bin/dielectric.ll: lx $src/dielectric.lx
 build $bin/hittable.ll: lx $src/hittable.lx
 build $bin/hittable_list.ll: lx $src/hittable_list.lx
+build $bin/interval.ll: lx $src/interval.lx
+build $bin/lambertian.ll: lx $src/lambertian.lx
 build $bin/main.ll: lx $src/main.lx
+build $bin/material.ll: lx $src/material.lx
+build $bin/metal.ll: lx $src/metal.lx
 build $bin/ppm.ll: lx $src/ppm.lx
 build $bin/ray.ll: lx $src/ray.lx
 build $bin/record.ll: lx $src/record.lx
@@ -25,9 +30,14 @@ build $bin/util.ll: lx $src/util.lx
 build $bin/vec3.ll: lx $src/vec3.lx
 
 build $bin/camera.o: ll $bin/camera.ll
+build $bin/dielectric.o: ll $bin/dielectric.ll
 build $bin/hittable.o: ll $bin/hittable.ll
 build $bin/hittable_list.o: ll $bin/hittable_list.ll
+build $bin/interval.o: ll $bin/interval.ll
+build $bin/lambertian.o: ll $bin/lambertian.ll
 build $bin/main.o: ll $bin/main.ll
+build $bin/material.o: ll $bin/material.ll
+build $bin/metal.o: ll $bin/metal.ll
 build $bin/ppm.o: ll $bin/ppm.ll
 build $bin/ray.o: ll $bin/ray.ll
 build $bin/record.o: ll $bin/record.ll
@@ -36,4 +46,4 @@ build $bin/std.o: ll $bin/std.ll
 build $bin/util.o: ll $bin/util.ll
 build $bin/vec3.o: ll $bin/vec3.ll
 
-build $bin/out.exe: link $bin/camera.o $bin/hittable.o $bin/hittable_list.o $bin/main.o $bin/ppm.o $bin/ray.o $bin/record.o $bin/sphere.o $bin/std.o $bin/util.o $bin/vec3.o
+build $bin/out.exe: link $bin/camera.o $bin/dielectric.o $bin/hittable.o $bin/hittable_list.o $bin/interval.o $bin/lambertian.o $bin/main.o $bin/material.o $bin/metal.o $bin/ppm.o $bin/ray.o $bin/record.o $bin/sphere.o $bin/std.o $bin/util.o $bin/vec3.o

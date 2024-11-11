@@ -3,6 +3,7 @@
 #include <format>
 #include <string>
 #include <vector>
+#include <llvm/IR/DebugInfoMetadata.h>
 #include <llvm/IR/Type.h>
 #include <LX/LX.hpp>
 #include <LX/Parameter.hpp>
@@ -32,15 +33,13 @@ namespace LX
         [[nodiscard]] virtual size_t ParamCount() const;
         [[nodiscard]] virtual TypePtr Param(size_t) const;
         [[nodiscard]] virtual bool HasVarArg() const;
-        virtual void WithName(const std::string&);
-        llvm::Type* GetIR(Builder&);
+        virtual void PutElements(const std::vector<Parameter>&);
+
+        virtual llvm::Type* GenIR(Builder&) const = 0;
+        virtual llvm::DIType* GenDI(Builder&) const = 0;
 
         std::string Name;
         unsigned Bits;
-        llvm::Type* IR{};
-
-    private:
-        virtual llvm::Type* GenIR(Builder&) const = 0;
     };
 
     struct VoidType : Type
@@ -48,7 +47,9 @@ namespace LX
         VoidType();
 
         [[nodiscard]] bool IsVoid() const override;
+
         llvm::Type* GenIR(Builder&) const override;
+        llvm::DIType* GenDI(Builder&) const override;
     };
 
     struct IntType : Type
@@ -59,7 +60,9 @@ namespace LX
 
         [[nodiscard]] bool IsInt() const override;
         [[nodiscard]] bool IsSigned() const override;
+
         llvm::Type* GenIR(Builder&) const override;
+        llvm::DIType* GenDI(Builder&) const override;
 
         bool Sign;
     };
@@ -71,7 +74,9 @@ namespace LX
         explicit FloatType(unsigned bits);
 
         [[nodiscard]] bool IsFloat() const override;
+
         llvm::Type* GenIR(Builder&) const override;
+        llvm::DIType* GenDI(Builder&) const override;
     };
 
     struct PointerType : Type
@@ -82,7 +87,9 @@ namespace LX
 
         [[nodiscard]] bool IsPointer() const override;
         [[nodiscard]] TypePtr Element() const override;
+
         llvm::Type* GenIR(Builder&) const override;
+        llvm::DIType* GenDI(Builder&) const override;
 
         TypePtr ElementType;
     };
@@ -97,7 +104,9 @@ namespace LX
         [[nodiscard]] size_t IndexOf(const std::string&) const override;
         [[nodiscard]] TypePtr Element(size_t) const override;
         [[nodiscard]] TypePtr Element() const override;
+
         llvm::Type* GenIR(Builder&) const override;
+        llvm::DIType* GenDI(Builder&) const override;
 
         TypePtr ElementType;
     };
@@ -109,6 +118,7 @@ namespace LX
         ArrayType(TypePtr element_type, size_t size);
 
         llvm::Type* GenIR(Builder&) const override;
+        llvm::DIType* GenDI(Builder&) const override;
 
         TypePtr ElementType;
         size_t Size;
@@ -125,7 +135,9 @@ namespace LX
         [[nodiscard]] size_t ParamCount() const override;
         [[nodiscard]] TypePtr Param(size_t) const override;
         [[nodiscard]] bool HasVarArg() const override;
+
         llvm::Type* GenIR(Builder&) const override;
+        llvm::DIType* GenDI(Builder&) const override;
 
         TypePtr ResultType;
         std::vector<Parameter> Params;
@@ -134,15 +146,17 @@ namespace LX
 
     struct StructType : Type
     {
-        static std::string GetName(const std::vector<Parameter>& elements);
+        static std::string GetName(const std::string& name, const std::vector<Parameter>& elements);
         static unsigned GetBits(const std::vector<Parameter>& elements);
 
-        explicit StructType(std::vector<Parameter> elements);
+        StructType(std::string name, std::vector<Parameter> elements);
 
         [[nodiscard]] TypePtr Element(size_t) const override;
         [[nodiscard]] size_t IndexOf(const std::string&) const override;
-        void WithName(const std::string&) override;
+        void PutElements(const std::vector<Parameter>&) override;
+
         llvm::Type* GenIR(Builder&) const override;
+        llvm::DIType* GenDI(Builder&) const override;
 
         std::string StructName;
         std::vector<Parameter> Elements;

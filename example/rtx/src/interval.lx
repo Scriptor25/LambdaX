@@ -1,0 +1,14 @@
+import "util.lx" as util
+
+type interval {
+    f64 min,
+    f64 max,
+}
+
+export empty() => interval = { util.inf(), -util.inf() } => interval
+export universe() => interval = { -util.inf(), util.inf() } => interval
+export create(f64 min, f64 max) => interval = { min, max } => interval
+export size(interval self) => f64 = self.max - self.min
+export contains(interval self, f64 x) => u1 = self.min <= x && x <= self.max
+export surrounds(interval self, f64 x) => u1 = self.min < x && x < self.max
+export clamp(interval self, f64 x) => f64 = x < self.min ? self.min : x > self.max ? self.max : x

@@ -1,3 +1,14 @@
+# IO
 export extern printf([i8], ...) => i32
-export extern sqrt(f64) => f64
+
+# Memory
 export extern realloc([], u64) => []
+
+# Math
+export extern sqrt(f64) => f64
+export extern fabs(f64) => f64
+export extern fmin(f64, f64) => f64
+
+# Random
+export RAND_MAX() => i32 = 0x7fff
+export extern rand() => i32

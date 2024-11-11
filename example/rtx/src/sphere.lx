@@ -1,40 +1,45 @@
-import "std.lx" as std
-import "vec3.lx" as vec3
+import "interval.lx" as interval
 import "ray.lx" as ray
 import "record.lx" as record
+import "std.lx" as std
+import "vec3.lx" as vec3
 
 type sphere {
-    [([], ray, f64, f64, mut record) => u1] hit,
+    [([], ray, interval, mut record) => u1] hit,
 
     point center,
     f64 radius,
+    [material] mat,
 }
 
-export hit(sphere self, ray r, f64 t_min, f64 t_max, mut record rec) => u1 = (
-    oc = vec3.sub(self.center, r.origin),
-    a = vec3.length_squared(r.direction),
-    b = vec3.dot(r.direction, oc),
-    c = vec3.length_squared(oc) - self.radius * self.radius,
-    discriminant = b * b - a * c,
-    discriminant < 0 ? 0 : (
-        sqrtd = std.sqrt(discriminant),
-        t1 = (b - sqrtd) / a,
-        t2 = (b + sqrtd) / a,
-        v1 = t1 <= t_min || t_max <= t1,
-        v2 = t2 <= t_min || t_max <= t2,
-        v1 && v2 ? 0 : (
-            rec.t = v1 ? t2 : t1,
+hit(sphere self, ray r, interval ray_t, mut record rec) => u1 = (
+    oc := vec3.sub(self.center, r.origin),
+    a := vec3.length_squared(r.direction),
+    b := vec3.dot(r.direction, oc),
+    c := vec3.length_squared(oc) - self.radius * self.radius,
+    discriminant := b * b - a * c,
+    discriminant >= 0 ?? (
+        sqrtd := std.sqrt(discriminant),
+        inva := 1.0 / a,
+        t1 := (b - sqrtd) * inva,
+        t2 := (b + sqrtd) * inva,
+        v1 := interval.surrounds(ray_t, t1),
+        v2 := interval.surrounds(ray_t, t2),
+        v1 || v2 ?? (
+            rec.t = v1 ? t1 : t2,
             rec.p = ray.at(r, rec.t),
-            on = vec3.div(vec3.sub(rec.p, self.center), self.radius),
+            on := vec3.div(vec3.sub(rec.p, self.center), self.radius),
             record.set_normal(rec, r, on),
+            rec.mat = self.mat,
             1
         )
     )
 )
 
-export sphere(point center, f64 radius) => sphere = {
-    $([] ptr, ray r, f64 t_min, f64 t_max, mut record rec) => u1 = hit(*(ptr as [sphere]), r, t_min, t_max, rec),
+export create(point center, f64 radius, [material] mat) => sphere = {
+    $([] ptr, ray r, interval ray_t, mut record rec) => u1 = hit(*(ptr as [sphere]), r, ray_t, rec),
 
     center,
     radius,
-}
+    mat,
+} => sphere

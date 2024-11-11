@@ -41,7 +41,9 @@ namespace LX
         void ParseParameter(Parameter&);
         bool ParseParameterList(std::vector<Parameter>&, const std::string&);
 
-        StmtPtr ParseStmt();
+        void ParseFunction(const SourceLocation&, Function&);
+
+        StmtPtr Parse();
         StmtPtr ParseImport();
         StmtPtr ParseFunction();
 
@@ -50,7 +52,20 @@ namespace LX
 
         ExprPtr ParseBinary(ExprPtr, unsigned);
         ExprPtr ParseOperand();
+
+        ExprPtr ParseCall(ExprPtr);
+        ExprPtr ParseSubscript(ExprPtr);
+        ExprPtr ParseCast(ExprPtr);
+        ExprPtr ParseMember(ExprPtr);
+
         ExprPtr ParsePrimary();
+
+        ExprPtr ParseSequence();
+        ExprPtr ParseConstStruct();
+        ExprPtr ParseConstFunction();
+        ExprPtr ParseMut();
+        ExprPtr ParseUnary();
+        ExprPtr ParseSymbol();
 
         bool m_IsImported;
         Context& m_Ctx;

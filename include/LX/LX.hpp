@@ -16,6 +16,8 @@ namespace LX
     typedef std::shared_ptr<Type> TypePtr;
 
     struct Parameter;
+    struct Function;
+    struct FunctionImport;
 
     struct Stmt;
     typedef std::unique_ptr<Stmt> StmtPtr;

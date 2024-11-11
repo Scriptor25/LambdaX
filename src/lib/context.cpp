@@ -1,5 +1,3 @@
-#include <ranges>
-#include <llvm/IR/DerivedTypes.h>
 #include <LX/Context.hpp>
 #include <LX/Error.hpp>
 #include <LX/Type.hpp>
@@ -19,8 +17,6 @@ LX::Context::Context()
     m_Types["f16"] = std::make_shared<FloatType>(16);
     m_Types["f32"] = std::make_shared<FloatType>(32);
     m_Types["f64"] = std::make_shared<FloatType>(64);
-
-    Push();
 }
 
 LX::TypePtr& LX::Context::GetType(const std::string& name)
@@ -49,11 +45,15 @@ LX::TypePtr& LX::Context::GetFloatType(const unsigned bits)
     return type = std::make_shared<FloatType>(bits);
 }
 
-LX::TypePtr& LX::Context::GetStructType(const std::vector<Parameter>& elements)
+LX::TypePtr& LX::Context::GetStructType(const std::string& name, const std::vector<Parameter>& elements)
 {
-    auto& type = GetType(StructType::GetName(elements));
-    if (type) return type;
-    return type = std::make_shared<StructType>(elements);
+    auto& type = GetType(StructType::GetName(name, elements));
+    if (type)
+    {
+        if (!elements.empty()) type->PutElements(elements);
+        return type;
+    }
+    return type = std::make_shared<StructType>(name, elements);
 }
 
 LX::TypePtr& LX::Context::GetPointerType(const TypePtr& element)
@@ -93,35 +93,4 @@ LX::TypePtr& LX::Context::GetFunPtrType(
     const bool vararg)
 {
     return GetPointerType(GetFunctionType(result_type, params, vararg));
-}
-
-void LX::Context::Push()
-{
-    m_Stack.emplace_back();
-}
-
-void LX::Context::Pop()
-{
-    m_Stack.pop_back();
-}
-
-LX::TypePtr& LX::Context::DefVar(const SourceLocation& where, const std::string& name)
-{
-    if (m_Stack.back().contains(name))
-        Error(where, "cannot redefine symbol with name '{}'", name);
-    return m_Stack.back()[name];
-}
-
-LX::TypePtr LX::Context::GetVar(const SourceLocation& where, const std::string& name)
-{
-    for (const auto& frame : std::ranges::views::reverse(m_Stack))
-        if (frame.contains(name)) return frame.at(name);
-    Error(where, "no symbol with name '{}'", name);
-}
-
-bool LX::Context::HasVar(const std::string& name)
-{
-    return std::ranges::any_of(
-        std::ranges::views::reverse(m_Stack),
-        [&](const auto& frame) { return frame.contains(name); });
 }

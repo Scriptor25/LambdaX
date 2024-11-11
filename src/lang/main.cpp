@@ -57,6 +57,7 @@ int main(const int argc, const char* const* argv)
         });
         stream.close();
 
+        builder.Finalize();
         linker.Link(builder);
     }
     linker.Output(output_filename);

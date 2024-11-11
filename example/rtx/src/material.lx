@@ -1,0 +1,8 @@
+import "ray.lx"
+import "vec3.lx"
+
+type record {}
+
+type material {
+    [([], ray, record, mut color, mut ray) => u1] scatter,
+}

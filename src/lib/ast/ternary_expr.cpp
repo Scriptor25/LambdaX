@@ -3,8 +3,10 @@
 #include <LX/Error.hpp>
 #include <LX/Value.hpp>
 
-LX::TernaryExpr::TernaryExpr(SourceLocation where, TypePtr type, ExprPtr condition, ExprPtr then, ExprPtr else_)
-    : Expr(std::move(where), std::move(type)),
+#include "LX/Type.hpp"
+
+LX::TernaryExpr::TernaryExpr(SourceLocation where, ExprPtr condition, ExprPtr then, ExprPtr else_)
+    : Expr(std::move(where)),
       Condition(std::move(condition)),
       Then(std::move(then)),
       Else(std::move(else_))
@@ -28,6 +30,8 @@ LX::ValuePtr LX::TernaryExpr::GenIR(Builder& builder) const
     const auto cond = builder.IRBuilder().CreateIsNotNull(condition->Load(builder));
     builder.IRBuilder().CreateCondBr(cond, then_bb, else_bb);
 
+    Where.EmitDI(builder);
+
     builder.IRBuilder().SetInsertPoint(then_bb);
     auto then = Then->GenIR(builder);
     then_bb = builder.IRBuilder().GetInsertBlock();
@@ -38,13 +42,17 @@ LX::ValuePtr LX::TernaryExpr::GenIR(Builder& builder) const
     else_bb = builder.IRBuilder().GetInsertBlock();
     builder.IRBuilder().CreateBr(end_bb);
 
+    const auto type = else_
+                          ? Type::Equalize(Where, builder.Ctx(), then->Type(), else_->Type())
+                          : then->Type();
+
     builder.IRBuilder().SetInsertPoint(then_bb->getTerminator());
-    then = builder.Cast(Where, then, Type);
+    then = builder.Cast(Where, then, type);
     const auto then_value = then->Load(builder);
     if (Else)
     {
         builder.IRBuilder().SetInsertPoint(else_bb->getTerminator());
-        else_ = builder.Cast(Where, else_, Type);
+        else_ = builder.Cast(Where, else_, type);
     }
     const auto else_value = Else
                                 ? else_->Load(builder)
@@ -55,5 +63,5 @@ LX::ValuePtr LX::TernaryExpr::GenIR(Builder& builder) const
     phi->addIncoming(then_value, then_bb);
     phi->addIncoming(else_value, else_bb);
 
-    return RValue::Create(Type, phi);
+    return RValue::Create(type, phi);
 }

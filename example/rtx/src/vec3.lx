@@ -1,17 +1,24 @@
 import "std.lx" as std
+import "util.lx" as util
 
 type vec3 { f64 x, f64 y, f64 z }
 type point = vec3
 type color = vec3
 
-export empty() => vec3 = { 0.0, 0.0, 0.0 }
-export scalar(f64 t) => vec3 = { t, t, t }
-export create(f64 x, f64 y, f64 z) => vec3 = { x, y, z }
+export empty() => vec3 = { 0, 0, 0 } => vec3
+export scalar(f64 t) => vec3 = { t, t, t } => vec3
+export create(f64 x, f64 y, f64 z) => vec3 = { x, y, z } => vec3
 
-export neg(vec3 v) => vec3 = { -v.x, -v.y, -v.z }
-export add(vec3 u, vec3 v) => vec3 = { u.x + v.x, u.y + v.y, u.z + v.z }
-export sub(vec3 u, vec3 v) => vec3 = { u.x - v.x, u.y - v.y, u.z - v.z }
-export mul(vec3 v, f64 t) => vec3 = { v.x * t, v.y * t, v.z * t }
+export near_zero(vec3 v) => u1 = (
+    s := 1e-8,
+    std.fabs(v.x) < s && std.fabs(v.y) < s && std.fabs(v.z) < s
+)
+
+export neg(vec3 v) => vec3 = create(-v.x, -v.y, -v.z)
+export add(vec3 u, vec3 v) => vec3 = create(u.x + v.x, u.y + v.y, u.z + v.z)
+export sub(vec3 u, vec3 v) => vec3 = create(u.x - v.x, u.y - v.y, u.z - v.z)
+export mul(vec3 v, f64 t) => vec3 = create(v.x * t, v.y * t, v.z * t)
+export mulv(vec3 u, vec3 v) => vec3 = create(u.x * v.x, u.y * v.y, u.z * v.z)
 export div(vec3 v, f64 t) => vec3 = mul(v, 1 / t)
 
 export length_squared(vec3 v) => f64 = v.x * v.x + v.y * v.y + v.z * v.z
@@ -21,8 +28,26 @@ export normalize(vec3 v) => vec3 = div(v, length(v))
 
 export dot(vec3 u, vec3 v) => f64 = u.x * v.x + u.y * v.y + u.z * v.z
 
-export cross(vec3 u, vec3 v) => vec3 = {
+export cross(vec3 u, vec3 v) => vec3 = create(
     u.y * v.z - u.z * v.y,
     u.z * v.x - u.x * v.z,
-    u.x * v.y - u.y * v.x,
-}
+    u.x * v.y - u.y * v.x
+)
+
+export random() => vec3 = create(util.random(), util.random(), util.random())
+export random_range(f64 min, f64 max) => vec3 = create(util.random_range(min, max), util.random_range(min, max), util.random_range(min, max))
+
+export random_unit_vector() => vec3 = normalize(sub(mul(random(), 2), scalar(1)))
+
+export random_on_hemisphere(vec3 normal) => vec3 = (
+    on_unit_sphere := random_unit_vector(),
+    dot(on_unit_sphere, normal) >= 0 ? on_unit_sphere : neg(on_unit_sphere)
+)
+
+export reflect(vec3 v, vec3 n) => vec3 = sub(v, mul(n, 2 * dot(v, n)))
+export refract(vec3 uv, vec3 n, f64 etai_over_etat) => vec3 = (
+    cos_theta := dot(neg(uv), n),
+    r_out_perp := mul(add(uv, mul(n, cos_theta)), etai_over_etat),
+    r_out_parallel := mul(n, -std.sqrt(std.fabs(1.0 - length_squared(r_out_perp)))),
+    add(r_out_perp, r_out_parallel)
+)

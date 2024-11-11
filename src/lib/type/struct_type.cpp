@@ -4,9 +4,11 @@
 #include <LX/Parameter.hpp>
 #include <LX/Type.hpp>
 
-std::string LX::StructType::GetName(const std::vector<Parameter>& elements)
+std::string LX::StructType::GetName(const std::string& name, const std::vector<Parameter>& elements)
 {
-    std::string str = "{ ";
+    if (!name.empty()) return "struct " + name;
+
+    std::string str = "struct { ";
     for (size_t i = 0; i < elements.size(); ++i)
     {
         if (i > 0) str += ", ";
@@ -23,8 +25,8 @@ unsigned LX::StructType::GetBits(const std::vector<Parameter>& elements)
     return bits;
 }
 
-LX::StructType::StructType(std::vector<Parameter> elements)
-    : Type(GetName(elements), GetBits(elements)), Elements(std::move(elements))
+LX::StructType::StructType(std::string name, std::vector<Parameter> elements)
+    : Type(GetName(name, elements), GetBits(elements)), StructName(std::move(name)), Elements(std::move(elements))
 {
 }
 
@@ -38,19 +40,30 @@ size_t LX::StructType::IndexOf(const std::string& name) const
     for (size_t i = 0; i < Elements.size(); ++i)
         if (Elements[i].Name == name)
             return i;
-    Error("no element '{}' in struct type {}", name, Name);
+    Error("no element '{}' in type {}", name, Name);
 }
 
-void LX::StructType::WithName(const std::string& name)
+void LX::StructType::PutElements(const std::vector<Parameter>& elements)
 {
-    StructName = name;
+    if (!Elements.empty())
+    {
+        size_t i = 0;
+        if (Elements.size() == elements.size())
+            for (; i < Elements.size(); ++i)
+                if (Elements[i].Type != elements[i].Type)
+                    break;
+        if (i < Elements.size())
+            Error("redefining non-opaque type {} with different elements", Name);
+        return;
+    }
+    Elements = elements;
 }
 
 llvm::Type* LX::StructType::GenIR(Builder& builder) const
 {
     std::vector<llvm::Type*> elements(Elements.size());
     for (size_t i = 0; i < Elements.size(); ++i)
-        elements[i] = Elements[i].Type->GetIR(builder);
+        elements[i] = Elements[i].Type->GenIR(builder);
 
     if (StructName.empty())
         return llvm::StructType::get(builder.IRContext(), elements);
@@ -58,8 +71,7 @@ llvm::Type* LX::StructType::GenIR(Builder& builder) const
     if (const auto type = llvm::StructType::getTypeByName(builder.IRContext(), StructName))
     {
         if (elements.empty()) return type;
-        if (!type->isOpaque()) Error("cannot redefine struct type with name '{}'", StructName);
-        type->setBody(elements);
+        if (type->isOpaque()) type->setBody(elements);
         return type;
     }
 
@@ -67,4 +79,25 @@ llvm::Type* LX::StructType::GenIR(Builder& builder) const
         return llvm::StructType::create(builder.IRContext(), StructName);
 
     return llvm::StructType::create(builder.IRContext(), elements, StructName);
+}
+
+llvm::DIType* LX::StructType::GenDI(Builder& builder) const
+{
+    std::vector<llvm::DINode*> elements;
+    for (const auto& [type_, name_] : Elements)
+        elements.push_back(type_->GenDI(builder));
+
+    return builder.DIBuilder().createStructType(
+        &builder.DIScope(),
+        StructName,
+        llvm::DIFile::get(
+            builder.IRContext(),
+            builder.DIScope().getFilename(),
+            builder.DIScope().getDirectory()),
+        0,
+        Bits,
+        0,
+        llvm::DINode::DIFlags::FlagZero,
+        nullptr,
+        {});
 }

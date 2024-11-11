@@ -5,18 +5,15 @@
 #include <vector>
 #include <llvm/Analysis/CGSCCPassManager.h>
 #include <llvm/Analysis/LoopAnalysisManager.h>
+#include <llvm/IR/DIBuilder.h>
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/Module.h>
 #include <llvm/IR/PassManager.h>
 #include <llvm/Passes/StandardInstrumentations.h>
-#include <LX/Value.hpp>
+#include <LX/LX.hpp>
 
 namespace LX
 {
-    struct FunctionRef
-    {
-    };
-
     class Builder
     {
         struct StackFrame
@@ -25,11 +22,15 @@ namespace LX
             const ValuePtr& operator[](const std::string&) const;
             [[nodiscard]] bool contains(const std::string&) const;
 
+            [[nodiscard]] llvm::DIScope& DIScope() const;
+
             std::map<std::string, ValuePtr> Variables;
+            llvm::DIScope* Scope;
         };
 
     public:
         Builder(Context&, llvm::LLVMContext&, const std::string&);
+        void Finalize() const;
 
         [[nodiscard]] const std::string& ModuleId() const;
 
@@ -40,12 +41,16 @@ namespace LX
         [[nodiscard]] std::unique_ptr<llvm::Module> IRModulePtr();
         [[nodiscard]] llvm::IRBuilder<>& IRBuilder() const;
 
-        void Push();
+        [[nodiscard]] llvm::DIBuilder& DIBuilder() const;
+        [[nodiscard]] llvm::DICompileUnit& DIUnit() const;
+        [[nodiscard]] llvm::DIScope& DIScope() const;
+
+        void Push(llvm::DIScope* = {});
         void Pop();
 
-        ValuePtr& DefVar(const SourceLocation& where, const std::string& name);
-        const ValuePtr& GetVar(const SourceLocation& where, const std::string& name);
-        bool HasVar(const std::string&);
+        ValuePtr& Define(const SourceLocation& where, const std::string& name);
+        const ValuePtr& Get(const SourceLocation& where, const std::string& name);
+        bool Contains(const std::string&);
 
         ValuePtr Cast(const SourceLocation& where, const ValuePtr& src, const TypePtr& dst);
         void Equalize(const SourceLocation& where, ValuePtr& a, ValuePtr& b);
@@ -63,6 +68,9 @@ namespace LX
 
         std::unique_ptr<llvm::Module> m_IRModule;
         std::unique_ptr<llvm::IRBuilder<>> m_IRBuilder;
+
+        std::unique_ptr<llvm::DIBuilder> m_DIBuilder;
+        llvm::DICompileUnit* m_DIUnit;
 
         std::unique_ptr<llvm::FunctionPassManager> m_FPM;
         std::unique_ptr<llvm::ModulePassManager> m_MPM;

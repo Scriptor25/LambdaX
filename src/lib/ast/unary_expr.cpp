@@ -27,8 +27,8 @@ LX::TypePtr LX::UnaryExpr::GetType(
     Error(where, "undefined unary operator '{}{}'", operator_, operand);
 }
 
-LX::UnaryExpr::UnaryExpr(SourceLocation where, TypePtr type, std::string operator_, ExprPtr operand)
-    : Expr(std::move(where), std::move(type)), Operator(std::move(operator_)), Operand(std::move(operand))
+LX::UnaryExpr::UnaryExpr(SourceLocation where, std::string operator_, ExprPtr operand)
+    : Expr(std::move(where)), Operator(std::move(operator_)), Operand(std::move(operand))
 {
 }
 
@@ -49,6 +49,8 @@ LX::ValuePtr LX::UnaryExpr::GenIR(Builder& builder) const
     };
 
     const auto operand = Operand->GenIR(builder);
+
+    Where.EmitDI(builder);
 
     if (const auto& op = OPS[Operator]; op)
         if (const auto value = op(builder, operand))

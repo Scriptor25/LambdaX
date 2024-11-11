@@ -25,3 +25,8 @@ llvm::Type* LX::PointerType::GenIR(Builder& builder) const
 {
     return builder.IRBuilder().getPtrTy();
 }
+
+llvm::DIType* LX::PointerType::GenDI(Builder& builder) const
+{
+    return builder.DIBuilder().createPointerType(ElementType->GenDI(builder), Bits);
+}

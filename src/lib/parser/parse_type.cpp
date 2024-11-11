@@ -29,12 +29,20 @@ LX::TypePtr LX::Parser::ParseType()
         else result = m_Ctx.GetVoidType();
         type = m_Ctx.GetFunctionType(result, params, vararg);
     }
-    else if (NextAt("{"))
+    else if (NextAt("struct"))
     {
+        std::string name;
+        if (At(TokenType_String))
+            name = Skip().StringValue;
+
         std::vector<Parameter> elements;
-        ParseParameterList(elements, "}");
-        Expect("}");
-        type = m_Ctx.GetStructType(elements);
+        if (NextAt("{"))
+        {
+            ParseParameterList(elements, "}");
+            Expect("}");
+        }
+
+        type = m_Ctx.GetStructType(name, elements);
     }
     else if (NextAt("mut"))
     {

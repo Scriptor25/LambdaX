@@ -20,24 +20,32 @@ LX::StmtPtr LX::Parser::ParseImport()
         const auto name = Expect(TokenType_Symbol).StringValue;
 
         std::vector<FunctionImport> imports;
-        std::vector<Parameter> params;
 
-        m_Ctx.Push();
         Parse(m_Ctx, stream, path.string(), [&](StmtPtr&& ptr)
         {
-            if (const auto f = dynamic_cast<FunctionStmt*>(ptr.get()); f && f->Export)
+            if (const auto f = dynamic_cast<FunctionStmt*>(ptr.get()); f && f->Fun.Export)
             {
-                auto& [type_,name_,extern_] = imports.emplace_back();
-                type_ = m_Ctx.GetPointerType(f->Type);
-                name_ = f->Name;
-                extern_ = f->Extern;
-                params.emplace_back(type_, name_);
+                const auto& [
+                    src_export_,
+                    src_extern_,
+                    src_name_,
+                    src_type_,
+                    src_params_,
+                    src_body_
+                ] = f->Fun;
+
+                auto& [
+                    dst_type_,
+                    dst_name_,
+                    dst_extern_
+                ] = imports.emplace_back();
+
+                dst_type_ = m_Ctx.GetPointerType(src_type_);
+                dst_name_ = src_name_;
+                dst_extern_ = src_extern_;
             }
         }, true);
-        m_Ctx.Pop();
         stream.close();
-
-        m_Ctx.DefVar(where, name) = m_Ctx.GetStructType(params);
 
         const auto module_id = path.filename().replace_extension().string();
         return std::make_unique<ImportStmt>(where, std::move(imports), module_id, name);

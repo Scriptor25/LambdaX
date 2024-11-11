@@ -4,8 +4,8 @@
 #include <LX/Type.hpp>
 #include <LX/Value.hpp>
 
-LX::CallExpr::CallExpr(SourceLocation where, TypePtr type, ExprPtr callee, std::vector<ExprPtr> args)
-    : Expr(std::move(where), std::move(type)), Callee(std::move(callee)), Args(std::move(args))
+LX::CallExpr::CallExpr(SourceLocation where, ExprPtr callee, std::vector<ExprPtr> args)
+    : Expr(std::move(where)), Callee(std::move(callee)), Args(std::move(args))
 {
 }
 
@@ -52,7 +52,9 @@ LX::ValuePtr LX::CallExpr::GenIR(Builder& builder) const
         else args[i] = arg->Load(builder);
     }
 
-    const auto type_ir = llvm::dyn_cast<llvm::FunctionType>(callee_type->GetIR(builder));
+    Where.EmitDI(builder);
+
+    const auto type_ir = llvm::dyn_cast<llvm::FunctionType>(callee_type->GenIR(builder));
 
     const auto type = callee_type->Result();
     const auto value = builder.IRBuilder().CreateCall(type_ir, callee->Load(builder), args);

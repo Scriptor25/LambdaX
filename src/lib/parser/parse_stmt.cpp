@@ -5,21 +5,23 @@
 #include <LX/Parser.hpp>
 #include <LX/Type.hpp>
 
-LX::StmtPtr LX::Parser::ParseStmt()
+LX::StmtPtr LX::Parser::Parse()
 {
     if (NextAt("type"))
     {
         const auto name = Expect(TokenType_Symbol).StringValue;
-        if (At("{"))
+        if (NextAt("{"))
         {
-            const auto type = ParseType();
-            m_Ctx.GetType(name) = type;
-            type->WithName(name);
+            std::vector<Parameter> elements;
+            ParseParameterList(elements, "}");
+            Expect("}");
+
+            m_Ctx.GetType(name) = m_Ctx.GetStructType(name, elements);
             return {};
         }
+
         Expect("=");
-        const auto type = ParseType();
-        m_Ctx.GetType(name) = type;
+        m_Ctx.GetType(name) = ParseType();
         return {};
     }
 

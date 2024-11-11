@@ -72,29 +72,19 @@ LX::ExprPtr LX::Parser::ParseBinary(ExprPtr left, const unsigned min_pre)
         {
             Expect(":");
             auto else_ = ParseExpr();
-            const auto type = Type::Equalize(where_, m_Ctx, right->Type, else_->Type);
             left = std::make_unique<TernaryExpr>(
                 where_,
-                type,
                 std::move(left),
                 std::move(right),
                 std::move(else_));
         }
         else if (operator_ == "??")
-        {
-            const auto type = right->Type;
             left = std::make_unique<TernaryExpr>(
                 where_,
-                type,
                 std::move(left),
                 std::move(right),
                 nullptr);
-        }
-        else
-        {
-            const auto type = BinaryExpr::GetType(where_, m_Ctx, operator_, left->Type, right->Type);
-            left = std::make_unique<BinaryExpr>(where_, type, operator_, std::move(left), std::move(right));
-        }
+        else left = std::make_unique<BinaryExpr>(where_, operator_, std::move(left), std::move(right));
     }
 
     return left;

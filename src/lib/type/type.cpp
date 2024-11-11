@@ -93,15 +93,9 @@ bool LX::Type::HasVarArg() const
     Error("{} is not a function type; cannot tell if it has variadic args", Name);
 }
 
-void LX::Type::WithName(const std::string& name)
+void LX::Type::PutElements(const std::vector<Parameter>&)
 {
-    Error("{} is not a struct type; cannot set struct name to '{}'", Name, name);
-}
-
-llvm::Type* LX::Type::GetIR(Builder& builder)
-{
-    if (IR) return IR;
-    return IR = GenIR(builder);
+    Error("{} is not a struct type; cannot set elements", Name);
 }
 
 LX::TypePtr LX::Type::Element() const

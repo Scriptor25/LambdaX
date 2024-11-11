@@ -288,7 +288,7 @@ LX::ValuePtr LX::OperatorRt(Builder& builder, const ValuePtr& lhs, const ValuePt
     {
         const auto r = builder.IRBuilder().CreateFDiv(
             llvm::ConstantFP::get(
-                rhs->Type()->GetIR(builder),
+                rhs->Type()->GenIR(builder),
                 1.0),
             rhs->Load(builder));
         const auto value = builder.IRBuilder().CreateBinaryIntrinsic(llvm::Intrinsic::pow, lhs->Load(builder), r);

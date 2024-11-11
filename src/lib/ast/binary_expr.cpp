@@ -54,8 +54,8 @@ LX::TypePtr LX::BinaryExpr::GetType(
     Error(where, "undefined binary operator '{} {} {}'", left, operator_, right);
 }
 
-LX::BinaryExpr::BinaryExpr(SourceLocation where, TypePtr type, std::string operator_, ExprPtr left, ExprPtr right)
-    : Expr(std::move(where), std::move(type)),
+LX::BinaryExpr::BinaryExpr(SourceLocation where, std::string operator_, ExprPtr left, ExprPtr right)
+    : Expr(std::move(where)),
       Operator(std::move(operator_)),
       Left(std::move(left)),
       Right(std::move(right))
@@ -101,8 +101,11 @@ LX::ValuePtr LX::BinaryExpr::GenIR(Builder& builder) const
     auto lhs = Left->GenIR(builder);
     auto rhs = Right->GenIR(builder);
 
+    Where.EmitDI(builder);
+
     if (Operator == "=")
     {
+        rhs = builder.Cast(Where, rhs, lhs->Type());
         lhs->Store(builder, rhs->Load(builder));
         return lhs;
     }

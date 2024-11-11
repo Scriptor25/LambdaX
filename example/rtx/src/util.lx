@@ -1,4 +1,11 @@
 import "std.lx" as std
 
+export pi() => f64 = 3.1415926535897932385
+export inf() => f64 = 1.0 / 0.0
+
 export clamp(f64 x, f64 min, f64 max) => f64 = x < min ? min : x > max ? max : x
 export gamma(f64 c) => f64 = c < 0 ? 0 : std.sqrt(c)
+export deg_to_rad(f64 deg) => f64 = deg * pi() / 180.0
+
+export random() => f64 = std.rand() / (std.RAND_MAX() + 1.0)
+export random_range(f64 min, f64 max) => f64 = min + (max - min) * random()

@@ -58,9 +58,18 @@ bool LX::FunctionType::HasVarArg() const
 
 llvm::Type* LX::FunctionType::GenIR(Builder& builder) const
 {
-    const auto result_type = ResultType->GetIR(builder);
+    const auto result_type = ResultType->GenIR(builder);
     std::vector<llvm::Type*> param_types(Params.size());
     for (size_t i = 0; i < Params.size(); ++i)
-        param_types[i] = Params[i].Type->GetIR(builder);
+        param_types[i] = Params[i].Type->GenIR(builder);
     return llvm::FunctionType::get(result_type, param_types, VarArg);
+}
+
+llvm::DIType* LX::FunctionType::GenDI(Builder& builder) const
+{
+    llvm::SmallVector<llvm::Metadata*, 8> elements;
+    elements.push_back(ResultType->GenDI(builder));
+    for (const auto& [type_, name_] : Params)
+        elements.push_back(type_->GenDI(builder));
+    return builder.DIBuilder().createSubroutineType(builder.DIBuilder().getOrCreateTypeArray(elements));
 }

@@ -3,8 +3,8 @@
 #include <LX/Type.hpp>
 #include <LX/Value.hpp>
 
-LX::MemberExpr::MemberExpr(SourceLocation where, TypePtr type, ExprPtr parent, std::string member, const bool deref)
-    : Expr(std::move(where), std::move(type)), Parent(std::move(parent)), Member(std::move(member)), Deref(deref)
+LX::MemberExpr::MemberExpr(SourceLocation where, ExprPtr parent, std::string member, const bool deref)
+    : Expr(std::move(where)), Parent(std::move(parent)), Member(std::move(member)), Deref(deref)
 {
 }
 
@@ -19,18 +19,21 @@ LX::ValuePtr LX::MemberExpr::GenIR(Builder& builder) const
     if (Deref)
         parent = LValue::Create(parent->Type()->Element(), parent->Load(builder));
 
+    Where.EmitDI(builder);
+
     const auto index = parent->Type()->IndexOf(Member);
+    const auto type = parent->Type()->Element(index);
 
     if (parent->IsMutable())
     {
         const auto gep = builder.IRBuilder().CreateStructGEP(
-            parent->Type()->GetIR(builder),
+            parent->Type()->GenIR(builder),
             parent->Ptr(),
             index,
             Member);
-        return LValue::Create(Type, gep);
+        return LValue::Create(type, gep);
     }
 
     const auto value = builder.IRBuilder().CreateExtractValue(parent->Load(builder), index, Member);
-    return RValue::Create(Type, value);
+    return RValue::Create(type, value);
 }

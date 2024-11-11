@@ -25,3 +25,8 @@ llvm::Type* LX::IntType::GenIR(Builder& builder) const
 {
     return builder.IRBuilder().getIntNTy(Bits);
 }
+
+llvm::DIType* LX::IntType::GenDI(Builder& builder) const
+{
+    return builder.DIBuilder().createBasicType(Name, Bits, 0);
+}

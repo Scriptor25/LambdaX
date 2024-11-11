@@ -27,3 +27,8 @@ llvm::Type* LX::FloatType::GenIR(Builder& builder) const
     default: Error("undefined float type with {} bits", Bits);
     }
 }
+
+llvm::DIType* LX::FloatType::GenDI(Builder& builder) const
+{
+    return builder.DIBuilder().createBasicType(Name, Bits, llvm::dwarf::DW_ATE_float);
+}

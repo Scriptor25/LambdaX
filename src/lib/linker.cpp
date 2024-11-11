@@ -1,8 +1,7 @@
 #include <llvm/Linker/Linker.h>
 #include <LX/Builder.hpp>
+#include <LX/Error.hpp>
 #include <LX/Linker.hpp>
-
-#include "LX/Error.hpp"
 
 LX::Linker::Linker(const std::string& module_id)
 {

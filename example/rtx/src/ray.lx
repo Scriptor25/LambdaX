@@ -2,4 +2,5 @@ import "vec3.lx" as vec3
 
 type ray { point origin, vec3 direction }
 
+export create(point origin, vec3 direction) => ray = { origin, direction } => ray
 export at(ray r, f64 t) => point = vec3.add(r.origin, vec3.mul(r.direction, t))

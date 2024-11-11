@@ -1,0 +1,42 @@
+import "ray.lx" as ray
+import "record.lx"
+import "std.lx" as std
+import "util.lx" as util
+import "vec3.lx" as vec3
+
+type dielectric {
+    [([], ray, record, mut color, mut ray) => u1] scatter,
+
+    color albedo,
+    f64 refraction_index,
+}
+
+reflectance(f64 cosine, f64 refraction_index) => f64 = (
+    r0 := (1 - refraction_index) / (1 + refraction_index),
+    r00 := r0 * r0,
+    r00 + (1 - r00) * ((1 - cosine) ** 5)
+)
+
+scatter(dielectric self, ray r_in, record rec, mut color attenuation, mut ray scattered) => u1 = (
+    attenuation = self.albedo,
+    ri := rec.front_face ? 1 / self.refraction_index : self.refraction_index,
+
+    unit_direction := vec3.normalize(r_in.direction),
+    cos_theta := std.fmin(vec3.dot(vec3.neg(unit_direction), rec.normal), 1),
+    sin_theta := std.sqrt(1 - cos_theta * cos_theta),
+    cannot_refract := ri * sin_theta > 1,
+
+    direction := cannot_refract || reflectance(cos_theta, ri) > util.random()
+        ? vec3.reflect(unit_direction, rec.normal)
+        : vec3.refract(unit_direction, rec.normal, ri),
+
+    scattered = ray.create(rec.p, direction),
+    1
+)
+
+export create(color albedo, f64 refraction_index) => dielectric = {
+    $([] ptr, ray r_in, record rec, mut color attenuation, mut ray scattered) => u1 = scatter(*(ptr as [dielectric]), r_in, rec, attenuation, scattered),
+
+    albedo,
+    refraction_index,
+} => dielectric

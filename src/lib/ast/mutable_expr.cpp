@@ -1,10 +1,10 @@
 #include <LX/AST.hpp>
 #include <LX/Builder.hpp>
-#include <LX/Error.hpp>
 #include <LX/Type.hpp>
+#include <LX/Value.hpp>
 
-LX::MutableExpr::MutableExpr(SourceLocation where, TypePtr type, std::string name, ExprPtr init)
-    : Expr(std::move(where), std::move(type)), Name(std::move(name)), Init(std::move(init))
+LX::MutableExpr::MutableExpr(SourceLocation where, std::string name, TypePtr type, ExprPtr init)
+    : Expr(std::move(where)), Name(std::move(name)), Type(std::move(type)), Init(std::move(init))
 {
 }
 
@@ -12,7 +12,7 @@ std::ostream& LX::MutableExpr::Print(std::ostream& os) const
 {
     os << "mut " << Name;
     if (Type) Type->Print(os << " => ");
-    if (Init) Init->Print(os << " = ");
+    if (Init) Init->Print(os << " := ");
     return os;
 }
 
@@ -20,12 +20,15 @@ LX::ValuePtr LX::MutableExpr::GenIR(Builder& builder) const
 {
     auto init = Init ? Init->GenIR(builder) : nullptr;
 
-    const auto ptr = builder.CreateAlloca(Type->GetIR(builder), Name);
-    if (init)
+    Where.EmitDI(builder);
+
+    const auto type = Type ? Type : init->Type();
+    const auto ptr = builder.CreateAlloca(type->GenIR(builder), Name);
+    if (Init)
     {
-        init = builder.Cast(Where, init, Type);
+        if (Type) init = builder.Cast(Where, init, type);
         builder.IRBuilder().CreateStore(init->Load(builder), ptr);
     }
 
-    return builder.DefVar(Where, Name) = LValue::Create(Type, ptr);
+    return builder.Define(Where, Name) = LValue::Create(type, ptr);
 }

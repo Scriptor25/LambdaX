@@ -2,18 +2,21 @@
 #include <LX/Builder.hpp>
 #include <LX/Type.hpp>
 
-LX::CastExpr::CastExpr(SourceLocation where, TypePtr type, ExprPtr source)
-    : Expr(std::move(where), std::move(type)), Source(std::move(source))
+LX::CastExpr::CastExpr(SourceLocation where, ExprPtr source, TypePtr dest)
+    : Expr(std::move(where)), Source(std::move(source)), Dest(std::move(dest))
 {
 }
 
 std::ostream& LX::CastExpr::Print(std::ostream& os) const
 {
-    return Type->Print(Source->Print(os) << " as ");
+    return Dest->Print(Source->Print(os) << " as ");
 }
 
 LX::ValuePtr LX::CastExpr::GenIR(Builder& builder) const
 {
     const auto src = Source->GenIR(builder);
-    return builder.Cast(Where, src, Type);
+
+    Where.EmitDI(builder);
+
+    return builder.Cast(Where, src, Dest);
 }
