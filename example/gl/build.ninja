@@ -8,17 +8,11 @@ bin = bin
 
 rule lx
  command = $lx -o $out $in
-rule ll
- command = $llc -o $out --filetype=obj $in
 rule link
- command = $cc -o $out $in -lm -lgdi32 -lopengl32
+ command = $cc -g -o $out $in -lm -lgdi32 -lopengl32
 
-build $bin/gl.ll: lx $src/gl.lx
-build $bin/glfw.ll: lx $src/glfw.lx
-build $bin/main.ll: lx $src/main.lx
-
-build $bin/gl.o: ll $bin/gl.ll
-build $bin/glfw.o: ll $bin/glfw.ll
-build $bin/main.o: ll $bin/main.ll
+build $bin/gl.o: lx $src/gl.lx
+build $bin/glfw.o: lx $src/glfw.lx
+build $bin/main.o: lx $src/main.lx
 
 build $bin/out.exe: link $bin/gl.o $bin/glfw.o $bin/main.o $lib/libglfw3.a

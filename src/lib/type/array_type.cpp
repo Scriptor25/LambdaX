@@ -12,12 +12,14 @@ LX::ArrayType::ArrayType(TypePtr element_type, const size_t size)
 {
 }
 
-llvm::Type* LX::ArrayType::GenIR(Builder& builder) const
+llvm::Type* LX::ArrayType::GenIR(Builder& builder)
 {
-    return llvm::ArrayType::get(ElementType->GenIR(builder), Size);
+    if (m_IR) return m_IR;
+    return m_IR = llvm::ArrayType::get(ElementType->GenIR(builder), Size);
 }
 
-llvm::DIType* LX::ArrayType::GenDI(Builder& builder) const
+llvm::DIType* LX::ArrayType::GenDI(Builder& builder)
 {
-    return builder.DIBuilder().createArrayType(Size, 0, ElementType->GenDI(builder), {});
+    if (m_DI) return m_DI;
+    return m_DI = builder.DIBuilder().createArrayType(Size, 0, ElementType->GenDI(builder), {});
 }

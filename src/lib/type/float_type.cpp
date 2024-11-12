@@ -17,18 +17,20 @@ bool LX::FloatType::IsFloat() const
     return true;
 }
 
-llvm::Type* LX::FloatType::GenIR(Builder& builder) const
+llvm::Type* LX::FloatType::GenIR(Builder& builder)
 {
+    if (m_IR) return m_IR;
     switch (Bits)
     {
-    case 16: return builder.IRBuilder().getHalfTy();
-    case 32: return builder.IRBuilder().getFloatTy();
-    case 64: return builder.IRBuilder().getDoubleTy();
+    case 16: return m_IR = builder.IRBuilder().getHalfTy();
+    case 32: return m_IR = builder.IRBuilder().getFloatTy();
+    case 64: return m_IR = builder.IRBuilder().getDoubleTy();
     default: Error("undefined float type with {} bits", Bits);
     }
 }
 
-llvm::DIType* LX::FloatType::GenDI(Builder& builder) const
+llvm::DIType* LX::FloatType::GenDI(Builder& builder)
 {
-    return builder.DIBuilder().createBasicType(Name, Bits, llvm::dwarf::DW_ATE_float);
+    if (m_DI) return m_DI;
+    return m_DI = builder.DIBuilder().createBasicType(Name, Bits, llvm::dwarf::DW_ATE_float);
 }

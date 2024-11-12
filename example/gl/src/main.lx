@@ -11,7 +11,7 @@ await_close([GLFWwindow] window, [([GLFWwindow])] fn)
 
 extern main() => i32 = (
     GLFW.init(),
-    window = GLFW.createWindow(640, 480, "LambdaX GLFW", 0, 0),
+    window := GLFW.createWindow(640, 480, "LambdaX GLFW", 0, 0),
     GLFW.setKeyCallback(window, on_key),
     GLFW.makeContextCurrent(window),
     GL.clearColor(0.1, 0.2, 0.9, 1.0),

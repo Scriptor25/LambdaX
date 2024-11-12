@@ -26,5 +26,5 @@ LX::ValuePtr LX::SubscriptExpr::GenIR(Builder& builder) const
         type->GenIR(builder),
         base->Load(builder),
         {offset->Load(builder)});
-    return LValue::Create(type, gep);
+    return LValue::Create(type, gep, base->IsMutable());
 }

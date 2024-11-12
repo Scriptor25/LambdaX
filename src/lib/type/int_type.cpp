@@ -21,12 +21,19 @@ bool LX::IntType::IsSigned() const
     return Sign;
 }
 
-llvm::Type* LX::IntType::GenIR(Builder& builder) const
+llvm::Type* LX::IntType::GenIR(Builder& builder)
 {
-    return builder.IRBuilder().getIntNTy(Bits);
+    if (m_IR) return m_IR;
+    return m_IR = builder.IRBuilder().getIntNTy(Bits);
 }
 
-llvm::DIType* LX::IntType::GenDI(Builder& builder) const
+llvm::DIType* LX::IntType::GenDI(Builder& builder)
 {
-    return builder.DIBuilder().createBasicType(Name, Bits, 0);
+    if (m_DI) return m_DI;
+    return m_DI = builder.DIBuilder().createBasicType(
+        Name,
+        Bits,
+        Sign
+            ? llvm::dwarf::DW_ATE_signed
+            : llvm::dwarf::DW_ATE_unsigned);
 }

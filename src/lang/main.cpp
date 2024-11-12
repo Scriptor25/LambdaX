@@ -13,6 +13,7 @@ int main(const int argc, const char* const* argv)
         {"help", "display help text", {"--help", "-h"}},
         {"output", "specify output file", {"--output", "-o"}, false},
         {"version", "display version info", {"--version", "-v"}},
+        {"emit-ir", "set to emit ir instead of object code", {"--emit-ir", "-i"}},
     });
     args.Parse(argc, argv);
 
@@ -60,5 +61,8 @@ int main(const int argc, const char* const* argv)
         builder.Finalize();
         linker.Link(builder);
     }
-    linker.Output(output_filename);
+
+    if (args.Flags["emit-ir"])
+        linker.EmitIR(output_filename);
+    else linker.EmitObj(output_filename);
 }

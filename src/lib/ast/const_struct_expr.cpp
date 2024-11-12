@@ -33,7 +33,7 @@ LX::ValuePtr LX::ConstStructExpr::GenIR(Builder& builder) const
         auto& value = values.emplace_back();
         value = Elements[i]->GenIR(builder);
         if (Type)
-            value = builder.Cast(Where, value, Type->Element(i));
+            value = builder.CreateCast(Where, value, Type->Element(i));
         else params.emplace_back(value->Type(), "");
         if (const auto c = llvm::dyn_cast<llvm::Constant>(value->Load(builder)))
             constants.push_back(c);

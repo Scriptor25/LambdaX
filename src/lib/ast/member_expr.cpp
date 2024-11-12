@@ -17,21 +17,21 @@ LX::ValuePtr LX::MemberExpr::GenIR(Builder& builder) const
 {
     auto parent = Parent->GenIR(builder);
     if (Deref)
-        parent = LValue::Create(parent->Type()->Element(), parent->Load(builder));
+        parent = LValue::Create(parent->Type()->Element(), parent->Load(builder), parent->IsMutable());
 
     Where.EmitDI(builder);
 
     const auto index = parent->Type()->IndexOf(Member);
     const auto type = parent->Type()->Element(index);
 
-    if (parent->IsMutable())
+    if (parent->HasPtr())
     {
         const auto gep = builder.IRBuilder().CreateStructGEP(
             parent->Type()->GenIR(builder),
             parent->Ptr(),
             index,
             Member);
-        return LValue::Create(type, gep);
+        return LValue::Create(type, gep, parent->IsMutable());
     }
 
     const auto value = builder.IRBuilder().CreateExtractValue(parent->Load(builder), index, Member);

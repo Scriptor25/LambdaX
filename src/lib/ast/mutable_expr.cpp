@@ -23,12 +23,32 @@ LX::ValuePtr LX::MutableExpr::GenIR(Builder& builder) const
     Where.EmitDI(builder);
 
     const auto type = Type ? Type : init->Type();
-    const auto ptr = builder.CreateAlloca(type->GenIR(builder), Name);
+    const auto value = builder.CreateAlloca(type, true, Name);
+
     if (Init)
     {
-        if (Type) init = builder.Cast(Where, init, type);
-        builder.IRBuilder().CreateStore(init->Load(builder), ptr);
+        if (Type) init = builder.CreateCast(Where, init, Type);
+        value->Store(builder, init->Load(builder));
     }
 
-    return builder.Define(Where, Name) = LValue::Create(type, ptr);
+    const auto d = builder.DIBuilder().createAutoVariable(
+        &builder.DIScope(),
+        Name,
+        builder.DIScope().getFile(),
+        Where.Row,
+        type->GenDI(builder),
+        true);
+    builder.DIBuilder().insertDeclare(
+        value->Ptr(),
+        d,
+        builder.DIBuilder().createExpression(),
+        llvm::DILocation::get(
+            builder.IRContext(),
+            Where.Row,
+            Where.Col,
+            &builder.DIScope()),
+        builder.IRBuilder().GetInsertBlock()
+    );
+
+    return builder.Define(Where, Name) = value;
 }

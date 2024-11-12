@@ -31,12 +31,16 @@ LX::TypePtr LX::MutableType::Element() const
     return ElementType;
 }
 
-llvm::Type* LX::MutableType::GenIR(Builder& builder) const
+llvm::Type* LX::MutableType::GenIR(Builder& builder)
 {
-    return builder.IRBuilder().getPtrTy();
+    if (m_IR) return m_IR;
+    return m_IR = builder.IRBuilder().getPtrTy();
 }
 
-llvm::DIType* LX::MutableType::GenDI(Builder& builder) const
+llvm::DIType* LX::MutableType::GenDI(Builder& builder)
 {
-    return builder.DIBuilder().createReferenceType(0, ElementType->GenDI(builder));
+    if (m_DI) return m_DI;
+    return m_DI = builder.DIBuilder().createReferenceType(
+        llvm::dwarf::DW_TAG_reference_type,
+        ElementType->GenDI(builder));
 }

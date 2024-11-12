@@ -18,5 +18,5 @@ LX::ValuePtr LX::CastExpr::GenIR(Builder& builder) const
 
     Where.EmitDI(builder);
 
-    return builder.Cast(Where, src, Dest);
+    return builder.CreateCast(Where, src, Dest);
 }

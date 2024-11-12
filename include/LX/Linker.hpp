@@ -19,7 +19,8 @@ namespace LX
         [[nodiscard]] llvm::Linker& IRLinker() const;
 
         void Link(Builder&) const;
-        void Output(const std::string&) const;
+        void EmitIR(const std::string&) const;
+        void EmitObj(const std::string&) const;
 
     private:
         std::unique_ptr<llvm::LLVMContext> m_IRContext;

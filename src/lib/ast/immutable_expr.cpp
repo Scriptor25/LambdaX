@@ -22,6 +22,29 @@ LX::ValuePtr LX::ImmutableExpr::GenIR(Builder& builder) const
     Where.EmitDI(builder);
 
     const auto type = Type ? Type : init->Type();
-    if (Type) init = builder.Cast(Where, init, Type);
-    return builder.Define(Where, Name) = RValue::Create(type, init->Load(builder));
+    const auto value = builder.CreateAlloca(type, false, Name);
+
+    if (Type) init = builder.CreateCast(Where, init, Type);
+    value->StoreForce(builder, init->Load(builder));
+
+    const auto d = builder.DIBuilder().createAutoVariable(
+        &builder.DIScope(),
+        Name,
+        builder.DIScope().getFile(),
+        Where.Row,
+        type->GenDI(builder),
+        true);
+    builder.DIBuilder().insertDeclare(
+        value->Ptr(),
+        d,
+        builder.DIBuilder().createExpression(),
+        llvm::DILocation::get(
+            builder.IRContext(),
+            Where.Row,
+            Where.Col,
+            &builder.DIScope()),
+        builder.IRBuilder().GetInsertBlock()
+    );
+
+    return builder.Define(Where, Name) = value;
 }

@@ -21,12 +21,14 @@ LX::TypePtr LX::PointerType::Element() const
     return ElementType;
 }
 
-llvm::Type* LX::PointerType::GenIR(Builder& builder) const
+llvm::Type* LX::PointerType::GenIR(Builder& builder)
 {
-    return builder.IRBuilder().getPtrTy();
+    if (m_IR) return m_IR;
+    return m_IR = builder.IRBuilder().getPtrTy();
 }
 
-llvm::DIType* LX::PointerType::GenDI(Builder& builder) const
+llvm::DIType* LX::PointerType::GenDI(Builder& builder)
 {
-    return builder.DIBuilder().createPointerType(ElementType->GenDI(builder), Bits);
+    if (m_DI) return m_DI;
+    return m_DI = builder.DIBuilder().createPointerType(ElementType->GenDI(builder), Bits);
 }

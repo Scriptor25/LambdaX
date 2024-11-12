@@ -35,11 +35,15 @@ namespace LX
         [[nodiscard]] virtual bool HasVarArg() const;
         virtual void PutElements(const std::vector<Parameter>&);
 
-        virtual llvm::Type* GenIR(Builder&) const = 0;
-        virtual llvm::DIType* GenDI(Builder&) const = 0;
+        virtual llvm::Type* GenIR(Builder&) = 0;
+        virtual llvm::DIType* GenDI(Builder&) = 0;
 
         std::string Name;
         unsigned Bits;
+
+    protected:
+        llvm::Type* m_IR{};
+        llvm::DIType* m_DI{};
     };
 
     struct VoidType : Type
@@ -48,8 +52,8 @@ namespace LX
 
         [[nodiscard]] bool IsVoid() const override;
 
-        llvm::Type* GenIR(Builder&) const override;
-        llvm::DIType* GenDI(Builder&) const override;
+        llvm::Type* GenIR(Builder&) override;
+        llvm::DIType* GenDI(Builder&) override;
     };
 
     struct IntType : Type
@@ -61,8 +65,8 @@ namespace LX
         [[nodiscard]] bool IsInt() const override;
         [[nodiscard]] bool IsSigned() const override;
 
-        llvm::Type* GenIR(Builder&) const override;
-        llvm::DIType* GenDI(Builder&) const override;
+        llvm::Type* GenIR(Builder&) override;
+        llvm::DIType* GenDI(Builder&) override;
 
         bool Sign;
     };
@@ -75,8 +79,8 @@ namespace LX
 
         [[nodiscard]] bool IsFloat() const override;
 
-        llvm::Type* GenIR(Builder&) const override;
-        llvm::DIType* GenDI(Builder&) const override;
+        llvm::Type* GenIR(Builder&) override;
+        llvm::DIType* GenDI(Builder&) override;
     };
 
     struct PointerType : Type
@@ -88,8 +92,8 @@ namespace LX
         [[nodiscard]] bool IsPointer() const override;
         [[nodiscard]] TypePtr Element() const override;
 
-        llvm::Type* GenIR(Builder&) const override;
-        llvm::DIType* GenDI(Builder&) const override;
+        llvm::Type* GenIR(Builder&) override;
+        llvm::DIType* GenDI(Builder&) override;
 
         TypePtr ElementType;
     };
@@ -105,8 +109,8 @@ namespace LX
         [[nodiscard]] TypePtr Element(size_t) const override;
         [[nodiscard]] TypePtr Element() const override;
 
-        llvm::Type* GenIR(Builder&) const override;
-        llvm::DIType* GenDI(Builder&) const override;
+        llvm::Type* GenIR(Builder&) override;
+        llvm::DIType* GenDI(Builder&) override;
 
         TypePtr ElementType;
     };
@@ -117,8 +121,8 @@ namespace LX
 
         ArrayType(TypePtr element_type, size_t size);
 
-        llvm::Type* GenIR(Builder&) const override;
-        llvm::DIType* GenDI(Builder&) const override;
+        llvm::Type* GenIR(Builder&) override;
+        llvm::DIType* GenDI(Builder&) override;
 
         TypePtr ElementType;
         size_t Size;
@@ -136,8 +140,8 @@ namespace LX
         [[nodiscard]] TypePtr Param(size_t) const override;
         [[nodiscard]] bool HasVarArg() const override;
 
-        llvm::Type* GenIR(Builder&) const override;
-        llvm::DIType* GenDI(Builder&) const override;
+        llvm::Type* GenIR(Builder&) override;
+        llvm::DIType* GenDI(Builder&) override;
 
         TypePtr ResultType;
         std::vector<Parameter> Params;
@@ -155,8 +159,8 @@ namespace LX
         [[nodiscard]] size_t IndexOf(const std::string&) const override;
         void PutElements(const std::vector<Parameter>&) override;
 
-        llvm::Type* GenIR(Builder&) const override;
-        llvm::DIType* GenDI(Builder&) const override;
+        llvm::Type* GenIR(Builder&) override;
+        llvm::DIType* GenDI(Builder&) override;
 
         std::string StructName;
         std::vector<Parameter> Elements;

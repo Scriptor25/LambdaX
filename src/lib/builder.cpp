@@ -2,6 +2,9 @@
 #include <ranges>
 #include <llvm/IR/Verifier.h>
 #include <llvm/Passes/PassBuilder.h>
+#include <llvm/Transforms/InstCombine/InstCombine.h>
+#include <llvm/Transforms/Scalar/SimplifyCFG.h>
+#include <llvm/Transforms/Scalar/TailRecursionElimination.h>
 #include <LX/Builder.hpp>
 #include <LX/Error.hpp>
 #include <LX/Type.hpp>
@@ -30,18 +33,21 @@ llvm::DIScope& LX::Builder::StackFrame::DIScope() const
 LX::Builder::Builder(Context& ctx, llvm::LLVMContext& context, const std::string& filename)
     : m_Ctx(ctx), m_IRContext(context)
 {
-    m_Id = std::filesystem::path(filename).filename().replace_extension().string();
+    const auto path = std::filesystem::absolute(filename);
+    m_Id = path.filename().replace_extension().string();
 
     m_IRModule = std::make_unique<llvm::Module>(m_Id, IRContext());
     IRModule().setSourceFileName(filename);
     m_IRBuilder = std::make_unique<llvm::IRBuilder<>>(IRContext());
 
     m_DIBuilder = std::make_unique<llvm::DIBuilder>(IRModule());
+
+    const auto file = DIBuilder().createFile(path.filename().string(), path.parent_path().string());
     m_DIUnit = DIBuilder().createCompileUnit(
         llvm::dwarf::DW_LANG_C,
-        DIBuilder().createFile(filename, "."),
+        file,
         "LambdaX",
-        false,
+        true,
         "",
         0);
 
@@ -56,9 +62,9 @@ LX::Builder::Builder(Context& ctx, llvm::LLVMContext& context, const std::string
 
     m_SI->registerCallbacks(*m_PIC, m_MAM.get());
 
-    //m_FPM->addPass(llvm::InstCombinePass());
-    //m_FPM->addPass(llvm::SimplifyCFGPass());
-    //m_FPM->addPass(llvm::TailCallElimPass());
+    m_FPM->addPass(llvm::InstCombinePass());
+    m_FPM->addPass(llvm::SimplifyCFGPass());
+    m_FPM->addPass(llvm::TailCallElimPass());
     m_FPM->addPass(llvm::VerifierPass());
 
     m_MPM->addPass(llvm::VerifierPass());
@@ -128,7 +134,7 @@ void LX::Builder::Push(llvm::DIScope* scope)
 {
     if (!scope)
         scope = m_Stack.empty()
-                    ? m_DIUnit
+                    ? nullptr
                     : m_Stack.back().Scope;
     auto& [vars_, scope_] = m_Stack.emplace_back();
     scope_ = scope;
@@ -160,7 +166,7 @@ bool LX::Builder::Contains(const std::string& name)
         [&](const auto& frame) { return frame.contains(name); });
 }
 
-LX::ValuePtr LX::Builder::Cast(const SourceLocation& where, const ValuePtr& src, const TypePtr& dst)
+LX::ValuePtr LX::Builder::CreateCast(const SourceLocation& where, const ValuePtr& src, const TypePtr& dst)
 {
     const auto src_ty = src->Type();
     if (src_ty == dst)
@@ -221,23 +227,23 @@ LX::ValuePtr LX::Builder::Cast(const SourceLocation& where, const ValuePtr& src,
     Error(where, "cannot cast value of type '{}' to type '{}'", src_ty, dst);
 }
 
+LX::ValuePtr LX::Builder::CreateAlloca(const TypePtr& type, const bool is_mutable, const std::string& name)
+{
+    const auto bkp = IRBuilder().GetInsertBlock();
+    IRBuilder().SetInsertPointPastAllocas(bkp->getParent());
+    const auto ptr = IRBuilder().CreateAlloca(type->GenIR(*this), {}, name);
+    IRBuilder().SetInsertPoint(bkp);
+    return LValue::Create(type, ptr, is_mutable);
+}
+
 void LX::Builder::Equalize(const SourceLocation& where, ValuePtr& a, ValuePtr& b)
 {
     if (a->Type() == b->Type())
         return;
 
     const auto dst = Type::Equalize(where, m_Ctx, a->Type(), b->Type());
-    a = Cast(where, a, dst);
-    b = Cast(where, b, dst);
-}
-
-llvm::Value* LX::Builder::CreateAlloca(llvm::Type* type, const std::string& name) const
-{
-    const auto bkp = IRBuilder().GetInsertBlock();
-    IRBuilder().SetInsertPointPastAllocas(bkp->getParent());
-    const auto ptr = IRBuilder().CreateAlloca(type, {}, name);
-    IRBuilder().SetInsertPoint(bkp);
-    return ptr;
+    a = CreateCast(where, a, dst);
+    b = CreateCast(where, b, dst);
 }
 
 bool LX::Builder::RunPasses(llvm::Function& function) const

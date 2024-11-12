@@ -28,6 +28,11 @@ void LX::RValue::Store(Builder&, llvm::Value*) const
     Error("cannot assign to rvalue");
 }
 
+void LX::RValue::StoreForce(Builder&, llvm::Value*) const
+{
+    Error("cannot assign to rvalue");
+}
+
 llvm::Value* LX::RValue::Ptr() const
 {
     Error("cannot get pointer to rvalue");
@@ -38,14 +43,19 @@ bool LX::RValue::IsMutable() const
     return false;
 }
 
+bool LX::RValue::HasPtr() const
+{
+    return false;
+}
+
 LX::RValue::RValue(TypePtr type, llvm::Value* value)
     : Value(std::move(type)), m_Value(value)
 {
 }
 
-LX::ValuePtr LX::LValue::Create(const TypePtr& type, llvm::Value* ptr)
+LX::ValuePtr LX::LValue::Create(const TypePtr& type, llvm::Value* ptr, const bool is_mutable)
 {
-    return std::shared_ptr<LValue>(new LValue(type, ptr));
+    return std::shared_ptr<LValue>(new LValue(type, ptr, is_mutable));
 }
 
 llvm::Value* LX::LValue::Load(Builder& builder) const
@@ -54,6 +64,13 @@ llvm::Value* LX::LValue::Load(Builder& builder) const
 }
 
 void LX::LValue::Store(Builder& builder, llvm::Value* value) const
+{
+    if (!m_IsMutable)
+        Error("lvalue is not marked as mutable");
+    builder.IRBuilder().CreateStore(value, m_Ptr);
+}
+
+void LX::LValue::StoreForce(Builder& builder, llvm::Value* value) const
 {
     builder.IRBuilder().CreateStore(value, m_Ptr);
 }
@@ -65,10 +82,15 @@ llvm::Value* LX::LValue::Ptr() const
 
 bool LX::LValue::IsMutable() const
 {
+    return m_IsMutable;
+}
+
+bool LX::LValue::HasPtr() const
+{
     return true;
 }
 
-LX::LValue::LValue(TypePtr type, llvm::Value* ptr)
-    : Value(std::move(type)), m_Ptr(ptr)
+LX::LValue::LValue(TypePtr type, llvm::Value* ptr, const bool is_mutable)
+    : Value(std::move(type)), m_Ptr(ptr), m_IsMutable(is_mutable)
 {
 }

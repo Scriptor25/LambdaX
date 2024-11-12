@@ -2,6 +2,7 @@
 export extern printf([i8], ...) => i32
 
 # Memory
+export extern malloc(u64) => []
 export extern realloc([], u64) => []
 
 # Math

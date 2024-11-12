@@ -56,7 +56,9 @@ LX::ValuePtr LX::Function::GenIR(const SourceLocation& where, Builder& builder) 
     if (!function->empty())
         Error(where, "cannot redefine function '{}'", Name);
 
-    const auto unit = builder.DIBuilder().createFile(builder.DIUnit().getFilename(), builder.DIUnit().getDirectory());
+    const auto unit = builder.DIBuilder().createFile(
+        builder.DIUnit().getFilename(),
+        builder.DIUnit().getDirectory());
     const auto sub = builder.DIBuilder().createFunction(
         unit,
         function->getName(),
@@ -64,14 +66,17 @@ LX::ValuePtr LX::Function::GenIR(const SourceLocation& where, Builder& builder) 
         unit,
         where.Row,
         llvm::dyn_cast<llvm::DISubroutineType>(Type->GenDI(builder)),
-        0,
+        where.Row,
         llvm::DINode::FlagPrototyped,
         llvm::DISubprogram::SPFlagDefinition);
     function->setSubprogram(sub);
 
+    builder.IRBuilder().SetCurrentDebugLocation({});
     builder.Push(sub);
+
     const auto bkp = builder.IRBuilder().GetInsertBlock();
     builder.IRBuilder().SetInsertPoint(llvm::BasicBlock::Create(builder.IRContext(), "entry", function));
+
     for (size_t i = 0; i < Params.size(); ++i)
     {
         const auto& [param_type_, param_name_] = Params[i];
@@ -79,10 +84,14 @@ LX::ValuePtr LX::Function::GenIR(const SourceLocation& where, Builder& builder) 
         const auto arg = function->getArg(i);
         arg->setName(param_name_);
 
-        builder.Define(where, param_name_) =
-            param_type_->IsMutable()
-                ? LValue::Create(param_type_->Element(), arg)
-                : RValue::Create(param_type_, arg);
+        auto& var = builder.Define(where, param_name_);
+        if (param_type_->IsMutable())
+            var = LValue::Create(param_type_->Element(), arg, true);
+        else
+        {
+            var = builder.CreateAlloca(param_type_, false);
+            var->StoreForce(builder, arg);
+        }
 
         const auto d = builder.DIBuilder().createParameterVariable(
             sub,
@@ -90,9 +99,10 @@ LX::ValuePtr LX::Function::GenIR(const SourceLocation& where, Builder& builder) 
             i + 1,
             unit,
             where.Row,
-            param_type_->GenDI(builder));
+            var->Type()->GenDI(builder),
+            true);
         builder.DIBuilder().insertDeclare(
-            arg,
+            var->Ptr(),
             d,
             builder.DIBuilder().createExpression(),
             llvm::DILocation::get(
@@ -108,13 +118,15 @@ LX::ValuePtr LX::Function::GenIR(const SourceLocation& where, Builder& builder) 
         builder.IRBuilder().CreateRetVoid();
     else
     {
-        value = builder.Cast(where, value, Type->Result());
+        value = builder.CreateCast(where, value, Type->Result());
         builder.IRBuilder().CreateRet(
             Type->Result()->IsMutable()
                 ? value->Ptr()
                 : value->Load(builder));
     }
+
     builder.IRBuilder().SetInsertPoint(bkp);
+
     builder.Pop();
 
     builder.RunPasses(*function);

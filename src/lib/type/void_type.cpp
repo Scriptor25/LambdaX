@@ -11,12 +11,14 @@ bool LX::VoidType::IsVoid() const
     return true;
 }
 
-llvm::Type* LX::VoidType::GenIR(Builder& builder) const
+llvm::Type* LX::VoidType::GenIR(Builder& builder)
 {
-    return builder.IRBuilder().getVoidTy();
+    if (m_IR) return m_IR;
+    return m_IR = builder.IRBuilder().getVoidTy();
 }
 
-llvm::DIType* LX::VoidType::GenDI(Builder& builder) const
+llvm::DIType* LX::VoidType::GenDI(Builder& builder)
 {
-    return builder.DIBuilder().createBasicType("void", 0, 0);
+    if (m_DI) return m_DI;
+    return m_DI = builder.DIBuilder().createBasicType("void", 0, 0);
 }

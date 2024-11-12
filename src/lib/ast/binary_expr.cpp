@@ -105,7 +105,7 @@ LX::ValuePtr LX::BinaryExpr::GenIR(Builder& builder) const
 
     if (Operator == "=")
     {
-        rhs = builder.Cast(Where, rhs, lhs->Type());
+        rhs = builder.CreateCast(Where, rhs, lhs->Type());
         lhs->Store(builder, rhs->Load(builder));
         return lhs;
     }

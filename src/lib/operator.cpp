@@ -450,7 +450,7 @@ LX::TypePtr LX::OperatorTypeRef(Context& ctx, const TypePtr& type)
 LX::ValuePtr LX::OperatorDeref(Builder& builder, const ValuePtr& val)
 {
     if (val->Type()->IsPointer())
-        return LValue::Create(val->Type()->Element(), val->Load(builder));
+        return LValue::Create(val->Type()->Element(), val->Load(builder), val->IsMutable());
     return {};
 }
 

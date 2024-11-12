@@ -47,12 +47,12 @@ LX::ValuePtr LX::TernaryExpr::GenIR(Builder& builder) const
                           : then->Type();
 
     builder.IRBuilder().SetInsertPoint(then_bb->getTerminator());
-    then = builder.Cast(Where, then, type);
+    then = builder.CreateCast(Where, then, type);
     const auto then_value = then->Load(builder);
     if (Else)
     {
         builder.IRBuilder().SetInsertPoint(else_bb->getTerminator());
-        else_ = builder.Cast(Where, else_, type);
+        else_ = builder.CreateCast(Where, else_, type);
     }
     const auto else_value = Else
                                 ? else_->Load(builder)

@@ -52,10 +52,10 @@ namespace LX
         const ValuePtr& Get(const SourceLocation& where, const std::string& name);
         bool Contains(const std::string&);
 
-        ValuePtr Cast(const SourceLocation& where, const ValuePtr& src, const TypePtr& dst);
-        void Equalize(const SourceLocation& where, ValuePtr& a, ValuePtr& b);
+        ValuePtr CreateCast(const SourceLocation& where, const ValuePtr& src, const TypePtr& dst);
+        ValuePtr CreateAlloca(const TypePtr&, bool, const std::string& = {});
 
-        llvm::Value* CreateAlloca(llvm::Type*, const std::string& = {}) const;
+        void Equalize(const SourceLocation& where, ValuePtr& a, ValuePtr& b);
 
         bool RunPasses(llvm::Function&) const;
         bool RunPasses(llvm::Module&) const;

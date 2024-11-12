@@ -12,7 +12,5 @@ std::ostream& LX::ConstFunctionExpr::Print(std::ostream& os) const
 
 LX::ValuePtr LX::ConstFunctionExpr::GenIR(Builder& builder) const
 {
-    Where.EmitDI(builder);
-
     return Fun.GenIR(Where, builder);
 }

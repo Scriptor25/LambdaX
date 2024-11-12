@@ -59,8 +59,10 @@ void LX::StructType::PutElements(const std::vector<Parameter>& elements)
     Elements = elements;
 }
 
-llvm::Type* LX::StructType::GenIR(Builder& builder) const
+llvm::Type* LX::StructType::GenIR(Builder& builder)
 {
+    if (m_IR) return m_IR;
+
     std::vector<llvm::Type*> elements(Elements.size());
     for (size_t i = 0; i < Elements.size(); ++i)
         elements[i] = Elements[i].Type->GenIR(builder);
@@ -81,23 +83,30 @@ llvm::Type* LX::StructType::GenIR(Builder& builder) const
     return llvm::StructType::create(builder.IRContext(), elements, StructName);
 }
 
-llvm::DIType* LX::StructType::GenDI(Builder& builder) const
+llvm::DIType* LX::StructType::GenDI(Builder& builder)
 {
-    std::vector<llvm::DINode*> elements;
+    constexpr auto dead_beef = 0xDEADBEEF;
+    if (m_DI == reinterpret_cast<llvm::DIType*>(dead_beef))
+        return {};
+
+    if (m_DI) return m_DI;
+    m_DI = reinterpret_cast<llvm::DIType*>(dead_beef);
+
+    std::vector<llvm::Metadata*> elements;
     for (const auto& [type_, name_] : Elements)
         elements.push_back(type_->GenDI(builder));
 
-    return builder.DIBuilder().createStructType(
-        &builder.DIScope(),
+    return m_DI = builder.DIBuilder().createStructType(
+        &builder.DIUnit(),
         StructName,
         llvm::DIFile::get(
             builder.IRContext(),
-            builder.DIScope().getFilename(),
-            builder.DIScope().getDirectory()),
+            builder.DIUnit().getFilename(),
+            builder.DIUnit().getDirectory()),
         0,
         Bits,
         0,
         llvm::DINode::DIFlags::FlagZero,
         nullptr,
-        {});
+        builder.DIBuilder().getOrCreateArray(elements));
 }
