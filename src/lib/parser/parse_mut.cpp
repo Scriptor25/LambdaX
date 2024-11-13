@@ -4,8 +4,7 @@
 
 LX::ExprPtr LX::Parser::ParseMut()
 {
-    const auto where = Skip().Where;
-
+    const auto where = Expect("mut").Where;
     const auto name = Expect(TokenType_Symbol).StringValue;
 
     TypePtr type;
@@ -16,5 +15,5 @@ LX::ExprPtr LX::Parser::ParseMut()
     if ((!type && (Expect(":="), true)) || NextAt(":="))
         init = ParseExpr();
 
-    return std::make_unique<MutableExpr>(where, name, type, std::move(init));
+    return std::make_unique<DefineExpr>(where, true, name, type, std::move(init));
 }

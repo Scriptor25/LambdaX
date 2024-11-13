@@ -42,7 +42,7 @@ void LX::Linker::Link(Builder& builder) const
     const auto name = builder.IRModule().getModuleIdentifier();
     const auto src_filename = builder.IRModule().getSourceFileName();
     if (IRLinker().linkInModule(builder.IRModulePtr()))
-        Error("failed to link module '{}'", name);
+        Error("linker: failed to link module '{}'", name);
 
     const auto dst_filename = IRModule().getSourceFileName();
     IRModule().setSourceFileName(dst_filename.empty() ? src_filename : dst_filename + ',' + src_filename);
@@ -58,6 +58,8 @@ void LX::Linker::EmitIR(const std::string& filename) const
 
     std::error_code ec;
     llvm::raw_fd_ostream os(filename, ec);
+    if (ec) Error("linker: failed to open file '{}'", filename);
+
     IRModule().print(os, nullptr);
 }
 
@@ -73,6 +75,8 @@ void LX::Linker::EmitObj(const std::string& filename) const
 
     std::string err;
     const auto target = llvm::TargetRegistry::lookupTarget(triple, err);
+    if (!target)
+        Error("linker: failed to find target for triple '{}': {}", triple, err);
 
     const auto cpu = "generic";
     const auto features = "";
@@ -86,7 +90,8 @@ void LX::Linker::EmitObj(const std::string& filename) const
     if (filename.empty())
     {
         llvm::legacy::PassManager manager;
-        machine->addPassesToEmitFile(manager, llvm::outs(), nullptr, llvm::CodeGenFileType::ObjectFile);
+        if (machine->addPassesToEmitFile(manager, llvm::outs(), nullptr, llvm::CodeGenFileType::ObjectFile))
+            Error("linker: target machine cannot emit object code to stdout");
         manager.run(*m_IRModule);
     }
     else
@@ -94,7 +99,8 @@ void LX::Linker::EmitObj(const std::string& filename) const
         std::error_code ec;
         llvm::raw_fd_ostream os(filename, ec);
         llvm::legacy::PassManager manager;
-        machine->addPassesToEmitFile(manager, os, nullptr, llvm::CodeGenFileType::ObjectFile);
+        if (machine->addPassesToEmitFile(manager, os, nullptr, llvm::CodeGenFileType::ObjectFile))
+            Error("linker: target machine cannot emit object code to file '{}'", filename);
         manager.run(*m_IRModule);
     }
 }

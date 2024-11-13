@@ -39,17 +39,17 @@ LX::ValuePtr LX::CallExpr::GenIR(Builder& builder) const
                 ? callee_type->Param(Where, i)
                 : nullptr;
 
-        if (param && !param->IsMutable() && arg->Type() != param)
+        if (param && !param->IsReference() && arg->Type() != param)
             arg = builder.CreateCast(Where, arg, param);
 
-        if (param && param->IsMutable())
+        if (param && param->IsReference())
         {
-            if (!arg->IsMutable())
-                Error(Where, "assigning immutable value to mutable arg index {}", i);
+            if (!arg->HasPtr())
+                Error(Where, "assigning rvalue to reference arg index {}", i);
             if (param->Element(Where) != arg->Type())
                 Error(
                     Where,
-                    "assigning value of type {} to mutable arg type {}, index {}; casting would make it immutable",
+                    "assigning value of type {} to reference arg type {}, index {}; casting would create a copy",
                     arg->Type(),
                     i,
                     param);
@@ -64,7 +64,7 @@ LX::ValuePtr LX::CallExpr::GenIR(Builder& builder) const
 
     const auto type = callee_type->Result(Where);
     const auto value = builder.IRBuilder().CreateCall(type_ir, callee->Load(Where, builder), args);
-    return type->IsMutable()
+    return type->IsReference()
                ? LValue::Create(type->Element(Where), value, true)
                : RValue::Create(type, value);
 }

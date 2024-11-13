@@ -4,14 +4,14 @@ import "vec3.lx" as vec3
 type material {}
 
 type record {
-    point p,
-    vec3 normal,
-    [material] mat,
-    f64 t,
-    u1 front_face,
+    mut point p,
+    mut vec3 normal,
+    mut [material] mat,
+    mut f64 t,
+    mut u1 front_face,
 }
 
-export set_normal(mut record rec, ray r, vec3 n) => i32 = (
+export set_normal(mut record& rec, ray r, vec3 n) => i32 = (
     rec.front_face = vec3.dot(r.direction, n) < 0,
     rec.normal = rec.front_face ? n : vec3.neg(n),
     0

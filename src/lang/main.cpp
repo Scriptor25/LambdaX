@@ -11,9 +11,9 @@ int main(const int argc, const char* const* argv)
 {
     LX::ArgParser args({
         {"help", "display help text", {"--help", "-h"}},
-        {"output", "specify output file", {"--output", "-o"}, false},
+        {"output", "specify output file (defaults to stdout)", {"--output", "-o"}, false},
+        {"type", "specify output type ('obj' (default) or 'llvm')", {"--type", "-t"}, false},
         {"version", "display version info", {"--version", "-v"}},
-        {"emit-ir", "set to emit ir instead of object code", {"--emit-ir", "-i"}},
     });
     args.Parse(argc, argv);
 
@@ -21,7 +21,7 @@ int main(const int argc, const char* const* argv)
         args.Flags["help"] = true;
 
     if (args.Flags["help"] || args.Flags["version"])
-        std::cout << "LX [version 1.0.0]" << std::endl;
+        std::cerr << "LX [version 1.0.0]" << std::endl;
 
     if (args.Flags["help"])
     {
@@ -36,15 +36,15 @@ int main(const int argc, const char* const* argv)
     }
 
     const auto& input_filenames = args.Args;
-    const auto& output_filename = args.Options["output"];
+    const auto& output_filename = args.Values["output"];
 
     LX::Linker linker("lx");
     for (const auto& filename : input_filenames)
     {
         std::ifstream stream(filename);
-        if (!stream.is_open())
+        if (!stream)
         {
-            std::cerr << "failed to open file " << filename << std::endl;
+            std::cerr << "failed to open file '" << filename << "'" << std::endl;
             continue;
         }
 
@@ -62,7 +62,10 @@ int main(const int argc, const char* const* argv)
         linker.Link(builder);
     }
 
-    if (args.Flags["emit-ir"])
+    if (const auto type = args.Values["type"]; type.empty() || type == "obj")
+        linker.EmitObj(output_filename);
+    else if (type == "llvm")
         linker.EmitIR(output_filename);
-    else linker.EmitObj(output_filename);
+    else
+        std::cerr << "undefined output type '" << type << "'" << std::endl;
 }

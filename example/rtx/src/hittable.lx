@@ -3,5 +3,5 @@ import "ray.lx"
 import "record.lx"
 
 type hittable {
-    [([], ray, interval, mut record) => u1] hit,
+    [([], ray, interval, mut record&) => u1] hit,
 }

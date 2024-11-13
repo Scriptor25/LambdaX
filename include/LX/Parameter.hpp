@@ -8,6 +8,7 @@ namespace LX
     {
         std::ostream& Print(std::ostream&) const;
 
+        bool IsMutable;
         TypePtr Type;
         std::string Name;
     };

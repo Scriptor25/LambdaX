@@ -1,0 +1,104 @@
+export DEFAULT => u64    = 0
+export GREY => u64       = 1
+export GREY_ALPHA => u64 = 2
+export RGB => u64        = 3
+export RGB_ALPHA => u64  = 4
+
+type FILE {}
+
+type stbi_uc = u8
+type stbi_us = u16
+
+type stbi_io_callbacks {
+    [([] user, [i8] data, i32 size) => i32] read,
+    [([] user, i32 n)] skip,
+    [([] user) => i32] eof,
+}
+
+extern stbi_load_from_memory([stbi_uc] buffer, i32 len, [i32] x, [i32] y, [i32] channels_in_file, i32 desired_channels) => [stbi_uc]
+extern stbi_load_from_callbacks([stbi_io_callbacks] clbk, [] user, [i32] x, [i32] y, [i32] channels_in_file, i32 desired_channels) => [stbi_uc]
+extern stbi_load([i8] filename, [i32] x, [i32] y, [i32] channels_in_file, i32 desired_channels) => [stbi_uc]
+extern stbi_load_from_file([FILE] f, [i32] x, [i32] y, [i32] channels_in_file, i32 desired_channels) => [stbi_uc]
+extern stbi_load_gif_from_memory([stbi_uc] buffer, i32 len, [i32] delays, [i32] x, [i32] y, [i32] z, [i32] comp, i32 req_comp) => [stbi_uc]
+extern stbi_load_16_from_memory([stbi_uc] buffer, i32 len, [i32] x, [i32] y, [i32] channels_in_file, i32 desired_channels) => [stbi_us]
+extern stbi_load_16_from_callbacks([stbi_io_callbacks] clbk, [] user, [i32] x, [i32] y, [i32] channels_in_file, i32 desired_channels) => [stbi_us]
+extern stbi_load_16([i8] filename, [i32] x, [i32] y, [i32] channels_in_file, i32 desired_channels) => [stbi_us]
+extern stbi_load_from_file_16([FILE] f, [i32] x, [i32] y, [i32] channels_in_file, i32 desired_channels) => [stbi_us]
+extern stbi_loadf_from_memory([stbi_uc] buffer, i32 len, [i32] x, [i32] y, [i32] channels_in_file, i32 desired_channels) => [f32]
+extern stbi_loadf_from_callbacks([stbi_io_callbacks] clbk, [] user, [i32] x, [i32] y,  [i32] channels_in_file, i32 desired_channels) => [f32]
+extern stbi_loadf([i8] filename, [i32] x, [i32] y, [i32] channels_in_file, i32 desired_channels) => [f32]
+extern stbi_loadf_from_file([FILE] f, [i32] x, [i32] y, [i32] channels_in_file, i32 desired_channels) => [f32]
+extern stbi_hdr_to_ldr_gamma(f32 gamma)
+extern stbi_hdr_to_ldr_scale(f32 scale)
+extern stbi_ldr_to_hdr_gamma(f32 gamma)
+extern stbi_ldr_to_hdr_scale(f32 scale)
+extern stbi_is_hdr_from_callbacks([stbi_io_callbacks] clbk, [] user) => i32
+extern stbi_is_hdr_from_memory([stbi_uc] buffer, i32 len) => i32
+extern stbi_is_hdr([i8] filename) => i32
+extern stbi_is_hdr_from_file([FILE] f) => i32
+extern stbi_failure_reason() => [i8]
+extern stbi_image_free([] retval_from_stbi_load)
+extern stbi_info_from_memory([stbi_uc] buffer, i32 len, [i32] x, [i32] y, [i32] comp) => i32
+extern stbi_info_from_callbacks([stbi_io_callbacks] clbk, [] user, [i32] x, [i32] y, [i32] comp) => i32
+extern stbi_is_16_bit_from_memory([stbi_uc] buffer, i32 len) => i32
+extern stbi_is_16_bit_from_callbacks([stbi_io_callbacks] clbk, [] user) => i32
+extern stbi_info([i8] filename, [i32] x, [i32] y, [i32] comp) => i32
+extern stbi_info_from_file([FILE] f, [i32] x, [i32] y, [i32] comp) => i32
+extern stbi_is_16_bit([i8] filename) => i32
+extern stbi_is_16_bit_from_file([FILE] f) => i32
+extern stbi_set_unpremultiply_on_load(i32 flag_true_if_should_unpremultiply)
+extern stbi_convert_iphone_png_to_rgb(i32 flag_true_if_should_convert)
+extern stbi_set_flip_vertically_on_load(i32 flag_true_if_should_flip)
+extern stbi_set_unpremultiply_on_load_thread(i32 flag_true_if_should_unpremultiply)
+extern stbi_convert_iphone_png_to_rgb_thread(i32 flag_true_if_should_convert)
+extern stbi_set_flip_vertically_on_load_thread(i32 flag_true_if_should_flip)
+extern stbi_zlib_decode_malloc_guesssize([i8] buffer, i32 len, i32 initial_size, [i32] outlen) => [i8]
+extern stbi_zlib_decode_malloc_guesssize_headerflag([i8] buffer, i32 len, i32 initial_size, [i32] outlen, i32 parse_header) => [i8]
+extern stbi_zlib_decode_malloc([i8] buffer, i32 len, [i32] outlen) => [i8]
+extern stbi_zlib_decode_buffer([i8] obuffer, i32 olen, [i8] ibuffer, i32 ilen) => i32
+extern stbi_zlib_decode_noheader_malloc([i8] buffer, i32 len, [i32] outlen) => [i8]
+extern stbi_zlib_decode_noheader_buffer([i8] obuffer, i32 olen, [i8] ibuffer, i32 ilen) => i32
+
+export load_from_memory([stbi_uc] buffer, i32 len, [i32] x, [i32] y, [i32] channels_in_file, i32 desired_channels) => [stbi_uc] = stbi_load_from_memory(buffer, len, x, y, channels_in_file, desired_channels)
+export load_from_callbacks([stbi_io_callbacks] clbk, [] user, [i32] x, [i32] y, [i32] channels_in_file, i32 desired_channels) => [stbi_uc] = stbi_load_from_callbacks(clbk, user, x, y, channels_in_file, desired_channels)
+export load([i8] filename, [i32] x, [i32] y, [i32] channels_in_file, i32 desired_channels) => [stbi_uc] = stbi_load(filename, x, y, channels_in_file, desired_channels)
+export load_from_file([FILE] f, [i32] x, [i32] y, [i32] channels_in_file, i32 desired_channels) => [stbi_uc] = stbi_load_from_file(f, x, y, channels_in_file, desired_channels)
+export load_gif_from_memory([stbi_uc] buffer, i32 len, [i32] delays, [i32] x, [i32] y, [i32] z, [i32] comp, i32 req_comp) => [stbi_uc] = stbi_load_gif_from_memory(buffer, len, delays, x, y, z, comp, req_comp)
+export load_16_from_memory([stbi_uc] buffer, i32 len, [i32] x, [i32] y, [i32] channels_in_file, i32 desired_channels) => [stbi_us] = stbi_load_16_from_memory(buffer, len, x, y, channels_in_file, desired_channels)
+export load_16_from_callbacks([stbi_io_callbacks] clbk, [] user, [i32] x, [i32] y, [i32] channels_in_file, i32 desired_channels) => [stbi_us] = stbi_load_16_from_callbacks(clbk, user, x, y, channels_in_file, desired_channels)
+export load_16([i8] filename, [i32] x, [i32] y, [i32] channels_in_file, i32 desired_channels) => [stbi_us] = stbi_load_16(filename, x, y, channels_in_file, desired_channels)
+export load_from_file_16([FILE] f, [i32] x, [i32] y, [i32] channels_in_file, i32 desired_channels) => [stbi_us] = stbi_load_from_file_16(f, x, y, channels_in_file, desired_channels)
+export loadf_from_memory([stbi_uc] buffer, i32 len, [i32] x, [i32] y, [i32] channels_in_file, i32 desired_channels) => [f32] = stbi_loadf_from_memory(buffer, len, x, y, channels_in_file, desired_channels)
+export loadf_from_callbacks([stbi_io_callbacks] clbk, [] user, [i32] x, [i32] y,  [i32] channels_in_file, i32 desired_channels) => [f32] = stbi_loadf_from_callbacks(clbk, user, x, y, channels_in_file, desired_channels)
+export loadf([i8] filename, [i32] x, [i32] y, [i32] channels_in_file, i32 desired_channels) => [f32] = stbi_loadf(filename, x, y, channels_in_file, desired_channels)
+export loadf_from_file([FILE] f, [i32] x, [i32] y, [i32] channels_in_file, i32 desired_channels) => [f32] = stbi_loadf_from_file(f, x, y, channels_in_file, desired_channels)
+export hdr_to_ldr_gamma(f32 gamma) = stbi_hdr_to_ldr_gamma(gamma)
+export hdr_to_ldr_scale(f32 scale) = stbi_hdr_to_ldr_scale(scale)
+export ldr_to_hdr_gamma(f32 gamma) = stbi_ldr_to_hdr_gamma(gamma)
+export ldr_to_hdr_scale(f32 scale) = stbi_ldr_to_hdr_scale(scale)
+export is_hdr_from_callbacks([stbi_io_callbacks] clbk, [] user) => i32 = stbi_is_hdr_from_callbacks(clbk, user)
+export is_hdr_from_memory([stbi_uc] buffer, i32 len) => i32 = stbi_is_hdr_from_memory(buffer, len)
+export is_hdr([i8] filename) => i32 = stbi_is_hdr(filename)
+export is_hdr_from_file([FILE] f) => i32 = stbi_is_hdr_from_file(f)
+export failure_reason() => [i8] = stbi_failure_reason()
+export image_free([] retval_from_stbi_load) = stbi_image_free(retval_from_stbi_load)
+export info_from_memory([stbi_uc] buffer, i32 len, [i32] x, [i32] y, [i32] comp) => i32 = stbi_info_from_memory(buffer, len, x, y, comp)
+export info_from_callbacks([stbi_io_callbacks] clbk, [] user, [i32] x, [i32] y, [i32] comp) => i32 = stbi_info_from_callbacks(clbk, user, x, y, comp)
+export is_16_bit_from_memory([stbi_uc] buffer, i32 len) => i32 = stbi_is_16_bit_from_memory(buffer, len)
+export is_16_bit_from_callbacks([stbi_io_callbacks] clbk, [] user) => i32 = stbi_is_16_bit_from_callbacks(clbk, user)
+export info([i8] filename, [i32] x, [i32] y, [i32] comp) => i32 = stbi_info(filename, x, y, comp)
+export info_from_file([FILE] f, [i32] x, [i32] y, [i32] comp) => i32 = stbi_info_from_file(f, x, y, comp)
+export is_16_bit([i8] filename) => i32 = stbi_is_16_bit(filename)
+export is_16_bit_from_file([FILE] f) => i32 = stbi_is_16_bit_from_file(f)
+export set_unpremultiply_on_load(i32 flag_true_if_should_unpremultiply) = stbi_set_unpremultiply_on_load(flag_true_if_should_unpremultiply)
+export convert_iphone_png_to_rgb(i32 flag_true_if_should_convert) = stbi_convert_iphone_png_to_rgb(flag_true_if_should_convert)
+export set_flip_vertically_on_load(i32 flag_true_if_should_flip) = stbi_set_flip_vertically_on_load(flag_true_if_should_flip)
+export set_unpremultiply_on_load_thread(i32 flag_true_if_should_unpremultiply) = stbi_set_unpremultiply_on_load_thread(flag_true_if_should_unpremultiply)
+export convert_iphone_png_to_rgb_thread(i32 flag_true_if_should_convert) = stbi_convert_iphone_png_to_rgb_thread(flag_true_if_should_convert)
+export set_flip_vertically_on_load_thread(i32 flag_true_if_should_flip) = stbi_set_flip_vertically_on_load_thread(flag_true_if_should_flip)
+export zlib_decode_malloc_guesssize([i8] buffer, i32 len, i32 initial_size, [i32] outlen) => [i8] = stbi_zlib_decode_malloc_guesssize(buffer, len, initial_size, outlen)
+export zlib_decode_malloc_guesssize_headerflag([i8] buffer, i32 len, i32 initial_size, [i32] outlen, i32 parse_header) => [i8] = stbi_zlib_decode_malloc_guesssize_headerflag(buffer, len, initial_size, outlen, parse_header)
+export zlib_decode_malloc([i8] buffer, i32 len, [i32] outlen) => [i8] = stbi_zlib_decode_malloc(buffer, len, outlen)
+export zlib_decode_buffer([i8] obuffer, i32 olen, [i8] ibuffer, i32 ilen) => i32 = stbi_zlib_decode_buffer(obuffer, olen, ibuffer, ilen)
+export zlib_decode_noheader_malloc([i8] buffer, i32 len, [i32] outlen) => [i8] = stbi_zlib_decode_noheader_malloc(buffer, len, outlen)
+export zlib_decode_noheader_buffer([i8] obuffer, i32 olen, [i8] ibuffer, i32 ilen) => i32 = stbi_zlib_decode_noheader_buffer(obuffer, olen, ibuffer, ilen)

@@ -27,9 +27,9 @@ namespace LX
         [[nodiscard]] virtual bool IsArray() const;
         [[nodiscard]] virtual bool IsStruct() const;
         [[nodiscard]] virtual bool IsFunction() const;
-        [[nodiscard]] virtual bool IsMutable() const;
+        [[nodiscard]] virtual bool IsReference() const;
         [[nodiscard]] virtual TypePtr Element(const SourceLocation&) const;
-        [[nodiscard]] virtual TypePtr Element(const SourceLocation&, size_t) const;
+        [[nodiscard]] virtual Parameter Element(const SourceLocation&, size_t) const;
         [[nodiscard]] virtual size_t IndexOf(const SourceLocation&, const std::string&) const;
         [[nodiscard]] virtual TypePtr Result(const SourceLocation&) const;
         [[nodiscard]] virtual size_t ParamCount(const SourceLocation&) const;
@@ -100,15 +100,13 @@ namespace LX
         TypePtr ElementType;
     };
 
-    struct MutableType : Type
+    struct ReferenceType : Type
     {
         static std::string GetName(const TypePtr& element_type);
 
-        explicit MutableType(TypePtr element_type);
+        explicit ReferenceType(TypePtr element_type);
 
-        [[nodiscard]] bool IsMutable() const override;
-        [[nodiscard]] size_t IndexOf(const SourceLocation&, const std::string&) const override;
-        [[nodiscard]] TypePtr Element(const SourceLocation&, size_t) const override;
+        [[nodiscard]] bool IsReference() const override;
         [[nodiscard]] TypePtr Element(const SourceLocation&) const override;
 
         llvm::Type* GenIR(const SourceLocation&, Builder&) override;
@@ -125,7 +123,6 @@ namespace LX
 
         [[nodiscard]] bool IsArray() const override;
         [[nodiscard]] TypePtr Element(const SourceLocation&) const override;
-        [[nodiscard]] TypePtr Element(const SourceLocation&, size_t) const override;
 
         llvm::Type* GenIR(const SourceLocation&, Builder&) override;
         llvm::DIType* GenDI(Builder&) override;
@@ -162,7 +159,7 @@ namespace LX
         StructType(std::string name, std::vector<Parameter> elements);
 
         [[nodiscard]] bool IsStruct() const override;
-        [[nodiscard]] TypePtr Element(const SourceLocation&, size_t) const override;
+        [[nodiscard]] Parameter Element(const SourceLocation&, size_t) const override;
         [[nodiscard]] size_t IndexOf(const SourceLocation&, const std::string&) const override;
         void PutElements(const SourceLocation&, const std::vector<Parameter>&) override;
 

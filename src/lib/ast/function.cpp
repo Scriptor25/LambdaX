@@ -34,18 +34,15 @@ LX::ValuePtr LX::Function::GenIR(const SourceLocation& where, Builder& builder) 
     }
     else
     {
-        const auto type = llvm::dyn_cast<llvm::FunctionType>(Type->GenIR(where, builder));
+        const auto type_ir = llvm::dyn_cast<llvm::FunctionType>(Type->GenIR(where, builder));
+        const auto linkage = Export || Extern
+                                 ? llvm::GlobalValue::ExternalLinkage
+                                 : llvm::GlobalValue::InternalLinkage;
         const auto name = Export && !Extern
                               ? builder.ModuleId() + '.' + Name
                               : Name;
 
-        function = llvm::Function::Create(
-            type,
-            Export || Extern
-                ? llvm::GlobalValue::ExternalLinkage
-                : llvm::GlobalValue::InternalLinkage,
-            name,
-            builder.IRModule());
+        function = llvm::Function::Create(type_ir, linkage, name, builder.IRModule());
         result = RValue::Create(builder.Ctx().GetPointerType(Type), function);
 
         if (!Name.empty())
@@ -79,23 +76,23 @@ LX::ValuePtr LX::Function::GenIR(const SourceLocation& where, Builder& builder) 
 
     for (size_t i = 0; i < Params.size(); ++i)
     {
-        const auto& [param_type_, param_name_] = Params[i];
+        const auto& [mutable_, type_, name_] = Params[i];
 
         const auto arg = function->getArg(i);
-        arg->setName(param_name_);
+        arg->setName(name_);
 
-        auto& var = builder.Define(where, param_name_);
-        if (param_type_->IsMutable())
-            var = LValue::Create(param_type_->Element(where), arg, true);
+        auto& var = builder.Define(where, name_);
+        if (type_->IsReference())
+            var = LValue::Create(type_->Element(where), arg, mutable_);
         else
         {
-            var = builder.CreateAlloca(where, param_type_, false);
+            var = builder.CreateAlloca(where, type_, mutable_);
             var->StoreForce(where, builder, arg);
         }
 
         const auto d = builder.DIBuilder().createParameterVariable(
             sub,
-            param_name_,
+            name_,
             i + 1,
             unit,
             where.Row,
@@ -120,11 +117,12 @@ LX::ValuePtr LX::Function::GenIR(const SourceLocation& where, Builder& builder) 
     {
         value = builder.CreateCast(where, value, Type->Result(where));
         builder.IRBuilder().CreateRet(
-            Type->Result(where)->IsMutable()
+            Type->Result(where)->IsReference()
                 ? value->Ptr(where)
                 : value->Load(where, builder));
     }
 
+    builder.IRBuilder().SetCurrentDebugLocation({});
     builder.IRBuilder().SetInsertPoint(bkp);
 
     builder.Pop();

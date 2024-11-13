@@ -45,7 +45,7 @@ namespace LX
 
         StmtPtr Parse();
         StmtPtr ParseImport();
-        StmtPtr ParseFunction();
+        StmtPtr ParseGlobal();
 
         ExprPtr ParseExpr();
         void ParseExprList(std::vector<ExprPtr>&, const std::string&);

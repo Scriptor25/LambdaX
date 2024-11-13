@@ -14,5 +14,6 @@ rule link
 build $bin/gl.o: lx $src/gl.lx
 build $bin/glfw.o: lx $src/glfw.lx
 build $bin/main.o: lx $src/main.lx
+build $bin/stb_image.o: lx $src/stb_image.lx
 
-build $bin/out.exe: link $bin/gl.o $bin/glfw.o $bin/main.o $lib/libglfw3.a
+build $bin/out.exe: link $bin/gl.o $bin/glfw.o $bin/main.o $bin/stb_image.o $lib/libglfw3.a $lib/libstbi.a

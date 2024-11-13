@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <llvm/IR/Constant.h>
 #include <LX/LX.hpp>
 #include <LX/Parameter.hpp>
 #include <LX/SourceLocation.hpp>
@@ -15,17 +16,45 @@ namespace LX
         bool Export = false;
         bool Extern = false;
         std::string Name;
-
-        TypePtr Type;
         std::vector<Parameter> Params;
+        TypePtr Type;
         ExprPtr Body;
     };
 
-    struct FunctionImport
+    struct GlobalSymbol
     {
+        std::ostream& Print(std::ostream&) const;
+        ValuePtr GenIR(const SourceLocation&, Builder&) const;
+
+        bool Export = false;
+        bool Extern = false;
+        bool IsMutable = false;
+        std::string Name;
+        TypePtr Type;
+        ExprPtr Init;
+    };
+
+    struct Import
+    {
+        virtual ~Import() = default;
+        [[nodiscard]] virtual llvm::Constant* Resolve(const SourceLocation&, Builder&, const std::string&) const = 0;
+
         TypePtr Type;
         std::string Name;
         bool Extern;
+        bool IsMutable = false;
+    };
+
+    typedef std::unique_ptr<Import> ImportPtr;
+
+    struct FunctionImport : Import
+    {
+        [[nodiscard]] llvm::Constant* Resolve(const SourceLocation&, Builder&, const std::string&) const override;
+    };
+
+    struct GlobalImport : Import
+    {
+        [[nodiscard]] llvm::Constant* Resolve(const SourceLocation&, Builder&, const std::string&) const override;
     };
 
     struct Stmt
@@ -49,14 +78,24 @@ namespace LX
         Function Fun;
     };
 
-    struct ImportStmt : Stmt
+    struct GlobalStmt : Stmt
     {
-        ImportStmt(SourceLocation where, std::vector<FunctionImport> imports, std::string module_id, std::string name);
+        GlobalStmt(SourceLocation where, GlobalSymbol global);
 
         std::ostream& Print(std::ostream&) const override;
         ValuePtr GenIR(Builder&) const override;
 
-        std::vector<FunctionImport> Imports;
+        GlobalSymbol Global;
+    };
+
+    struct ImportStmt : Stmt
+    {
+        ImportStmt(SourceLocation where, std::vector<ImportPtr> imports, std::string module_id, std::string name);
+
+        std::ostream& Print(std::ostream&) const override;
+        ValuePtr GenIR(Builder&) const override;
+
+        std::vector<ImportPtr> Imports;
         std::string ModuleId;
         std::string Name;
     };
@@ -158,13 +197,14 @@ namespace LX
         TypePtr Type;
     };
 
-    struct ImmutableExpr : Expr
+    struct DefineExpr : Expr
     {
-        ImmutableExpr(SourceLocation where, std::string name, TypePtr type, ExprPtr init);
+        DefineExpr(SourceLocation where, bool is_mutable, std::string name, TypePtr type, ExprPtr init);
 
         std::ostream& Print(std::ostream&) const override;
         ValuePtr GenIR(Builder&) const override;
 
+        bool IsMutable;
         std::string Name;
         TypePtr Type;
         ExprPtr Init;
@@ -180,18 +220,6 @@ namespace LX
         ExprPtr Parent;
         std::string Member;
         bool Deref;
-    };
-
-    struct MutableExpr : Expr
-    {
-        MutableExpr(SourceLocation where, std::string name, TypePtr type, ExprPtr init);
-
-        std::ostream& Print(std::ostream&) const override;
-        ValuePtr GenIR(Builder&) const override;
-
-        std::string Name;
-        TypePtr Type;
-        ExprPtr Init;
     };
 
     struct SequenceExpr : Expr

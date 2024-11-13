@@ -3,5 +3,5 @@ import "record.lx"
 import "vec3.lx"
 
 type material {
-    [([], ray, record, mut color, mut ray) => u1] scatter,
+    [([], ray, record, mut color&, mut ray&) => u1] scatter,
 }

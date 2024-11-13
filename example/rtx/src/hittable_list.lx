@@ -3,13 +3,13 @@ import "interval.lx" as interval
 import "std.lx" as std
 
 type hittable_list {
-    [([], ray, interval, mut record) => u1] hit,
+    [([], ray, interval, mut record&) => u1] hit,
 
-    [[hittable]] objects,
-    u64 count,
+    mut [[hittable]] objects,
+    mut u64 count,
 }
 
-for_objects(hittable_list self, ray r, f64 t_min, mut record rec, u64 i, mut f64 closest) => u1
+for_objects(hittable_list self, ray r, f64 t_min, mut record& rec, u64 i, mut f64& closest) => u1
  = i < self.count ?? (
     ptr := self.objects[i],
     mut tmp => record,
@@ -21,24 +21,24 @@ for_objects(hittable_list self, ray r, f64 t_min, mut record rec, u64 i, mut f64
     any || for_objects(self, r, t_min, rec, i + 1, closest)
 )
 
-hit(hittable_list self, ray r, interval ray_t, mut record rec) => u1 = (
-    mut closest => f64 := ray_t.max,
+hit(hittable_list self, ray r, interval ray_t, mut record& rec) => u1 = (
+    mut closest := ray_t.max,
     for_objects(self, r, ray_t.min, rec, 0, closest)
 )
 
-export clear(mut hittable_list self) = (
+export clear(mut hittable_list& self) = (
     self.count = 0,
     self.objects = std.realloc(self.objects, 0)
 )
 
-export add(mut hittable_list self, [hittable] object) = (
+export add(mut hittable_list& self, [hittable] object) = (
     self.count = self.count + 1,
     self.objects = std.realloc(self.objects, self.count * 8),
     self.objects[self.count - 1] = object
 )
 
 export create() => hittable_list = {
-    $([] ptr, ray r, interval ray_t, mut record rec) => u1 = hit(*(ptr as [hittable_list]), r, ray_t, rec),
+    $([] ptr, ray r, interval ray_t, mut record& rec) => u1 = hit(*(ptr as [hittable_list]), r, ray_t, rec),
 
     0,
     0,

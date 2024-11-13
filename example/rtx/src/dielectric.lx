@@ -5,7 +5,7 @@ import "util.lx" as util
 import "vec3.lx" as vec3
 
 type dielectric {
-    [([], ray, record, mut color, mut ray) => u1] scatter,
+    [([], ray, record, mut color&, mut ray&) => u1] scatter,
 
     color albedo,
     f64 refraction_index,
@@ -17,7 +17,7 @@ reflectance(f64 cosine, f64 refraction_index) => f64 = (
     r00 + (1 - r00) * ((1 - cosine) ** 5)
 )
 
-scatter(dielectric self, ray r_in, record rec, mut color attenuation, mut ray scattered) => u1 = (
+scatter(dielectric self, ray r_in, record rec, mut color& attenuation, mut ray& scattered) => u1 = (
     attenuation = self.albedo,
     ri := rec.front_face ? 1 / self.refraction_index : self.refraction_index,
 
@@ -35,7 +35,7 @@ scatter(dielectric self, ray r_in, record rec, mut color attenuation, mut ray sc
 )
 
 export create(color albedo, f64 refraction_index) => dielectric = {
-    $([] ptr, ray r_in, record rec, mut color attenuation, mut ray scattered) => u1 = scatter(*(ptr as [dielectric]), r_in, rec, attenuation, scattered),
+    $([] ptr, ray r_in, record rec, mut color& attenuation, mut ray& scattered) => u1 = scatter(*(ptr as [dielectric]), r_in, rec, attenuation, scattered),
 
     albedo,
     refraction_index,

@@ -3,13 +3,13 @@ import "record.lx"
 import "vec3.lx" as vec3
 
 type metal {
-    [([], ray, record, mut color, mut ray) => u1] scatter,
+    [([], ray, record, mut color&, mut ray&) => u1] scatter,
 
     color albedo,
     f64 fuzz,
 }
 
-scatter(metal self, ray r_in, record rec, mut color attenuation, mut ray scattered) => u1 = (
+scatter(metal self, ray r_in, record rec, mut color& attenuation, mut ray& scattered) => u1 = (
     reflected := vec3.add(vec3.normalize(vec3.reflect(r_in.direction, rec.normal)), vec3.mul(vec3.random_unit_vector(), self.fuzz)),
     scattered = ray.create(rec.p, reflected),
     attenuation = self.albedo,
@@ -17,7 +17,7 @@ scatter(metal self, ray r_in, record rec, mut color attenuation, mut ray scatter
 )
 
 export create(color albedo, f64 fuzz) => metal = {
-    $([] ptr, ray r_in, record rec, mut color attenuation, mut ray scattered) => u1
+    $([] ptr, ray r_in, record rec, mut color& attenuation, mut ray& scattered) => u1
      = scatter(*(ptr as [metal]), r_in, rec, attenuation, scattered),
 
     albedo,

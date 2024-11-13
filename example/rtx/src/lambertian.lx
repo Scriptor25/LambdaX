@@ -3,12 +3,12 @@ import "record.lx"
 import "vec3.lx" as vec3
 
 type lambertian {
-    [([], ray, record, mut color, mut ray) => u1] scatter,
+    [([], ray, record, mut color&, mut ray&) => u1] scatter,
 
     color albedo,
 }
 
-scatter(lambertian self, ray r_in, record rec, mut color attenuation, mut ray scattered) => u1 = (
+scatter(lambertian self, ray r_in, record rec, mut color& attenuation, mut ray& scattered) => u1 = (
     dir := vec3.add(rec.normal, vec3.random_unit_vector()),
 
     scatter_direction := vec3.near_zero(dir) ? rec.normal : dir,
@@ -19,7 +19,7 @@ scatter(lambertian self, ray r_in, record rec, mut color attenuation, mut ray sc
 )
 
 export create(color albedo) => lambertian = {
-    $([] ptr, ray r_in, record rec, mut color attenuation, mut ray scattered) => u1
+    $([] ptr, ray r_in, record rec, mut color& attenuation, mut ray& scattered) => u1
      = scatter(*(ptr as [lambertian]), r_in, rec, attenuation, scattered),
 
     albedo,

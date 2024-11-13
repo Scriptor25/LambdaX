@@ -4,7 +4,7 @@
 
 std::string LX::ArrayType::GetName(const TypePtr& element_type, const size_t size)
 {
-    return element_type->Name + '[' + std::to_string(size) + ']';
+    return '[' + element_type->Name + ", " + std::to_string(size) + ']';
 }
 
 LX::ArrayType::ArrayType(TypePtr element_type, const size_t size)
@@ -18,11 +18,6 @@ bool LX::ArrayType::IsArray() const
 }
 
 LX::TypePtr LX::ArrayType::Element(const SourceLocation& where) const
-{
-    return ElementType;
-}
-
-LX::TypePtr LX::ArrayType::Element(const SourceLocation&, const size_t) const
 {
     return ElementType;
 }

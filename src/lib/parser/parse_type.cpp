@@ -9,14 +9,20 @@ LX::TypePtr LX::Parser::ParseType()
 
     if (NextAt("["))
     {
-        TypePtr element;
+        auto element = m_Ctx.GetVoidType();
+        size_t count = 0;
+
         if (!NextAt("]"))
         {
             element = ParseType();
+            if (NextAt(","))
+                count = Expect(TokenType_Int).IntegerValue;
             Expect("]");
         }
-        else element = m_Ctx.GetVoidType();
-        type = m_Ctx.GetPointerType(element);
+
+        if (!count)
+            type = m_Ctx.GetPointerType(element);
+        else type = m_Ctx.GetArrayType(element, count);
     }
     else if (NextAt("("))
     {
@@ -46,11 +52,6 @@ LX::TypePtr LX::Parser::ParseType()
 
         type = m_Ctx.GetStructType(where, name, elements);
     }
-    else if (NextAt("mut"))
-    {
-        const auto element = ParseType();
-        type = m_Ctx.GetMutableType(element);
-    }
     else
     {
         const auto where = m_Token.Where;
@@ -60,12 +61,8 @@ LX::TypePtr LX::Parser::ParseType()
             Error(where, "'{}' is not an existing type", name);
     }
 
-    while (NextAt("["))
-    {
-        const auto size = Expect(TokenType_Int).IntegerValue;
-        Expect("]");
-        type = m_Ctx.GetArrayType(type, size);
-    }
+    while (NextAt("&"))
+        type = m_Ctx.GetReferenceType(type);
 
     return type;
 }

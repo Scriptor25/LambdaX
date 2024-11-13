@@ -61,9 +61,9 @@ llvm::Type* LX::FunctionType::GenIR(const SourceLocation& where, Builder& builde
     if (m_IR) return m_IR;
 
     const auto result_type = ResultType->GenIR(where, builder);
-    std::vector<llvm::Type*> param_types(Params.size());
-    for (size_t i = 0; i < Params.size(); ++i)
-        param_types[i] = Params[i].Type->GenIR(where, builder);
+    std::vector<llvm::Type*> param_types;
+    for (const auto& [mutable_, type_, name_] : Params)
+        param_types.push_back(type_->GenIR(where, builder));
     return m_IR = llvm::FunctionType::get(result_type, param_types, VarArg);
 }
 
@@ -73,7 +73,7 @@ llvm::DIType* LX::FunctionType::GenDI(Builder& builder)
 
     std::vector<llvm::Metadata*> elements;
     elements.push_back(ResultType->GenDI(builder));
-    for (const auto& [type_, name_] : Params)
+    for (const auto& [mutable_, type_, name_] : Params)
         elements.push_back(type_->GenDI(builder));
     return m_DI = builder.DIBuilder().createSubroutineType(builder.DIBuilder().getOrCreateTypeArray(elements));
 }

@@ -20,8 +20,8 @@ std::string LX::StructType::GetName(const std::string& name, const std::vector<P
 unsigned LX::StructType::GetBits(const std::vector<Parameter>& elements)
 {
     unsigned bits = 0;
-    for (const auto& [type, name] : elements)
-        bits += type->Bits;
+    for (const auto& [mutable_, type_, name_] : elements)
+        bits += type_->Bits;
     return bits;
 }
 
@@ -35,9 +35,9 @@ bool LX::StructType::IsStruct() const
     return true;
 }
 
-LX::TypePtr LX::StructType::Element(const SourceLocation&, const size_t i) const
+LX::Parameter LX::StructType::Element(const SourceLocation&, const size_t i) const
 {
-    return Elements[i].Type;
+    return Elements[i];
 }
 
 size_t LX::StructType::IndexOf(const SourceLocation& where, const std::string& name) const
@@ -98,7 +98,7 @@ llvm::DIType* LX::StructType::GenDI(Builder& builder)
     m_DI = reinterpret_cast<llvm::DIType*>(dead_beef);
 
     std::vector<llvm::Metadata*> elements;
-    for (const auto& [type_, name_] : Elements)
+    for (const auto& [mutable_, type_, name_] : Elements)
         elements.push_back(type_->GenDI(builder));
 
     return m_DI = builder.DIBuilder().createStructType(

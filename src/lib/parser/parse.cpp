@@ -29,5 +29,5 @@ LX::StmtPtr LX::Parser::Parse()
     if (At("import"))
         return ParseImport();
 
-    return ParseFunction();
+    return ParseGlobal();
 }

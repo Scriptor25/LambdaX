@@ -1,7 +1,7 @@
 import "std.lx" as std
 import "util.lx" as util
 
-type vec3 = f64[3]
+type vec3 = [f64, 3]
 type point = vec3
 type color = vec3
 

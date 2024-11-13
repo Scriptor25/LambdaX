@@ -22,7 +22,7 @@ LX::ValuePtr LX::MemberExpr::GenIR(Builder& builder) const
     Where.EmitDI(builder);
 
     const auto index = parent->Type()->IndexOf(Where, Member);
-    const auto type = parent->Type()->Element(Where, index);
+    const auto [mutable_, type_, name_] = parent->Type()->Element(Where, index);
 
     if (parent->HasPtr())
     {
@@ -31,9 +31,16 @@ LX::ValuePtr LX::MemberExpr::GenIR(Builder& builder) const
             parent->Ptr(Where),
             index,
             Member);
-        return LValue::Create(type, gep, parent->IsMutable());
+        if (type_->IsReference())
+            return LValue::Create(
+                type_->Element(Where),
+                builder.IRBuilder().CreateLoad(builder.IRBuilder().getPtrTy(), gep),
+                mutable_);
+        return LValue::Create(type_, gep, parent->IsMutable() && mutable_);
     }
 
     const auto value = builder.IRBuilder().CreateExtractValue(parent->Load(Where, builder), index, Member);
-    return RValue::Create(type, value);
+    if (type_->IsReference())
+        return LValue::Create(type_->Element(Where), value, mutable_);
+    return RValue::Create(type_, value);
 }

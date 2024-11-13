@@ -8,7 +8,7 @@ import "std.lx" as std
 import "vec3.lx" as vec3
 
 extern main(i32 argc, [[i8]] argv) => i32 = (
-    mut world => hittable_list := hittable_list.create(),
+    mut world := hittable_list.create(),
 
     material_ground := lambertian.create(vec3.create(0.8, 0.8, 0.0)),
     material_center := lambertian.create(vec3.create(0.1, 0.2, 0.5)),

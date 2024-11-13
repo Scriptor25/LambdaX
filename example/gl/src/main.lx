@@ -1,30 +1,93 @@
-import "gl.lx" as GL
-import "glfw.lx" as GLFW
+import "gl.lx" as gl
+import "glfw.lx" as glfw
+import "stb_image.lx" as stbi
 
 extern printf([i8], ...) => i32
+extern malloc(u64) => []
 
 on_key([GLFWwindow] window, i32 key, i32 scancode, i32 action, i32 mods)
- = key == GLFW.KEY_ESCAPE() && action == GLFW.RELEASE() ?? GLFW.setWindowShouldClose(window, GLFW.TRUE())
+ = key == glfw.KEY_ESCAPE && action == glfw.RELEASE ?? glfw.setWindowShouldClose(window, glfw.TRUE)
+
+on_error(i32 error_code, [i8] description) = printf("[GLFW 0x%08X] %s\n", error_code, description)
 
 await_close([GLFWwindow] window, [([GLFWwindow])] fn)
- = !GLFW.windowShouldClose(window) ?? (fn(window), await_close(window, fn))
+ = !glfw.windowShouldClose(window) ?? (fn(window), await_close(window, fn))
+
+VERTICES = {
+    -0.5, -0.5, 0.0, 0.0,
+    -0.5,  0.5, 0.0, 1.0,
+     0.5,  0.5, 1.0, 1.0,
+     0.5, -0.5, 1.0, 0.0,
+} [GLfloat, 16]
+
+INDICES = {
+    0, 1, 2,
+    2, 3, 0,
+} [GLuint, 6]
+
+VSHADER = "#version 450 core\nlayout(location = 0) in vec4 Position; layout(location = 1) in vec2 Texture; out vec2 vTexture; void main() { gl_Position = Position; vTexture = Texture; }"
+FSHADER = "#version 450 core\nlayout(location = 0) out vec4 Color; in vec2 vTexture; void main() { Color = vec4(vTexture, 0.0, 1.0); }"
 
 extern main() => i32 = (
-    GLFW.init(),
-    window := GLFW.createWindow(640, 480, "LambdaX GLFW", 0, 0),
-    GLFW.setKeyCallback(window, on_key),
-    GLFW.makeContextCurrent(window),
-    GL.clearColor(0.1, 0.2, 0.9, 1.0),
+    glfw.__ctor(),
+    glfw.setErrorCallback(on_error),
+    glfw.init(),
+
+    window := glfw.createWindow(640, 480, "LambdaX GL", 0, 0),
+    glfw.setKeyCallback(window, on_key),
+    glfw.makeContextCurrent(window),
+
+    mut icon => GLFWimage,
+    icon.pixels = stbi.load("icon.png", &icon.width, &icon.height, 0, 4),
+    glfw.setWindowIcon(window, 1, &icon),
+    stbi.image_free(icon.pixels),
+
+    gl.clearColor(0.2, 0.3, 1.0, 1.0),
+
+    mut vbo => GLuint, mut ibo => GLuint,
+
+    gl.genBuffers(1, &vbo),
+    gl.bindBuffer(gl.ARRAY_BUFFER, vbo),
+    gl.bufferData(gl.ARRAY_BUFFER, 4 * 16, VERTICES, gl.STATIC_DRAW),
+
+    gl.genBuffers(1, &ibo),
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo),
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, 4 * 6, INDICES, gl.STATIC_DRAW),
+
+    gl.enableVertexAttribArray(0),
+    gl.vertexAttribPointer(0, 2, gl.FLOAT, gl.FALSE, 4 * 4, 0),
+    gl.enableVertexAttribArray(1),
+    gl.vertexAttribPointer(1, 2, gl.FLOAT, gl.FALSE, 4 * 4, 4 * 2),
+
+    vsh := gl.createShader(gl.VERTEX_SHADER),
+    gl.shaderSource(vsh, 1, &VSHADER, 0),
+    gl.compileShader(vsh),
+
+    fsh := gl.createShader(gl.FRAGMENT_SHADER),
+    gl.shaderSource(fsh, 1, &FSHADER, 0),
+    gl.compileShader(fsh),
+
+    pgm := gl.createProgram(),
+    gl.attachShader(pgm, vsh),
+    gl.attachShader(pgm, fsh),
+    gl.linkProgram(pgm),
+    gl.validateProgram(pgm),
+
+    gl.useProgram(pgm),
+
     await_close(window, $([GLFWwindow] window) = (
         mut width => i32, mut height => i32,
-        GLFW.getFramebufferSize(window, &width, &height),
-        GL.viewport(0, 0, width, height),
-        GL.clear(GL.COLOR_BUFFER_BIT() | GL.DEPTH_BUFFER_BIT()),
+        glfw.getFramebufferSize(window, width, height),
+        gl.viewport(0, 0, width, height),
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT),
 
-        GLFW.swapBuffers(window),
-        GLFW.pollEvents(),
+        gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_INT, 0),
+
+        glfw.swapBuffers(window),
+        glfw.pollEvents(),
     )),
-    GLFW.destroyWindow(window),
-    GLFW.terminate(),
+
+    glfw.destroyWindow(window),
+    glfw.terminate(),
     0
 )

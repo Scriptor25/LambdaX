@@ -9,20 +9,20 @@ import "util.lx" as util
 import "vec3.lx" as vec3
 
 type camera {
-    f64 aspect_ratio,
-    u32 image_width,
-    u32 samples_per_pixel,
-    u32 max_depth,
+    mut f64 aspect_ratio,
+    mut u32 image_width,
+    mut u32 samples_per_pixel,
+    mut u32 max_depth,
 
-    u32 image_height,
-    f64 pixel_samples_scale,
-    point center,
-    point pixel00_loc,
-    vec3 pixel_delta_u,
-    vec3 pixel_delta_v,
+    mut u32 image_height,
+    mut f64 pixel_samples_scale,
+    mut point center,
+    mut point pixel00_loc,
+    mut vec3 pixel_delta_u,
+    mut vec3 pixel_delta_v,
 }
 
-initialize(mut camera self) = (
+initialize(mut camera& self) = (
     self.image_height = self.image_width / self.aspect_ratio,
     self.image_height = self.image_height < 1 ? 1 : self.image_height,
 
@@ -90,7 +90,7 @@ per_row(camera self, [hittable] world, u64 j) = j < self.image_height ?? (
     per_row(self, world, j + 1)
 )
 
-export render(mut camera self, [hittable] world) = (
+export render(mut camera& self, [hittable] world) = (
     initialize(self),
 
     ppm.print_header(self.image_width, self.image_height, 255),

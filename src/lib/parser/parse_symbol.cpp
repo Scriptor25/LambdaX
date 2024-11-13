@@ -23,5 +23,5 @@ LX::ExprPtr LX::Parser::ParseSymbol()
     if (!init)
         return std::make_unique<SymbolExpr>(where_, name_);
 
-    return std::make_unique<ImmutableExpr>(where_, name_, type, std::move(init));
+    return std::make_unique<DefineExpr>(where_, false, name_, type, std::move(init));
 }

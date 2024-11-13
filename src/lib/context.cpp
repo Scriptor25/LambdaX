@@ -66,11 +66,11 @@ LX::TypePtr& LX::Context::GetPointerType(const TypePtr& element)
     return type = std::make_shared<PointerType>(element);
 }
 
-LX::TypePtr& LX::Context::GetMutableType(const TypePtr& element)
+LX::TypePtr& LX::Context::GetReferenceType(const TypePtr& element)
 {
-    auto& type = GetType(MutableType::GetName(element));
+    auto& type = GetType(ReferenceType::GetName(element));
     if (type) return type;
-    return type = std::make_shared<MutableType>(element);
+    return type = std::make_shared<ReferenceType>(element);
 }
 
 LX::TypePtr& LX::Context::GetArrayType(const TypePtr& element, const size_t size)

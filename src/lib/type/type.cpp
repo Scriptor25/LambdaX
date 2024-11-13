@@ -78,7 +78,7 @@ bool LX::Type::IsFunction() const
     return false;
 }
 
-bool LX::Type::IsMutable() const
+bool LX::Type::IsReference() const
 {
     return false;
 }
@@ -113,9 +113,9 @@ LX::TypePtr LX::Type::Element(const SourceLocation& where) const
     Error(where, "{} is not a pointer, array or mutable type; cannot get element type", Name);
 }
 
-LX::TypePtr LX::Type::Element(const SourceLocation& where, const size_t i) const
+LX::Parameter LX::Type::Element(const SourceLocation& where, const size_t i) const
 {
-    Error(where, "{} is not a struct or array type; cannot get element type at {}", Name, i);
+    Error(where, "{} is not a struct type; cannot get element type at {}", Name, i);
 }
 
 size_t LX::Type::IndexOf(const SourceLocation& where, const std::string& name) const
