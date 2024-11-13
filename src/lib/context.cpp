@@ -45,12 +45,15 @@ LX::TypePtr& LX::Context::GetFloatType(const unsigned bits)
     return type = std::make_shared<FloatType>(bits);
 }
 
-LX::TypePtr& LX::Context::GetStructType(const std::string& name, const std::vector<Parameter>& elements)
+LX::TypePtr& LX::Context::GetStructType(
+    const SourceLocation& where,
+    const std::string& name,
+    const std::vector<Parameter>& elements)
 {
     auto& type = GetType(StructType::GetName(name, elements));
     if (type)
     {
-        if (!elements.empty()) type->PutElements(elements);
+        if (!elements.empty()) type->PutElements(where, elements);
         return type;
     }
     return type = std::make_shared<StructType>(name, elements);

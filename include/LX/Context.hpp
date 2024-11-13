@@ -16,7 +16,7 @@ namespace LX
         TypePtr& GetVoidType();
         TypePtr& GetIntType(unsigned, bool);
         TypePtr& GetFloatType(unsigned);
-        TypePtr& GetStructType(const std::string&, const std::vector<Parameter>&);
+        TypePtr& GetStructType(const SourceLocation&, const std::string&, const std::vector<Parameter>&);
         TypePtr& GetPointerType(const TypePtr&);
         TypePtr& GetMutableType(const TypePtr&);
         TypePtr& GetArrayType(const TypePtr&, size_t);

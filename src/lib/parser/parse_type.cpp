@@ -29,8 +29,10 @@ LX::TypePtr LX::Parser::ParseType()
         else result = m_Ctx.GetVoidType();
         type = m_Ctx.GetFunctionType(result, params, vararg);
     }
-    else if (NextAt("struct"))
+    else if (At("struct"))
     {
+        const auto where = Skip().Where;
+
         std::string name;
         if (At(TokenType_String))
             name = Skip().StringValue;
@@ -42,7 +44,7 @@ LX::TypePtr LX::Parser::ParseType()
             Expect("}");
         }
 
-        type = m_Ctx.GetStructType(name, elements);
+        type = m_Ctx.GetStructType(where, name, elements);
     }
     else if (NextAt("mut"))
     {

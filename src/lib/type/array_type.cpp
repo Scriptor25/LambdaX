@@ -12,10 +12,25 @@ LX::ArrayType::ArrayType(TypePtr element_type, const size_t size)
 {
 }
 
-llvm::Type* LX::ArrayType::GenIR(Builder& builder)
+bool LX::ArrayType::IsArray() const
+{
+    return true;
+}
+
+LX::TypePtr LX::ArrayType::Element(const SourceLocation& where) const
+{
+    return ElementType;
+}
+
+LX::TypePtr LX::ArrayType::Element(const SourceLocation&, const size_t) const
+{
+    return ElementType;
+}
+
+llvm::Type* LX::ArrayType::GenIR(const SourceLocation& where, Builder& builder)
 {
     if (m_IR) return m_IR;
-    return m_IR = llvm::ArrayType::get(ElementType->GenIR(builder), Size);
+    return m_IR = llvm::ArrayType::get(ElementType->GenIR(where, builder), Size);
 }
 
 llvm::DIType* LX::ArrayType::GenDI(Builder& builder)

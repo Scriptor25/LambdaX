@@ -63,6 +63,16 @@ bool LX::Type::IsPointer() const
     return false;
 }
 
+bool LX::Type::IsArray() const
+{
+    return false;
+}
+
+bool LX::Type::IsStruct() const
+{
+    return false;
+}
+
 bool LX::Type::IsFunction() const
 {
     return false;
@@ -73,42 +83,42 @@ bool LX::Type::IsMutable() const
     return false;
 }
 
-LX::TypePtr LX::Type::Result() const
+LX::TypePtr LX::Type::Result(const SourceLocation& where) const
 {
-    Error("{} is not a function type; cannot provide result type", Name);
+    Error(where, "{} is not a function type; cannot provide result type", Name);
 }
 
-size_t LX::Type::ParamCount() const
+size_t LX::Type::ParamCount(const SourceLocation& where) const
 {
-    Error("{} is not a function type; cannot provide parameter count", Name);
+    Error(where, "{} is not a function type; cannot provide parameter count", Name);
 }
 
-LX::TypePtr LX::Type::Param(const size_t i) const
+LX::TypePtr LX::Type::Param(const SourceLocation& where, const size_t i) const
 {
-    Error("{} is not a function type; cannot provide parameter at {}", Name, i);
+    Error(where, "{} is not a function type; cannot provide parameter at {}", Name, i);
 }
 
-bool LX::Type::HasVarArg() const
+bool LX::Type::HasVarArg(const SourceLocation& where) const
 {
-    Error("{} is not a function type; cannot tell if it has variadic args", Name);
+    Error(where, "{} is not a function type; cannot tell if it has variadic args", Name);
 }
 
-void LX::Type::PutElements(const std::vector<Parameter>&)
+void LX::Type::PutElements(const SourceLocation& where, const std::vector<Parameter>&)
 {
-    Error("{} is not a struct type; cannot set elements", Name);
+    Error(where, "{} is not a struct type; cannot set elements", Name);
 }
 
-LX::TypePtr LX::Type::Element() const
+LX::TypePtr LX::Type::Element(const SourceLocation& where) const
 {
-    Error("{} is not a pointer or mutable type; cannot get element type", Name);
+    Error(where, "{} is not a pointer, array or mutable type; cannot get element type", Name);
 }
 
-LX::TypePtr LX::Type::Element(const size_t i) const
+LX::TypePtr LX::Type::Element(const SourceLocation& where, const size_t i) const
 {
-    Error("{} is not a struct type; cannot get element type at {}", Name, i);
+    Error(where, "{} is not a struct or array type; cannot get element type at {}", Name, i);
 }
 
-size_t LX::Type::IndexOf(const std::string& name) const
+size_t LX::Type::IndexOf(const SourceLocation& where, const std::string& name) const
 {
-    Error("{} is not a struct type; cannot get index of named element '{}'", Name, name);
+    Error(where, "{} is not a struct type; cannot get index of named element '{}'", Name, name);
 }

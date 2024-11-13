@@ -1,5 +1,6 @@
 #include <LX/AST.hpp>
 #include <LX/Builder.hpp>
+#include <LX/Error.hpp>
 #include <LX/Type.hpp>
 #include <LX/Value.hpp>
 
@@ -23,12 +24,21 @@ LX::ValuePtr LX::MutableExpr::GenIR(Builder& builder) const
     Where.EmitDI(builder);
 
     const auto type = Type ? Type : init->Type();
-    const auto value = builder.CreateAlloca(type, true, Name);
+    const auto value = init && !Type
+                           ? init
+                           : builder.CreateAlloca(Where, type, true, Name);
 
-    if (Init)
+    if (value == init && !init->IsMutable())
+        Error(
+            Where,
+            "initializer must be mutable to create a reference; if you want to copy it, change to 'mut {} => {} = ...'",
+            Name,
+            type);
+
+    if (init && value != init)
     {
-        if (Type) init = builder.CreateCast(Where, init, Type);
-        value->Store(builder, init->Load(builder));
+        init = builder.CreateCast(Where, init, type);
+        value->Store(Where, builder, init->Load(Where, builder));
     }
 
     const auto d = builder.DIBuilder().createAutoVariable(
@@ -39,7 +49,7 @@ LX::ValuePtr LX::MutableExpr::GenIR(Builder& builder) const
         type->GenDI(builder),
         true);
     builder.DIBuilder().insertDeclare(
-        value->Ptr(),
+        value->Ptr(Where),
         d,
         builder.DIBuilder().createExpression(),
         llvm::DILocation::get(

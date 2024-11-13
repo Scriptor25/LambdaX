@@ -23,4 +23,4 @@ export create(color albedo) => lambertian = {
      = scatter(*(ptr as [lambertian]), r_in, rec, attenuation, scattered),
 
     albedo,
-} => lambertian
+} lambertian

@@ -21,7 +21,7 @@ bool LX::IntType::IsSigned() const
     return Sign;
 }
 
-llvm::Type* LX::IntType::GenIR(Builder& builder)
+llvm::Type* LX::IntType::GenIR(const SourceLocation&, Builder& builder)
 {
     if (m_IR) return m_IR;
     return m_IR = builder.IRBuilder().getIntNTy(Bits);

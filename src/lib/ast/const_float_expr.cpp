@@ -19,6 +19,6 @@ LX::ValuePtr LX::ConstFloatExpr::GenIR(Builder& builder) const
     Where.EmitDI(builder);
 
     const auto type = builder.Ctx().GetFloatType(64);
-    const auto value = llvm::ConstantFP::get(type->GenIR(builder), Value);
+    const auto value = llvm::ConstantFP::get(type->GenIR(Where, builder), Value);
     return RValue::Create(type, value);
 }

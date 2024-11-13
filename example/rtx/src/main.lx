@@ -8,19 +8,19 @@ import "std.lx" as std
 import "vec3.lx" as vec3
 
 extern main(i32 argc, [[i8]] argv) => i32 = (
-    mut world := hittable_list.create(),
+    mut world => hittable_list := hittable_list.create(),
 
-    mut material_ground := lambertian.create(vec3.create(0.8, 0.8, 0.0)),
-    mut material_center := lambertian.create(vec3.create(0.1, 0.2, 0.5)),
-    mut material_left   := dielectric.create(vec3.scalar(1), 1.5),
-    mut material_bubble := dielectric.create(vec3.scalar(1), 1 / 1.5),
-    mut material_right  := metal.create(vec3.create(0.8, 0.6, 0.2), 1.0),
+    material_ground := lambertian.create(vec3.create(0.8, 0.8, 0.0)),
+    material_center := lambertian.create(vec3.create(0.1, 0.2, 0.5)),
+    material_left   := dielectric.create(vec3.scalar(1), 1.5),
+    material_bubble := dielectric.create(vec3.scalar(1), 1 / 1.5),
+    material_right  := metal.create(vec3.create(0.8, 0.6, 0.2), 1.0),
 
-    mut s1 := sphere.create(vec3.create( 0.0, -100.5, -1.0), 100, &material_ground),
-    mut s2 := sphere.create(vec3.create( 0.0,    0.0, -1.2), 0.5, &material_center),
-    mut s3 := sphere.create(vec3.create(-1.0,    0.0, -1.0), 0.5, &material_left),
-    mut s4 := sphere.create(vec3.create(-1.0,    0.0, -1.0), 0.4, &material_bubble),
-    mut s5 := sphere.create(vec3.create( 1.0,    0.0, -1.0), 0.5, &material_right),
+    s1 := sphere.create(vec3.create( 0.0, -100.5, -1.0), 100, &material_ground),
+    s2 := sphere.create(vec3.create( 0.0,    0.0, -1.2), 0.5, &material_center),
+    s3 := sphere.create(vec3.create(-1.0,    0.0, -1.0), 0.5, &material_left),
+    s4 := sphere.create(vec3.create(-1.0,    0.0, -1.0), 0.4, &material_bubble),
+    s5 := sphere.create(vec3.create( 1.0,    0.0, -1.0), 0.5, &material_right),
 
     hittable_list.add(world, &s1),
     hittable_list.add(world, &s2),

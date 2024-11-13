@@ -5,9 +5,9 @@ import "vec3.lx"
 export print_header(i32 width, i32 height, i32 max) => i32 = std.printf("P3\n%d %d\n%d\n", width, height, max)
 
 export print_color(color c) => i32 = (
-    r := util.gamma(c.x),
-    g := util.gamma(c.y),
-    b := util.gamma(c.z),
+    r := util.gamma(c[0]),
+    g := util.gamma(c[1]),
+    b := util.gamma(c[2]),
     ir := (util.clamp(r, 0.0, 0.999) * 256) as i32,
     ig := (util.clamp(g, 0.0, 0.999) * 256) as i32,
     ib := (util.clamp(b, 0.0, 0.999) * 256) as i32,

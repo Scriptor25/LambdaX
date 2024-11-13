@@ -1,0 +1,7 @@
+foo(mut i32 bar) = bar = bar + 1
+
+extern main() => i32 = (
+    mut bar => i32 := 10,
+    foo(bar),
+    0
+)

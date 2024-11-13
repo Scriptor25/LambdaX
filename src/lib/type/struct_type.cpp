@@ -30,20 +30,25 @@ LX::StructType::StructType(std::string name, std::vector<Parameter> elements)
 {
 }
 
-LX::TypePtr LX::StructType::Element(const size_t i) const
+bool LX::StructType::IsStruct() const
+{
+    return true;
+}
+
+LX::TypePtr LX::StructType::Element(const SourceLocation&, const size_t i) const
 {
     return Elements[i].Type;
 }
 
-size_t LX::StructType::IndexOf(const std::string& name) const
+size_t LX::StructType::IndexOf(const SourceLocation& where, const std::string& name) const
 {
     for (size_t i = 0; i < Elements.size(); ++i)
         if (Elements[i].Name == name)
             return i;
-    Error("no element '{}' in type {}", name, Name);
+    Error(where, "no element '{}' in type {}", name, Name);
 }
 
-void LX::StructType::PutElements(const std::vector<Parameter>& elements)
+void LX::StructType::PutElements(const SourceLocation& where, const std::vector<Parameter>& elements)
 {
     if (!Elements.empty())
     {
@@ -53,19 +58,19 @@ void LX::StructType::PutElements(const std::vector<Parameter>& elements)
                 if (Elements[i].Type != elements[i].Type)
                     break;
         if (i < Elements.size())
-            Error("redefining non-opaque type {} with different elements", Name);
+            Error(where, "redefining non-opaque type {} with different elements", Name);
         return;
     }
     Elements = elements;
 }
 
-llvm::Type* LX::StructType::GenIR(Builder& builder)
+llvm::Type* LX::StructType::GenIR(const SourceLocation& where, Builder& builder)
 {
     if (m_IR) return m_IR;
 
     std::vector<llvm::Type*> elements(Elements.size());
     for (size_t i = 0; i < Elements.size(); ++i)
-        elements[i] = Elements[i].Type->GenIR(builder);
+        elements[i] = Elements[i].Type->GenIR(where, builder);
 
     if (StructName.empty())
         return llvm::StructType::get(builder.IRContext(), elements);

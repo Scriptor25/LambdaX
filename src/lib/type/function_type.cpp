@@ -36,34 +36,34 @@ bool LX::FunctionType::IsFunction() const
     return true;
 }
 
-LX::TypePtr LX::FunctionType::Result() const
+LX::TypePtr LX::FunctionType::Result(const SourceLocation&) const
 {
     return ResultType;
 }
 
-size_t LX::FunctionType::ParamCount() const
+size_t LX::FunctionType::ParamCount(const SourceLocation&) const
 {
     return Params.size();
 }
 
-LX::TypePtr LX::FunctionType::Param(const size_t index) const
+LX::TypePtr LX::FunctionType::Param(const SourceLocation&, const size_t index) const
 {
     return Params[index].Type;
 }
 
-bool LX::FunctionType::HasVarArg() const
+bool LX::FunctionType::HasVarArg(const SourceLocation&) const
 {
     return VarArg;
 }
 
-llvm::Type* LX::FunctionType::GenIR(Builder& builder)
+llvm::Type* LX::FunctionType::GenIR(const SourceLocation& where, Builder& builder)
 {
     if (m_IR) return m_IR;
 
-    const auto result_type = ResultType->GenIR(builder);
+    const auto result_type = ResultType->GenIR(where, builder);
     std::vector<llvm::Type*> param_types(Params.size());
     for (size_t i = 0; i < Params.size(); ++i)
-        param_types[i] = Params[i].Type->GenIR(builder);
+        param_types[i] = Params[i].Type->GenIR(where, builder);
     return m_IR = llvm::FunctionType::get(result_type, param_types, VarArg);
 }
 

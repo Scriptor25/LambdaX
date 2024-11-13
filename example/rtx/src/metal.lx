@@ -22,4 +22,4 @@ export create(color albedo, f64 fuzz) => metal = {
 
     albedo,
     fuzz,
-} => metal
+} metal

@@ -14,10 +14,6 @@ LX::ExprPtr LX::Parser::ParseConstStruct()
             Expect(",");
     }
     Expect("}");
-
-    TypePtr type;
-    if (NextAt("=>"))
-        type = ParseType();
-
+    const auto type = ParseType();
     return std::make_unique<ConstStructExpr>(where, std::move(elements), type);
 }

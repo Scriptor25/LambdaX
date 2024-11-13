@@ -11,10 +11,10 @@ namespace LX
         [[nodiscard]] TypePtr Type() const;
 
         virtual ~Value() = default;
-        virtual llvm::Value* Load(Builder&) const = 0;
-        virtual void Store(Builder&, llvm::Value*) const = 0;
-        virtual void StoreForce(Builder&, llvm::Value*) const = 0;
-        [[nodiscard]] virtual llvm::Value* Ptr() const = 0;
+        virtual llvm::Value* Load(const SourceLocation&, Builder&) const = 0;
+        virtual void Store(const SourceLocation&, Builder&, llvm::Value*) const = 0;
+        virtual void StoreForce(const SourceLocation&, Builder&, llvm::Value*) const = 0;
+        [[nodiscard]] virtual llvm::Value* Ptr(const SourceLocation&) const = 0;
         [[nodiscard]] virtual bool IsMutable() const = 0;
         [[nodiscard]] virtual bool HasPtr() const = 0;
 
@@ -29,10 +29,10 @@ namespace LX
     public:
         static ValuePtr Create(const TypePtr&, llvm::Value*);
 
-        llvm::Value* Load(Builder&) const override;
-        void Store(Builder&, llvm::Value*) const override;
-        void StoreForce(Builder&, llvm::Value*) const override;
-        [[nodiscard]] llvm::Value* Ptr() const override;
+        llvm::Value* Load(const SourceLocation&, Builder&) const override;
+        void Store(const SourceLocation&, Builder&, llvm::Value*) const override;
+        void StoreForce(const SourceLocation&, Builder&, llvm::Value*) const override;
+        [[nodiscard]] llvm::Value* Ptr(const SourceLocation&) const override;
         [[nodiscard]] bool IsMutable() const override;
         [[nodiscard]] bool HasPtr() const override;
 
@@ -47,10 +47,10 @@ namespace LX
     public:
         static ValuePtr Create(const TypePtr&, llvm::Value*, bool);
 
-        llvm::Value* Load(Builder&) const override;
-        void Store(Builder&, llvm::Value*) const override;
-        void StoreForce(Builder&, llvm::Value*) const override;
-        [[nodiscard]] llvm::Value* Ptr() const override;
+        llvm::Value* Load(const SourceLocation&, Builder&) const override;
+        void Store(const SourceLocation&, Builder&, llvm::Value*) const override;
+        void StoreForce(const SourceLocation&, Builder&, llvm::Value*) const override;
+        [[nodiscard]] llvm::Value* Ptr(const SourceLocation&) const override;
         [[nodiscard]] bool IsMutable() const override;
         [[nodiscard]] bool HasPtr() const override;
 

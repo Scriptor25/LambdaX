@@ -18,13 +18,27 @@ LX::ValuePtr LX::SubscriptExpr::GenIR(Builder& builder) const
 {
     const auto base = Base->GenIR(builder);
     const auto offset = Offset->GenIR(builder);
-    const auto type = base->Type()->Element();
+    const auto type = base->Type()->Element(Where);
 
     Where.EmitDI(builder);
 
-    const auto gep = builder.IRBuilder().CreateGEP(
-        type->GenIR(builder),
-        base->Load(builder),
-        {offset->Load(builder)});
-    return LValue::Create(type, gep, base->IsMutable());
+    if (base->Type()->IsPointer())
+    {
+        const auto gep = builder.IRBuilder().CreateGEP(
+            type->GenIR(Where, builder),
+            base->Load(Where, builder),
+            {offset->Load(Where, builder)});
+        return LValue::Create(type, gep, base->IsMutable());
+    }
+    if (base->Type()->IsArray())
+    {
+        const auto zero = builder.IRBuilder().getInt64(0);
+        const auto gep = builder.IRBuilder().CreateGEP(
+            base->Type()->GenIR(Where, builder),
+            base->Ptr(Where),
+            {zero, offset->Load(Where, builder)});
+        return LValue::Create(type, gep, base->IsMutable());
+    }
+
+    Error(Where, "base of subscript must be a pointer or array type, but is {}", base->Type());
 }

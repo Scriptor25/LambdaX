@@ -4,46 +4,46 @@
 
 namespace LX
 {
-    ValuePtr OperatorLOr(Builder&, const ValuePtr&, const ValuePtr&);
-    ValuePtr OperatorLXOr(Builder&, const ValuePtr&, const ValuePtr&);
-    ValuePtr OperatorLAnd(Builder&, const ValuePtr&, const ValuePtr&);
-    TypePtr OperatorTypeLogical(Context&, const TypePtr&);
+    ValuePtr OperatorLOr(const SourceLocation&, Builder&, const ValuePtr&, const ValuePtr&);
+    ValuePtr OperatorLXOr(const SourceLocation&, Builder&, const ValuePtr&, const ValuePtr&);
+    ValuePtr OperatorLAnd(const SourceLocation&, Builder&, const ValuePtr&, const ValuePtr&);
+    TypePtr OperatorTypeLogical(const SourceLocation&, Context&, const TypePtr&);
 
-    ValuePtr OperatorEQ(Builder&, const ValuePtr&, const ValuePtr&);
-    ValuePtr OperatorNE(Builder&, const ValuePtr&, const ValuePtr&);
-    ValuePtr OperatorLT(Builder&, const ValuePtr&, const ValuePtr&);
-    ValuePtr OperatorLE(Builder&, const ValuePtr&, const ValuePtr&);
-    ValuePtr OperatorGT(Builder&, const ValuePtr&, const ValuePtr&);
-    ValuePtr OperatorGE(Builder&, const ValuePtr&, const ValuePtr&);
-    TypePtr OperatorTypeCmp(Context&, const TypePtr&);
+    ValuePtr OperatorEQ(const SourceLocation&, Builder&, const ValuePtr&, const ValuePtr&);
+    ValuePtr OperatorNE(const SourceLocation&, Builder&, const ValuePtr&, const ValuePtr&);
+    ValuePtr OperatorLT(const SourceLocation&, Builder&, const ValuePtr&, const ValuePtr&);
+    ValuePtr OperatorLE(const SourceLocation&, Builder&, const ValuePtr&, const ValuePtr&);
+    ValuePtr OperatorGT(const SourceLocation&, Builder&, const ValuePtr&, const ValuePtr&);
+    ValuePtr OperatorGE(const SourceLocation&, Builder&, const ValuePtr&, const ValuePtr&);
+    TypePtr OperatorTypeCmp(const SourceLocation&, Context&, const TypePtr&);
 
-    ValuePtr OperatorAdd(Builder&, const ValuePtr&, const ValuePtr&);
-    ValuePtr OperatorSub(Builder&, const ValuePtr&, const ValuePtr&);
-    ValuePtr OperatorMul(Builder&, const ValuePtr&, const ValuePtr&);
-    ValuePtr OperatorDiv(Builder&, const ValuePtr&, const ValuePtr&);
-    ValuePtr OperatorRem(Builder&, const ValuePtr&, const ValuePtr&);
-    TypePtr OperatorTypeArith(Context&, const TypePtr&);
+    ValuePtr OperatorAdd(const SourceLocation&, Builder&, const ValuePtr&, const ValuePtr&);
+    ValuePtr OperatorSub(const SourceLocation&, Builder&, const ValuePtr&, const ValuePtr&);
+    ValuePtr OperatorMul(const SourceLocation&, Builder&, const ValuePtr&, const ValuePtr&);
+    ValuePtr OperatorDiv(const SourceLocation&, Builder&, const ValuePtr&, const ValuePtr&);
+    ValuePtr OperatorRem(const SourceLocation&, Builder&, const ValuePtr&, const ValuePtr&);
+    TypePtr OperatorTypeArith(const SourceLocation&, Context&, const TypePtr&);
 
-    ValuePtr OperatorPow(Builder&, const ValuePtr&, const ValuePtr&);
-    ValuePtr OperatorRt(Builder&, const ValuePtr&, const ValuePtr&);
-    TypePtr OperatorTypePow(Context&, const TypePtr&);
+    ValuePtr OperatorPow(const SourceLocation&, Builder&, const ValuePtr&, const ValuePtr&);
+    ValuePtr OperatorRt(const SourceLocation&, Builder&, const ValuePtr&, const ValuePtr&);
+    TypePtr OperatorTypePow(const SourceLocation&, Context&, const TypePtr&);
 
-    ValuePtr OperatorOr(Builder&, const ValuePtr&, const ValuePtr&);
-    ValuePtr OperatorXOr(Builder&, const ValuePtr&, const ValuePtr&);
-    ValuePtr OperatorAnd(Builder&, const ValuePtr&, const ValuePtr&);
-    ValuePtr OperatorShL(Builder&, const ValuePtr&, const ValuePtr&);
-    ValuePtr OperatorShR(Builder&, const ValuePtr&, const ValuePtr&);
-    TypePtr OperatorTypeBitwise(Context&, const TypePtr&);
+    ValuePtr OperatorOr(const SourceLocation&, Builder&, const ValuePtr&, const ValuePtr&);
+    ValuePtr OperatorXOr(const SourceLocation&, Builder&, const ValuePtr&, const ValuePtr&);
+    ValuePtr OperatorAnd(const SourceLocation&, Builder&, const ValuePtr&, const ValuePtr&);
+    ValuePtr OperatorShL(const SourceLocation&, Builder&, const ValuePtr&, const ValuePtr&);
+    ValuePtr OperatorShR(const SourceLocation&, Builder&, const ValuePtr&, const ValuePtr&);
+    TypePtr OperatorTypeBitwise(const SourceLocation&, Context&, const TypePtr&);
 
-    ValuePtr OperatorNeg(Builder&, const ValuePtr&);
-    TypePtr OperatorTypeNeg(Context&, const TypePtr&);
-    ValuePtr OperatorNot(Builder&, const ValuePtr&);
-    TypePtr OperatorTypeNot(Context&, const TypePtr&);
-    ValuePtr OperatorLNot(Builder&, const ValuePtr&);
-    TypePtr OperatorTypeLNot(Context&, const TypePtr&);
+    ValuePtr OperatorNeg(const SourceLocation&, Builder&, const ValuePtr&);
+    TypePtr OperatorTypeNeg(const SourceLocation&, Context&, const TypePtr&);
+    ValuePtr OperatorNot(const SourceLocation&, Builder&, const ValuePtr&);
+    TypePtr OperatorTypeNot(const SourceLocation&, Context&, const TypePtr&);
+    ValuePtr OperatorLNot(const SourceLocation&, Builder&, const ValuePtr&);
+    TypePtr OperatorTypeLNot(const SourceLocation&, Context&, const TypePtr&);
 
-    ValuePtr OperatorRef(Builder&, const ValuePtr&);
-    TypePtr OperatorTypeRef(Context&, const TypePtr&);
-    ValuePtr OperatorDeref(Builder&, const ValuePtr&);
-    TypePtr OperatorTypeDeref(Context&, const TypePtr&);
+    ValuePtr OperatorRef(const SourceLocation&, Builder&, const ValuePtr&);
+    TypePtr OperatorTypeRef(const SourceLocation&, Context&, const TypePtr&);
+    ValuePtr OperatorDeref(const SourceLocation&, Builder&, const ValuePtr&);
+    TypePtr OperatorTypeDeref(const SourceLocation&, Context&, const TypePtr&);
 }

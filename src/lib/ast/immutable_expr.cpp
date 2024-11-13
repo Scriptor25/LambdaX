@@ -22,10 +22,10 @@ LX::ValuePtr LX::ImmutableExpr::GenIR(Builder& builder) const
     Where.EmitDI(builder);
 
     const auto type = Type ? Type : init->Type();
-    const auto value = builder.CreateAlloca(type, false, Name);
+    const auto value = builder.CreateAlloca(Where, type, false, Name);
 
     if (Type) init = builder.CreateCast(Where, init, Type);
-    value->StoreForce(builder, init->Load(builder));
+    value->StoreForce(Where, builder, init->Load(Where, builder));
 
     const auto d = builder.DIBuilder().createAutoVariable(
         &builder.DIScope(),
@@ -35,7 +35,7 @@ LX::ValuePtr LX::ImmutableExpr::GenIR(Builder& builder) const
         type->GenDI(builder),
         true);
     builder.DIBuilder().insertDeclare(
-        value->Ptr(),
+        value->Ptr(Where),
         d,
         builder.DIBuilder().createExpression(),
         llvm::DILocation::get(

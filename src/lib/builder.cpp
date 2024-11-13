@@ -172,8 +172,8 @@ LX::ValuePtr LX::Builder::CreateCast(const SourceLocation& where, const ValuePtr
     if (src_ty == dst)
         return src;
 
-    const auto src_value = src->Load(*this);
-    const auto dst_type = dst->GenIR(*this);
+    const auto src_value = src->Load(where, *this);
+    const auto dst_type = dst->GenIR(where, *this);
 
     if (src_ty->IsInt())
     {
@@ -227,11 +227,15 @@ LX::ValuePtr LX::Builder::CreateCast(const SourceLocation& where, const ValuePtr
     Error(where, "cannot cast value of type '{}' to type '{}'", src_ty, dst);
 }
 
-LX::ValuePtr LX::Builder::CreateAlloca(const TypePtr& type, const bool is_mutable, const std::string& name)
+LX::ValuePtr LX::Builder::CreateAlloca(
+    const SourceLocation& where,
+    const TypePtr& type,
+    const bool is_mutable,
+    const std::string& name)
 {
     const auto bkp = IRBuilder().GetInsertBlock();
     IRBuilder().SetInsertPointPastAllocas(bkp->getParent());
-    const auto ptr = IRBuilder().CreateAlloca(type->GenIR(*this), {}, name);
+    const auto ptr = IRBuilder().CreateAlloca(type->GenIR(where, *this), {}, name);
     IRBuilder().SetInsertPoint(bkp);
     return LValue::Create(type, ptr, is_mutable);
 }

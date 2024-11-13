@@ -16,8 +16,8 @@ std::ostream& LX::Function::Print(std::ostream& os) const
         Params[i].Print(os);
     }
     os << ')';
-    if (!Type->Result()->IsVoid())
-        Type->Result()->Print(os << " => ");
+    if (!Type->Result({})->IsVoid())
+        Type->Result({})->Print(os << " => ");
     if (Body) Body->Print(os << " = ");
     return os;
 }
@@ -30,11 +30,11 @@ LX::ValuePtr LX::Function::GenIR(const SourceLocation& where, Builder& builder) 
     if (!Name.empty() && builder.Contains(Name))
     {
         result = builder.Get(where, Name);
-        function = llvm::dyn_cast<llvm::Function>(result->Load(builder));
+        function = llvm::dyn_cast<llvm::Function>(result->Load(where, builder));
     }
     else
     {
-        const auto type = llvm::dyn_cast<llvm::FunctionType>(Type->GenIR(builder));
+        const auto type = llvm::dyn_cast<llvm::FunctionType>(Type->GenIR(where, builder));
         const auto name = Export && !Extern
                               ? builder.ModuleId() + '.' + Name
                               : Name;
@@ -54,7 +54,7 @@ LX::ValuePtr LX::Function::GenIR(const SourceLocation& where, Builder& builder) 
 
     if (!Body) return result;
     if (!function->empty())
-        Error(where, "cannot redefine function '{}'", Name);
+        Error(where, "redefining function '{}'", Name);
 
     const auto unit = builder.DIBuilder().createFile(
         builder.DIUnit().getFilename(),
@@ -86,11 +86,11 @@ LX::ValuePtr LX::Function::GenIR(const SourceLocation& where, Builder& builder) 
 
         auto& var = builder.Define(where, param_name_);
         if (param_type_->IsMutable())
-            var = LValue::Create(param_type_->Element(), arg, true);
+            var = LValue::Create(param_type_->Element(where), arg, true);
         else
         {
-            var = builder.CreateAlloca(param_type_, false);
-            var->StoreForce(builder, arg);
+            var = builder.CreateAlloca(where, param_type_, false);
+            var->StoreForce(where, builder, arg);
         }
 
         const auto d = builder.DIBuilder().createParameterVariable(
@@ -102,7 +102,7 @@ LX::ValuePtr LX::Function::GenIR(const SourceLocation& where, Builder& builder) 
             var->Type()->GenDI(builder),
             true);
         builder.DIBuilder().insertDeclare(
-            var->Ptr(),
+            var->Ptr(where),
             d,
             builder.DIBuilder().createExpression(),
             llvm::DILocation::get(
@@ -114,15 +114,15 @@ LX::ValuePtr LX::Function::GenIR(const SourceLocation& where, Builder& builder) 
     }
 
     auto value = Body->GenIR(builder);
-    if (Type->Result()->IsVoid())
+    if (Type->Result(where)->IsVoid())
         builder.IRBuilder().CreateRetVoid();
     else
     {
-        value = builder.CreateCast(where, value, Type->Result());
+        value = builder.CreateCast(where, value, Type->Result(where));
         builder.IRBuilder().CreateRet(
-            Type->Result()->IsMutable()
-                ? value->Ptr()
-                : value->Load(builder));
+            Type->Result(where)->IsMutable()
+                ? value->Ptr(where)
+                : value->Load(where, builder));
     }
 
     builder.IRBuilder().SetInsertPoint(bkp);

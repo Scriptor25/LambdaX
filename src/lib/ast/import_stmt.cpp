@@ -28,7 +28,7 @@ LX::ValuePtr LX::ImportStmt::GenIR(Builder& builder) const
     std::vector<llvm::Constant*> elements;
     for (const auto& [type_, name_, extern_] : Imports)
     {
-        const auto function_type = llvm::dyn_cast<llvm::FunctionType>(type_->Element()->GenIR(builder));
+        const auto function_type = llvm::dyn_cast<llvm::FunctionType>(type_->Element(Where)->GenIR(Where, builder));
         const auto name = !extern_ ? ModuleId + '.' + name_ : name_;
 
         const auto function = llvm::Function::Create(
@@ -43,8 +43,8 @@ LX::ValuePtr LX::ImportStmt::GenIR(Builder& builder) const
     for (size_t i = 0; i < Imports.size(); ++i)
         params[i] = {Imports[i].Type, Imports[i].Name};
 
-    const auto type = builder.Ctx().GetStructType("module." + Name, params);
-    const auto struct_type = llvm::dyn_cast<llvm::StructType>(type->GenIR(builder));
+    const auto type = builder.Ctx().GetStructType(Where, "module." + Name, params);
+    const auto struct_type = llvm::dyn_cast<llvm::StructType>(type->GenIR(Where, builder));
     const auto value = llvm::ConstantStruct::get(struct_type, elements);
     return builder.Define(Where, Name) = RValue::Create(type, value);
 }

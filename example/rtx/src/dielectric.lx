@@ -39,4 +39,4 @@ export create(color albedo, f64 refraction_index) => dielectric = {
 
     albedo,
     refraction_index,
-} => dielectric
+} dielectric

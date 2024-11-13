@@ -18,24 +18,24 @@ LX::ValuePtr LX::RValue::Create(const TypePtr& type, llvm::Value* value)
     return std::shared_ptr<RValue>(new RValue(type, value));
 }
 
-llvm::Value* LX::RValue::Load(Builder&) const
+llvm::Value* LX::RValue::Load(const SourceLocation&, Builder&) const
 {
     return m_Value;
 }
 
-void LX::RValue::Store(Builder&, llvm::Value*) const
+void LX::RValue::Store(const SourceLocation& where, Builder&, llvm::Value*) const
 {
-    Error("cannot assign to rvalue");
+    Error(where, "cannot assign to rvalue");
 }
 
-void LX::RValue::StoreForce(Builder&, llvm::Value*) const
+void LX::RValue::StoreForce(const SourceLocation& where, Builder&, llvm::Value*) const
 {
-    Error("cannot assign to rvalue");
+    Error(where, "cannot assign to rvalue");
 }
 
-llvm::Value* LX::RValue::Ptr() const
+llvm::Value* LX::RValue::Ptr(const SourceLocation& where) const
 {
-    Error("cannot get pointer to rvalue");
+    Error(where, "cannot get pointer to rvalue");
 }
 
 bool LX::RValue::IsMutable() const
@@ -58,24 +58,24 @@ LX::ValuePtr LX::LValue::Create(const TypePtr& type, llvm::Value* ptr, const boo
     return std::shared_ptr<LValue>(new LValue(type, ptr, is_mutable));
 }
 
-llvm::Value* LX::LValue::Load(Builder& builder) const
+llvm::Value* LX::LValue::Load(const SourceLocation& where, Builder& builder) const
 {
-    return builder.IRBuilder().CreateLoad(m_Type->GenIR(builder), m_Ptr);
+    return builder.IRBuilder().CreateLoad(m_Type->GenIR(where, builder), m_Ptr);
 }
 
-void LX::LValue::Store(Builder& builder, llvm::Value* value) const
+void LX::LValue::Store(const SourceLocation& where, Builder& builder, llvm::Value* value) const
 {
     if (!m_IsMutable)
-        Error("lvalue is not marked as mutable");
+        Error(where, "lvalue is not marked as mutable");
     builder.IRBuilder().CreateStore(value, m_Ptr);
 }
 
-void LX::LValue::StoreForce(Builder& builder, llvm::Value* value) const
+void LX::LValue::StoreForce(const SourceLocation&, Builder& builder, llvm::Value* value) const
 {
     builder.IRBuilder().CreateStore(value, m_Ptr);
 }
 
-llvm::Value* LX::LValue::Ptr() const
+llvm::Value* LX::LValue::Ptr(const SourceLocation&) const
 {
     return m_Ptr;
 }

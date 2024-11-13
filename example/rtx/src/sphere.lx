@@ -42,4 +42,4 @@ export create(point center, f64 radius, [material] mat) => sphere = {
     center,
     radius,
     mat,
-} => sphere
+} sphere

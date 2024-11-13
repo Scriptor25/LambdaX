@@ -13,7 +13,7 @@ LX::TypePtr LX::BinaryExpr::GetType(
     const TypePtr& left,
     const TypePtr& right)
 {
-    static std::map<std::string, std::function<TypePtr(Context&, const TypePtr&)>> OPS
+    static std::map<std::string, std::function<TypePtr(const SourceLocation&, Context&, const TypePtr&)>> OPS
     {
         {"||", OperatorTypeLogical},
         {"^^", OperatorTypeLogical},
@@ -48,7 +48,7 @@ LX::TypePtr LX::BinaryExpr::GetType(
     const auto equ = Type::Equalize(where, ctx, left, right);
 
     if (const auto& op = OPS[operator_]; op)
-        if (const auto type = op(ctx, equ))
+        if (const auto type = op(where, ctx, equ))
             return type;
 
     Error(where, "undefined binary operator '{} {} {}'", left, operator_, right);
@@ -69,7 +69,8 @@ std::ostream& LX::BinaryExpr::Print(std::ostream& os) const
 
 LX::ValuePtr LX::BinaryExpr::GenIR(Builder& builder) const
 {
-    static std::map<std::string, std::function<ValuePtr(Builder&, const ValuePtr&, const ValuePtr&)>> OPS
+    static std::map<std::string, std::function<ValuePtr(const SourceLocation&, Builder&, const ValuePtr&,
+                                                        const ValuePtr&)>> OPS
     {
         {"||", OperatorLOr},
         {"^^", OperatorLXOr},
@@ -106,14 +107,14 @@ LX::ValuePtr LX::BinaryExpr::GenIR(Builder& builder) const
     if (Operator == "=")
     {
         rhs = builder.CreateCast(Where, rhs, lhs->Type());
-        lhs->Store(builder, rhs->Load(builder));
+        lhs->Store(Where, builder, rhs->Load(Where, builder));
         return lhs;
     }
 
     builder.Equalize(Where, lhs, rhs);
 
     if (const auto& op = OPS[Operator]; op)
-        if (const auto value = op(builder, lhs, rhs))
+        if (const auto value = op(Where, builder, lhs, rhs))
             return value;
 
     Error(Where, "undefined binary operator '{} {} {}'", lhs->Type(), Operator, rhs->Type());

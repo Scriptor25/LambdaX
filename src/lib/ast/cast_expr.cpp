@@ -15,8 +15,6 @@ std::ostream& LX::CastExpr::Print(std::ostream& os) const
 LX::ValuePtr LX::CastExpr::GenIR(Builder& builder) const
 {
     const auto src = Source->GenIR(builder);
-
     Where.EmitDI(builder);
-
     return builder.CreateCast(Where, src, Dest);
 }

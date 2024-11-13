@@ -22,7 +22,7 @@ for_objects(hittable_list self, ray r, f64 t_min, mut record rec, u64 i, mut f64
 )
 
 hit(hittable_list self, ray r, interval ray_t, mut record rec) => u1 = (
-    mut closest := ray_t.max,
+    mut closest => f64 := ray_t.max,
     for_objects(self, r, ray_t.min, rec, 0, closest)
 )
 
@@ -42,4 +42,4 @@ export create() => hittable_list = {
 
     0,
     0,
-} => hittable_list
+} hittable_list

@@ -17,7 +17,7 @@ bool LX::FloatType::IsFloat() const
     return true;
 }
 
-llvm::Type* LX::FloatType::GenIR(Builder& builder)
+llvm::Type* LX::FloatType::GenIR(const SourceLocation& where, Builder& builder)
 {
     if (m_IR) return m_IR;
     switch (Bits)
@@ -25,7 +25,7 @@ llvm::Type* LX::FloatType::GenIR(Builder& builder)
     case 16: return m_IR = builder.IRBuilder().getHalfTy();
     case 32: return m_IR = builder.IRBuilder().getFloatTy();
     case 64: return m_IR = builder.IRBuilder().getDoubleTy();
-    default: Error("undefined float type with {} bits", Bits);
+    default: Error(where, "undefined float type with {} bits", Bits);
     }
 }
 

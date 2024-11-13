@@ -7,8 +7,9 @@
 
 LX::StmtPtr LX::Parser::Parse()
 {
-    if (NextAt("type"))
+    if (At("type"))
     {
+        const auto where = Skip().Where;
         const auto name = Expect(TokenType_Symbol).StringValue;
         if (NextAt("{"))
         {
@@ -16,7 +17,7 @@ LX::StmtPtr LX::Parser::Parse()
             ParseParameterList(elements, "}");
             Expect("}");
 
-            m_Ctx.GetType(name) = m_Ctx.GetStructType(name, elements);
+            m_Ctx.GetType(name) = m_Ctx.GetStructType(where, name, elements);
             return {};
         }
 

@@ -11,7 +11,7 @@ bool LX::VoidType::IsVoid() const
     return true;
 }
 
-llvm::Type* LX::VoidType::GenIR(Builder& builder)
+llvm::Type* LX::VoidType::GenIR(const SourceLocation&, Builder& builder)
 {
     if (m_IR) return m_IR;
     return m_IR = builder.IRBuilder().getVoidTy();

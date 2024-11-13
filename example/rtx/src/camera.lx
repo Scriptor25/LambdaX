@@ -56,7 +56,7 @@ ray_color(ray r, u32 depth, [hittable] world) => color = depth <= 0 ? vec3.empty
                 ? vec3.mulv(attenuation, ray_color(scattered, depth - 1, world))
                 : vec3.empty()
         ) : (
-            a := r.direction.y * 0.5 + 0.5,
+            a := r.direction[1] * 0.5 + 0.5,
             mix_color(vec3.scalar(1), vec3.create(0.5, 0.7, 1.0), a)
         )
 )
@@ -65,7 +65,7 @@ sample_square() => vec3 = vec3.create(util.random() - 0.5, util.random() - 0.5, 
 
 get_ray(camera self, u32 i, u32 j) => ray = (
     offset := sample_square(),
-    pixel_sample := vec3.add(vec3.add(self.pixel00_loc, vec3.mul(self.pixel_delta_u, i + offset.x)), vec3.mul(self.pixel_delta_v, j + offset.y)),
+    pixel_sample := vec3.add(vec3.add(self.pixel00_loc, vec3.mul(self.pixel_delta_u, i + offset[0])), vec3.mul(self.pixel_delta_v, j + offset[1])),
 
     ray_origin := self.center,
     ray_direction := vec3.sub(pixel_sample, ray_origin),

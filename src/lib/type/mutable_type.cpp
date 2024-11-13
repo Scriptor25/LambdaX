@@ -16,22 +16,22 @@ bool LX::MutableType::IsMutable() const
     return true;
 }
 
-size_t LX::MutableType::IndexOf(const std::string& name) const
+size_t LX::MutableType::IndexOf(const SourceLocation& where, const std::string& name) const
 {
-    return ElementType->IndexOf(name);
+    return ElementType->IndexOf(where, name);
 }
 
-LX::TypePtr LX::MutableType::Element(const size_t i) const
+LX::TypePtr LX::MutableType::Element(const SourceLocation& where, const size_t i) const
 {
-    return ElementType->Element(i);
+    return ElementType->Element(where, i);
 }
 
-LX::TypePtr LX::MutableType::Element() const
+LX::TypePtr LX::MutableType::Element(const SourceLocation&) const
 {
     return ElementType;
 }
 
-llvm::Type* LX::MutableType::GenIR(Builder& builder)
+llvm::Type* LX::MutableType::GenIR(const SourceLocation&, Builder& builder)
 {
     if (m_IR) return m_IR;
     return m_IR = builder.IRBuilder().getPtrTy();

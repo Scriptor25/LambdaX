@@ -53,7 +53,7 @@ namespace LX
         bool Contains(const std::string&);
 
         ValuePtr CreateCast(const SourceLocation& where, const ValuePtr& src, const TypePtr& dst);
-        ValuePtr CreateAlloca(const TypePtr&, bool, const std::string& = {});
+        ValuePtr CreateAlloca(const SourceLocation&, const TypePtr&, bool, const std::string& = {});
 
         void Equalize(const SourceLocation& where, ValuePtr& a, ValuePtr& b);
 

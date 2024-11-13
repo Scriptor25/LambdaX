@@ -16,12 +16,12 @@ bool LX::PointerType::IsPointer() const
     return true;
 }
 
-LX::TypePtr LX::PointerType::Element() const
+LX::TypePtr LX::PointerType::Element(const SourceLocation&) const
 {
     return ElementType;
 }
 
-llvm::Type* LX::PointerType::GenIR(Builder& builder)
+llvm::Type* LX::PointerType::GenIR(const SourceLocation&, Builder& builder)
 {
     if (m_IR) return m_IR;
     return m_IR = builder.IRBuilder().getPtrTy();

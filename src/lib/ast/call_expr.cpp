@@ -24,20 +24,19 @@ LX::ValuePtr LX::CallExpr::GenIR(Builder& builder) const
 {
     const auto callee = Callee->GenIR(builder);
     if (!callee->Type()->IsPointer()) Error(Where, "callee is not a pointer");
-    const auto callee_type = callee->Type()->Element();
-    if (!callee_type) Error(Where, "cannot create call on opaque pointer");
+    const auto callee_type = callee->Type()->Element(Where);
     if (!callee_type->IsFunction()) Error(Where, "callee is not a function pointer");
-    if (Args.size() < callee_type->ParamCount()) Error(Where, "not enough arguments");
-    if (!callee_type->HasVarArg() && Args.size() > callee_type->ParamCount()) Error(Where, "too many arguments");
+    if (Args.size() < callee_type->ParamCount(Where)) Error(Where, "not enough arguments");
+    if (!callee_type->HasVarArg(Where) && Args.size() > callee_type->ParamCount(Where))
+        Error(Where, "too many arguments");
 
     std::vector<llvm::Value*> args(Args.size());
     for (size_t i = 0; i < Args.size(); ++i)
     {
         auto arg = Args[i]->GenIR(builder);
-
         const auto param =
-            i < callee_type->ParamCount()
-                ? callee_type->Param(i)
+            i < callee_type->ParamCount(Where)
+                ? callee_type->Param(Where, i)
                 : nullptr;
 
         if (param && !param->IsMutable() && arg->Type() != param)
@@ -46,21 +45,26 @@ LX::ValuePtr LX::CallExpr::GenIR(Builder& builder) const
         if (param && param->IsMutable())
         {
             if (!arg->IsMutable())
-                Error(Where, "cannot assign immutable value to mutable arg");
-            if (param->Element() != arg->Type())
-                Error(Where, "cannot assign value of type {} to mutable arg of type {}", arg->Type(), param);
-            args[i] = arg->Ptr();
+                Error(Where, "assigning immutable value to mutable arg index {}", i);
+            if (param->Element(Where) != arg->Type())
+                Error(
+                    Where,
+                    "assigning value of type {} to mutable arg type {}, index {}; casting would make it immutable",
+                    arg->Type(),
+                    i,
+                    param);
+            args[i] = arg->Ptr(Where);
         }
-        else args[i] = arg->Load(builder);
+        else args[i] = arg->Load(Where, builder);
     }
 
     Where.EmitDI(builder);
 
-    const auto type_ir = llvm::dyn_cast<llvm::FunctionType>(callee_type->GenIR(builder));
+    const auto type_ir = llvm::dyn_cast<llvm::FunctionType>(callee_type->GenIR(Where, builder));
 
-    const auto type = callee_type->Result();
-    const auto value = builder.IRBuilder().CreateCall(type_ir, callee->Load(builder), args);
+    const auto type = callee_type->Result(Where);
+    const auto value = builder.IRBuilder().CreateCall(type_ir, callee->Load(Where, builder), args);
     return type->IsMutable()
-               ? LValue::Create(type->Element(), value, true)
+               ? LValue::Create(type->Element(Where), value, true)
                : RValue::Create(type, value);
 }
