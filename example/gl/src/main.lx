@@ -13,23 +13,34 @@ on_error(i32 error_code, [i8] description) = printf("[GLFW 0x%08X] %s\n", error_
 await_close([GLFWwindow] window, [([GLFWwindow])] fn)
  = !glfw.windowShouldClose(window) ?? (fn(window), await_close(window, fn))
 
-VERTICES = {
+VERTICES := {
     -0.5, -0.5, 0.0, 0.0,
     -0.5,  0.5, 0.0, 1.0,
      0.5,  0.5, 1.0, 1.0,
      0.5, -0.5, 1.0, 0.0,
 } [GLfloat, 16]
 
-INDICES = {
+INDICES := {
     0, 1, 2,
     2, 3, 0,
 } [GLuint, 6]
 
-VSHADER = "#version 450 core\nlayout(location = 0) in vec4 Position; layout(location = 1) in vec2 Texture; out vec2 vTexture; void main() { gl_Position = Position; vTexture = Texture; }"
-FSHADER = "#version 450 core\nlayout(location = 0) out vec4 Color; in vec2 vTexture; void main() { Color = vec4(vTexture, 0.0, 1.0); }"
+VSHADER := "#version 450 core\n"
+           "layout(location = 0) in vec4 Position;"
+           "layout(location = 1) in vec2 Texture;"
+           "out vec2 vTexture;"
+           "void main() {"
+           "    gl_Position = Position;"
+           "    vTexture = Texture;"
+           "}"
+FSHADER := "#version 450 core\n"
+           "layout(location = 0) out vec4 Color;"
+           "in vec2 vTexture;"
+           "void main() {"
+           "    Color = vec4(vTexture, 0.0, 1.0);"
+           "}"
 
 extern main() => i32 = (
-    glfw.__ctor(),
     glfw.setErrorCallback(on_error),
     glfw.init(),
 

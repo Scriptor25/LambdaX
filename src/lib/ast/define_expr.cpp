@@ -29,7 +29,7 @@ LX::ValuePtr LX::DefineExpr::GenIR(Builder& builder) const
     if (type->IsReference())
     {
         if (!init) Error(Where, "reference definition requires initializer");
-        type = type->Element(Where);
+        type = type->Base(Where);
         if (type != init->Type())
             Error(
                 Where,
@@ -57,8 +57,7 @@ LX::ValuePtr LX::DefineExpr::GenIR(Builder& builder) const
         Name,
         builder.DIScope().getFile(),
         Where.Row,
-        type->GenDI(builder),
-        true);
+        type->GenDI(builder));
     builder.DIBuilder().insertDeclare(
         value->Ptr(Where),
         d,

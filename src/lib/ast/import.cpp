@@ -8,7 +8,7 @@ llvm::Constant* LX::FunctionImport::Resolve(
     Builder& builder,
     const std::string& module_id) const
 {
-    const auto type = Type->Element(where);
+    const auto type = Type->Base(where);
     const auto type_ir = llvm::dyn_cast<llvm::FunctionType>(type->GenIR(where, builder));
     const auto name = !Extern ? module_id + '.' + Name : Name;
 
@@ -24,7 +24,7 @@ llvm::Constant* LX::GlobalImport::Resolve(
     Builder& builder,
     const std::string& module_id) const
 {
-    const auto type_ir = Type->Element(where)->GenIR(where, builder);
+    const auto type_ir = Type->Base(where)->GenIR(where, builder);
     const auto name = !Extern ? module_id + '.' + Name : Name;
 
     return new llvm::GlobalVariable(

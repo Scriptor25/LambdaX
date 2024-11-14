@@ -36,22 +36,22 @@ bool LX::FunctionType::IsFunction() const
     return true;
 }
 
-LX::TypePtr LX::FunctionType::Result(const SourceLocation&) const
+LX::TypePtr& LX::FunctionType::Result(const SourceLocation&)
 {
     return ResultType;
 }
 
-size_t LX::FunctionType::ParamCount(const SourceLocation&) const
+size_t LX::FunctionType::ParamCount(const SourceLocation&)
 {
     return Params.size();
 }
 
-LX::TypePtr LX::FunctionType::Param(const SourceLocation&, const size_t index) const
+LX::Parameter& LX::FunctionType::Param(const SourceLocation&, const size_t index)
 {
-    return Params[index].Type;
+    return Params[index];
 }
 
-bool LX::FunctionType::HasVarArg(const SourceLocation&) const
+bool LX::FunctionType::HasVarArg(const SourceLocation&)
 {
     return VarArg;
 }

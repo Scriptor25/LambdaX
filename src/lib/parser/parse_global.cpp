@@ -22,7 +22,7 @@ LX::StmtPtr LX::Parser::ParseGlobal()
     if ((fun.Export && (Expect("=>"), true)) || NextAt("=>"))
         global.Type = ParseType();
 
-    if ((!fun.Extern && !(global.IsMutable && global.Type) && (Expect("="), true)) || NextAt("="))
+    if ((!fun.Extern && !(global.IsMutable && global.Type) && (Expect(":="), true)) || NextAt(":="))
         global.Init = ParseExpr();
 
     return std::make_unique<GlobalStmt>(where, std::move(global));

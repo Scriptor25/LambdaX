@@ -30,11 +30,18 @@ LX::ValuePtr LX::Function::GenIR(const SourceLocation& where, Builder& builder) 
     if (!Name.empty() && builder.Contains(Name))
     {
         result = builder.Get(where, Name);
+        if (result->Type()->Base(where) != Type)
+            Error(
+                where,
+                "function type mismatch: type {} of '{}' does not match predeclared type {}",
+                Type,
+                Name,
+                result->Type()->Base(where));
         function = llvm::dyn_cast<llvm::Function>(result->Load(where, builder));
     }
     else
     {
-        const auto type_ir = llvm::dyn_cast<llvm::FunctionType>(Type->GenIR(where, builder));
+        const auto function_type = llvm::dyn_cast<llvm::FunctionType>(Type->GenIR(where, builder));
         const auto linkage = Export || Extern
                                  ? llvm::GlobalValue::ExternalLinkage
                                  : llvm::GlobalValue::InternalLinkage;
@@ -42,7 +49,7 @@ LX::ValuePtr LX::Function::GenIR(const SourceLocation& where, Builder& builder) 
                               ? builder.ModuleId() + '.' + Name
                               : Name;
 
-        function = llvm::Function::Create(type_ir, linkage, name, builder.IRModule());
+        function = llvm::Function::Create(function_type, linkage, name, builder.IRModule());
         result = RValue::Create(builder.Ctx().GetPointerType(Type), function);
 
         if (!Name.empty())
@@ -53,14 +60,14 @@ LX::ValuePtr LX::Function::GenIR(const SourceLocation& where, Builder& builder) 
     if (!function->empty())
         Error(where, "redefining function '{}'", Name);
 
-    const auto unit = builder.DIBuilder().createFile(
+    const auto di_file = builder.DIBuilder().createFile(
         builder.DIUnit().getFilename(),
         builder.DIUnit().getDirectory());
     const auto sub = builder.DIBuilder().createFunction(
-        unit,
+        di_file,
         function->getName(),
         Name,
-        unit,
+        di_file,
         where.Row,
         llvm::dyn_cast<llvm::DISubroutineType>(Type->GenDI(builder)),
         where.Row,
@@ -71,8 +78,9 @@ LX::ValuePtr LX::Function::GenIR(const SourceLocation& where, Builder& builder) 
     builder.IRBuilder().SetCurrentDebugLocation({});
     builder.Push(sub);
 
-    const auto bkp = builder.IRBuilder().GetInsertBlock();
-    builder.IRBuilder().SetInsertPoint(llvm::BasicBlock::Create(builder.IRContext(), "entry", function));
+    const auto return_block = builder.IRBuilder().GetInsertBlock();
+    const auto entry_block = llvm::BasicBlock::Create(builder.IRContext(), "entry", function);
+    builder.IRBuilder().SetInsertPoint(entry_block);
 
     for (size_t i = 0; i < Params.size(); ++i)
     {
@@ -83,24 +91,24 @@ LX::ValuePtr LX::Function::GenIR(const SourceLocation& where, Builder& builder) 
 
         auto& var = builder.Define(where, name_);
         if (type_->IsReference())
-            var = LValue::Create(type_->Element(where), arg, mutable_);
+            var = LValue::Create(type_->Base(where), arg, mutable_);
         else
         {
             var = builder.CreateAlloca(where, type_, mutable_);
             var->StoreForce(where, builder, arg);
         }
 
-        const auto d = builder.DIBuilder().createParameterVariable(
+        const auto di_type = var->Type()->GenDI(builder);
+        const auto var_info = builder.DIBuilder().createParameterVariable(
             sub,
             name_,
             i + 1,
-            unit,
+            di_file,
             where.Row,
-            var->Type()->GenDI(builder),
-            true);
+            di_type);
         builder.DIBuilder().insertDeclare(
             var->Ptr(where),
-            d,
+            var_info,
             builder.DIBuilder().createExpression(),
             llvm::DILocation::get(
                 builder.IRContext(),
@@ -111,8 +119,7 @@ LX::ValuePtr LX::Function::GenIR(const SourceLocation& where, Builder& builder) 
     }
 
     auto value = Body->GenIR(builder);
-    if (Type->Result(where)->IsVoid())
-        builder.IRBuilder().CreateRetVoid();
+    if (Type->Result(where)->IsVoid()) builder.IRBuilder().CreateRetVoid();
     else
     {
         value = builder.CreateCast(where, value, Type->Result(where));
@@ -123,10 +130,8 @@ LX::ValuePtr LX::Function::GenIR(const SourceLocation& where, Builder& builder) 
     }
 
     builder.IRBuilder().SetCurrentDebugLocation({});
-    builder.IRBuilder().SetInsertPoint(bkp);
-
-    builder.Pop();
-
+    builder.IRBuilder().SetInsertPoint(return_block);
     builder.RunPasses(*function);
+    builder.Pop();
     return result;
 }

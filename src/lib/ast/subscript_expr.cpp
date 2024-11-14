@@ -18,7 +18,7 @@ LX::ValuePtr LX::SubscriptExpr::GenIR(Builder& builder) const
 {
     const auto base = Base->GenIR(builder);
     const auto offset = Offset->GenIR(builder);
-    const auto type = base->Type()->Element(Where);
+    const auto type = base->Type()->Base(Where);
 
     Where.EmitDI(builder);
 

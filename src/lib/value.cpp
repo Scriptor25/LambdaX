@@ -43,7 +43,7 @@ bool LX::RValue::IsMutable() const
     return false;
 }
 
-bool LX::RValue::HasPtr() const
+bool LX::RValue::IsReference() const
 {
     return false;
 }
@@ -85,7 +85,7 @@ bool LX::LValue::IsMutable() const
     return m_IsMutable;
 }
 
-bool LX::LValue::HasPtr() const
+bool LX::LValue::IsReference() const
 {
     return true;
 }

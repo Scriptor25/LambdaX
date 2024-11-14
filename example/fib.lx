@@ -1,11 +1,9 @@
 # fibonacci example
 
-fib(i32) => i32
-
-extern main() => i32
-    = fib(10)
-
 fib(i32 n) => i32
     = n <= 1
     ? n
     : fib(n - 1) + fib(n - 2)
+
+extern main() => i32
+    = fib(10)

@@ -23,10 +23,14 @@ std::ostream& LX::CallExpr::Print(std::ostream& os) const
 LX::ValuePtr LX::CallExpr::GenIR(Builder& builder) const
 {
     const auto callee = Callee->GenIR(builder);
-    if (!callee->Type()->IsPointer()) Error(Where, "callee is not a pointer");
-    const auto callee_type = callee->Type()->Element(Where);
-    if (!callee_type->IsFunction()) Error(Where, "callee is not a function pointer");
-    if (Args.size() < callee_type->ParamCount(Where)) Error(Where, "not enough arguments");
+    if (!callee->Type()->IsPointer())
+        Error(Where, "callee is not a pointer");
+
+    const auto callee_type = callee->Type()->Base(Where);
+    if (!callee_type->IsFunction())
+        Error(Where, "callee is not a function pointer");
+    if (Args.size() < callee_type->ParamCount(Where))
+        Error(Where, "not enough arguments");
     if (!callee_type->HasVarArg(Where) && Args.size() > callee_type->ParamCount(Where))
         Error(Where, "too many arguments");
 
@@ -34,28 +38,39 @@ LX::ValuePtr LX::CallExpr::GenIR(Builder& builder) const
     for (size_t i = 0; i < Args.size(); ++i)
     {
         auto arg = Args[i]->GenIR(builder);
-        const auto param =
-            i < callee_type->ParamCount(Where)
+        const auto [
+            mutable_,
+            type_,
+            name_
+        ] = i < callee_type->ParamCount(Where)
                 ? callee_type->Param(Where, i)
-                : nullptr;
+                : Parameter();
 
-        if (param && !param->IsReference() && arg->Type() != param)
-            arg = builder.CreateCast(Where, arg, param);
-
-        if (param && param->IsReference())
+        if (type_ && type_->IsReference())
         {
-            if (!arg->HasPtr())
-                Error(Where, "assigning rvalue to reference arg index {}", i);
-            if (param->Element(Where) != arg->Type())
+            if (!arg->IsReference())
+                Error(Where, "cannot assign rvalue to reference parameter '{}' (index {})", name_, i);
+            if (type_->Base(Where) != arg->Type())
                 Error(
                     Where,
-                    "assigning value of type {} to reference arg type {}, index {}; casting would create a copy",
+                    "cannot assign value of type {} to reference parameter '{}' (index {}) type {}; casting would create a copy",
                     arg->Type(),
+                    name_,
                     i,
-                    param);
+                    type_);
+            if (mutable_ && !arg->IsMutable())
+                Error(
+                    Where,
+                    "cannot assign immutable reference to mutable reference parameter '{}' (index {}); discarding mutability",
+                    name_,
+                    i);
             args[i] = arg->Ptr(Where);
         }
-        else args[i] = arg->Load(Where, builder);
+        else
+        {
+            if (type_) arg = builder.CreateCast(Where, arg, type_);
+            args[i] = arg->Load(Where, builder);
+        }
     }
 
     Where.EmitDI(builder);
@@ -65,6 +80,6 @@ LX::ValuePtr LX::CallExpr::GenIR(Builder& builder) const
     const auto type = callee_type->Result(Where);
     const auto value = builder.IRBuilder().CreateCall(type_ir, callee->Load(Where, builder), args);
     return type->IsReference()
-               ? LValue::Create(type->Element(Where), value, true)
+               ? LValue::Create(type->Base(Where), value, true)
                : RValue::Create(type, value);
 }

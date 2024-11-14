@@ -30,7 +30,12 @@ LX::ExprPtr LX::Parser::ParsePrimary()
         return std::make_unique<ConstFloatExpr>(m_Token.Where, Skip().FloatValue);
 
     if (At(TokenType_String))
-        return std::make_unique<ConstStringExpr>(m_Token.Where, Skip().StringValue);
+    {
+        auto [where, type_, value, int_, float_] = Skip();
+        while (At(TokenType_String))
+            value += Skip().StringValue;
+        return std::make_unique<ConstStringExpr>(where, value);
+    }
 
     Error(m_Token.Where, "unhandled token '{}'", m_Token);
 }

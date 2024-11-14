@@ -33,13 +33,6 @@ LX::StmtPtr LX::Parser::ParseImport()
     const auto name = Expect(TokenType_Symbol).StringValue;
 
     std::vector<ImportPtr> imports;
-    {
-        auto fi = std::make_unique<FunctionImport>();
-        fi->Type = m_Ctx.GetFunPtrType(m_Ctx.GetVoidType(), {}, false);
-        fi->Name = "__ctor";
-        fi->Extern = false;
-        imports.push_back(std::move(fi));
-    }
     Parse(m_Ctx, stream, path.string(), [&](StmtPtr&& ptr)
     {
         if (const auto f = dynamic_cast<FunctionStmt*>(ptr.get()); f && f->Fun.Export)

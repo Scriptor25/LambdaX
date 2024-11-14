@@ -17,14 +17,14 @@ LX::ValuePtr LX::MemberExpr::GenIR(Builder& builder) const
 {
     auto parent = Parent->GenIR(builder);
     if (Deref)
-        parent = LValue::Create(parent->Type()->Element(Where), parent->Load(Where, builder), parent->IsMutable());
+        parent = LValue::Create(parent->Type()->Base(Where), parent->Load(Where, builder), parent->IsMutable());
 
     Where.EmitDI(builder);
 
     const auto index = parent->Type()->IndexOf(Where, Member);
     const auto [mutable_, type_, name_] = parent->Type()->Element(Where, index);
 
-    if (parent->HasPtr())
+    if (parent->IsReference())
     {
         const auto gep = builder.IRBuilder().CreateStructGEP(
             parent->Type()->GenIR(Where, builder),
@@ -33,7 +33,7 @@ LX::ValuePtr LX::MemberExpr::GenIR(Builder& builder) const
             Member);
         if (type_->IsReference())
             return LValue::Create(
-                type_->Element(Where),
+                type_->Base(Where),
                 builder.IRBuilder().CreateLoad(builder.IRBuilder().getPtrTy(), gep),
                 mutable_);
         return LValue::Create(type_, gep, parent->IsMutable() && mutable_);
@@ -41,6 +41,6 @@ LX::ValuePtr LX::MemberExpr::GenIR(Builder& builder) const
 
     const auto value = builder.IRBuilder().CreateExtractValue(parent->Load(Where, builder), index, Member);
     if (type_->IsReference())
-        return LValue::Create(type_->Element(Where), value, mutable_);
+        return LValue::Create(type_->Base(Where), value, mutable_);
     return RValue::Create(type_, value);
 }

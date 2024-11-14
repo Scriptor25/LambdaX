@@ -1,8 +1,8 @@
-export DEFAULT => u64    = 0
-export GREY => u64       = 1
-export GREY_ALPHA => u64 = 2
-export RGB => u64        = 3
-export RGB_ALPHA => u64  = 4
+export DEFAULT => u64    := 0
+export GREY => u64       := 1
+export GREY_ALPHA => u64 := 2
+export RGB => u64        := 3
+export RGB_ALPHA => u64  := 4
 
 type FILE {}
 

@@ -1,4 +1,4 @@
-lx = ../../build/lx
+lx = lx
 llc = llc
 cc = gcc
 

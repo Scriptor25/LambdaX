@@ -28,14 +28,17 @@ namespace LX
         [[nodiscard]] virtual bool IsStruct() const;
         [[nodiscard]] virtual bool IsFunction() const;
         [[nodiscard]] virtual bool IsReference() const;
-        [[nodiscard]] virtual TypePtr Element(const SourceLocation&) const;
-        [[nodiscard]] virtual Parameter Element(const SourceLocation&, size_t) const;
-        [[nodiscard]] virtual size_t IndexOf(const SourceLocation&, const std::string&) const;
-        [[nodiscard]] virtual TypePtr Result(const SourceLocation&) const;
-        [[nodiscard]] virtual size_t ParamCount(const SourceLocation&) const;
-        [[nodiscard]] virtual TypePtr Param(const SourceLocation&, size_t) const;
-        [[nodiscard]] virtual bool HasVarArg(const SourceLocation&) const;
-        virtual void PutElements(const SourceLocation&, const std::vector<Parameter>&);
+
+        virtual TypePtr& Base(const SourceLocation&);
+
+        virtual Parameter& Element(const SourceLocation&, size_t);
+        virtual size_t IndexOf(const SourceLocation&, const std::string&);
+        virtual void SetElements(const SourceLocation&, const std::vector<Parameter>&);
+
+        virtual TypePtr& Result(const SourceLocation&);
+        virtual Parameter& Param(const SourceLocation&, size_t);
+        virtual size_t ParamCount(const SourceLocation&);
+        virtual bool HasVarArg(const SourceLocation&);
 
         virtual llvm::Type* GenIR(const SourceLocation&, Builder&) = 0;
         virtual llvm::DIType* GenDI(Builder&) = 0;
@@ -62,7 +65,7 @@ namespace LX
     {
         static std::string GetName(unsigned bits, bool sign);
 
-        explicit IntType(unsigned bits, bool sign);
+        IntType(unsigned bits, bool sign);
 
         [[nodiscard]] bool IsInt() const override;
         [[nodiscard]] bool IsSigned() const override;
@@ -87,47 +90,50 @@ namespace LX
 
     struct PointerType : Type
     {
-        static std::string GetName(const TypePtr& element_type);
+        static std::string GetName(const TypePtr& base_type);
 
-        explicit PointerType(TypePtr element_type);
+        explicit PointerType(TypePtr base_type);
 
         [[nodiscard]] bool IsPointer() const override;
-        [[nodiscard]] TypePtr Element(const SourceLocation&) const override;
+
+        TypePtr& Base(const SourceLocation&) override;
 
         llvm::Type* GenIR(const SourceLocation&, Builder&) override;
         llvm::DIType* GenDI(Builder&) override;
 
-        TypePtr ElementType;
+        TypePtr BaseType;
     };
 
     struct ReferenceType : Type
     {
-        static std::string GetName(const TypePtr& element_type);
+        static std::string GetName(const TypePtr& base_type);
 
-        explicit ReferenceType(TypePtr element_type);
+        explicit ReferenceType(TypePtr base_type);
 
         [[nodiscard]] bool IsReference() const override;
-        [[nodiscard]] TypePtr Element(const SourceLocation&) const override;
+
+        TypePtr& Base(const SourceLocation&) override;
 
         llvm::Type* GenIR(const SourceLocation&, Builder&) override;
         llvm::DIType* GenDI(Builder&) override;
 
-        TypePtr ElementType;
+        TypePtr BaseType;
     };
 
     struct ArrayType : Type
     {
-        static std::string GetName(const TypePtr& element_type, size_t size);
+        static std::string GetName(const TypePtr& base_type, size_t size);
 
-        ArrayType(TypePtr element_type, size_t size);
+        ArrayType(TypePtr base_type, size_t size);
 
         [[nodiscard]] bool IsArray() const override;
-        [[nodiscard]] TypePtr Element(const SourceLocation&) const override;
+
+        TypePtr& Base(const SourceLocation&) override;
 
         llvm::Type* GenIR(const SourceLocation&, Builder&) override;
         llvm::DIType* GenDI(Builder&) override;
 
-        TypePtr ElementType;
+        TypePtr BaseType;
         size_t Size;
     };
 
@@ -138,10 +144,11 @@ namespace LX
         FunctionType(TypePtr result_type, std::vector<Parameter> params, bool vararg);
 
         [[nodiscard]] bool IsFunction() const override;
-        [[nodiscard]] TypePtr Result(const SourceLocation&) const override;
-        [[nodiscard]] size_t ParamCount(const SourceLocation&) const override;
-        [[nodiscard]] TypePtr Param(const SourceLocation&, size_t) const override;
-        [[nodiscard]] bool HasVarArg(const SourceLocation&) const override;
+
+        TypePtr& Result(const SourceLocation&) override;
+        Parameter& Param(const SourceLocation&, size_t) override;
+        size_t ParamCount(const SourceLocation&) override;
+        bool HasVarArg(const SourceLocation&) override;
 
         llvm::Type* GenIR(const SourceLocation&, Builder&) override;
         llvm::DIType* GenDI(Builder&) override;
@@ -159,9 +166,10 @@ namespace LX
         StructType(std::string name, std::vector<Parameter> elements);
 
         [[nodiscard]] bool IsStruct() const override;
-        [[nodiscard]] Parameter Element(const SourceLocation&, size_t) const override;
-        [[nodiscard]] size_t IndexOf(const SourceLocation&, const std::string&) const override;
-        void PutElements(const SourceLocation&, const std::vector<Parameter>&) override;
+
+        Parameter& Element(const SourceLocation&, size_t) override;
+        size_t IndexOf(const SourceLocation&, const std::string&) override;
+        void SetElements(const SourceLocation&, const std::vector<Parameter>&) override;
 
         llvm::Type* GenIR(const SourceLocation&, Builder&) override;
         llvm::DIType* GenDI(Builder&) override;
@@ -171,15 +179,12 @@ namespace LX
     };
 }
 
-namespace std
+template <>
+struct std::formatter<LX::TypePtr> : std::formatter<std::string>
 {
-    template <>
-    struct formatter<LX::TypePtr> : formatter<string>
+    template <typename FormatContext>
+    auto format(const LX::TypePtr& type, FormatContext& ctx) const
     {
-        template <typename FormatContext>
-        auto format(const LX::TypePtr& type, FormatContext& ctx) const
-        {
-            return formatter<string>::format(type ? type->Name : "(null)", ctx);
-        }
-    };
-}
+        return std::formatter<std::string>::format(type ? type->Name : "(null)", ctx);
+    }
+};

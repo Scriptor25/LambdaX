@@ -8,7 +8,6 @@
 #include <LX/Builder.hpp>
 #include <LX/Context.hpp>
 #include <LX/Error.hpp>
-#include <LX/SourceLocation.hpp>
 #include <LX/Type.hpp>
 #include <LX/Value.hpp>
 
@@ -78,40 +77,11 @@ LX::Builder::Builder(Context& ctx, llvm::LLVMContext& context, const std::string
     pb.registerModuleAnalyses(*m_MAM);
     pb.crossRegisterProxies(*m_LAM, *m_FAM, *m_CGAM, *m_MAM);
 
-    const auto ctor_type = ctx.GetFunctionType(ctx.GetVoidType(), {}, false);
-    const auto ctor_type_ir = llvm::dyn_cast<llvm::FunctionType>(ctor_type->GenIR({}, *this));
-    const auto module_ctor = llvm::Function::Create(
-        ctor_type_ir,
-        llvm::GlobalValue::ExternalLinkage,
-        ModuleId() + ".__ctor",
-        IRModule());
-
-    const auto unit = DIBuilder().createFile(
-        DIUnit().getFilename(),
-        DIUnit().getDirectory());
-    const auto sub = DIBuilder().createFunction(
-        unit,
-        module_ctor->getName(),
-        "__ctor",
-        unit,
-        0,
-        llvm::dyn_cast<llvm::DISubroutineType>(ctor_type->GenDI(*this)),
-        0,
-        llvm::DINode::FlagPrototyped,
-        llvm::DISubprogram::SPFlagDefinition);
-    module_ctor->setSubprogram(sub);
-
-    IRBuilder().SetCurrentDebugLocation({});
-    Push(sub);
-
-    IRBuilder().SetInsertPoint(llvm::BasicBlock::Create(IRContext(), "entry", module_ctor));
+    Push();
 }
 
 void LX::Builder::Finalize() const
 {
-    IRBuilder().CreateRetVoid();
-    IRBuilder().SetCurrentDebugLocation({});
-
     RunPasses(IRModule());
     DIBuilder().finalize();
 }

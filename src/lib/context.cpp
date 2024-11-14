@@ -53,7 +53,7 @@ LX::TypePtr& LX::Context::GetStructType(
     auto& type = GetType(StructType::GetName(name, elements));
     if (type)
     {
-        if (!elements.empty()) type->PutElements(where, elements);
+        if (!elements.empty()) type->SetElements(where, elements);
         return type;
     }
     return type = std::make_shared<StructType>(name, elements);

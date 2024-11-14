@@ -83,42 +83,42 @@ bool LX::Type::IsReference() const
     return false;
 }
 
-LX::TypePtr LX::Type::Result(const SourceLocation& where) const
-{
-    Error(where, "{} is not a function type; cannot provide result type", Name);
-}
-
-size_t LX::Type::ParamCount(const SourceLocation& where) const
-{
-    Error(where, "{} is not a function type; cannot provide parameter count", Name);
-}
-
-LX::TypePtr LX::Type::Param(const SourceLocation& where, const size_t i) const
-{
-    Error(where, "{} is not a function type; cannot provide parameter at {}", Name, i);
-}
-
-bool LX::Type::HasVarArg(const SourceLocation& where) const
-{
-    Error(where, "{} is not a function type; cannot tell if it has variadic args", Name);
-}
-
-void LX::Type::PutElements(const SourceLocation& where, const std::vector<Parameter>&)
-{
-    Error(where, "{} is not a struct type; cannot set elements", Name);
-}
-
-LX::TypePtr LX::Type::Element(const SourceLocation& where) const
+LX::TypePtr& LX::Type::Base(const SourceLocation& where)
 {
     Error(where, "{} is not a pointer, array or mutable type; cannot get element type", Name);
 }
 
-LX::Parameter LX::Type::Element(const SourceLocation& where, const size_t i) const
+LX::Parameter& LX::Type::Element(const SourceLocation& where, const size_t i)
 {
     Error(where, "{} is not a struct type; cannot get element type at {}", Name, i);
 }
 
-size_t LX::Type::IndexOf(const SourceLocation& where, const std::string& name) const
+size_t LX::Type::IndexOf(const SourceLocation& where, const std::string& name)
 {
     Error(where, "{} is not a struct type; cannot get index of named element '{}'", Name, name);
+}
+
+void LX::Type::SetElements(const SourceLocation& where, const std::vector<Parameter>&)
+{
+    Error(where, "{} is not a struct type; cannot set elements", Name);
+}
+
+LX::TypePtr& LX::Type::Result(const SourceLocation& where)
+{
+    Error(where, "{} is not a function type; cannot provide result type", Name);
+}
+
+LX::Parameter& LX::Type::Param(const SourceLocation& where, const size_t i)
+{
+    Error(where, "{} is not a function type; cannot provide parameter at {}", Name, i);
+}
+
+size_t LX::Type::ParamCount(const SourceLocation& where)
+{
+    Error(where, "{} is not a function type; cannot provide parameter count", Name);
+}
+
+bool LX::Type::HasVarArg(const SourceLocation& where)
+{
+    Error(where, "{} is not a function type; cannot tell if it has variadic args", Name);
 }

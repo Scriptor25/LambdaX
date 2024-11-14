@@ -11,12 +11,14 @@ namespace LX
         [[nodiscard]] TypePtr Type() const;
 
         virtual ~Value() = default;
+
         virtual llvm::Value* Load(const SourceLocation&, Builder&) const = 0;
         virtual void Store(const SourceLocation&, Builder&, llvm::Value*) const = 0;
         virtual void StoreForce(const SourceLocation&, Builder&, llvm::Value*) const = 0;
+
         [[nodiscard]] virtual llvm::Value* Ptr(const SourceLocation&) const = 0;
         [[nodiscard]] virtual bool IsMutable() const = 0;
-        [[nodiscard]] virtual bool HasPtr() const = 0;
+        [[nodiscard]] virtual bool IsReference() const = 0;
 
     protected:
         explicit Value(TypePtr);
@@ -32,9 +34,10 @@ namespace LX
         llvm::Value* Load(const SourceLocation&, Builder&) const override;
         void Store(const SourceLocation&, Builder&, llvm::Value*) const override;
         void StoreForce(const SourceLocation&, Builder&, llvm::Value*) const override;
+
         [[nodiscard]] llvm::Value* Ptr(const SourceLocation&) const override;
         [[nodiscard]] bool IsMutable() const override;
-        [[nodiscard]] bool HasPtr() const override;
+        [[nodiscard]] bool IsReference() const override;
 
     private:
         RValue(TypePtr, llvm::Value*);
@@ -50,9 +53,10 @@ namespace LX
         llvm::Value* Load(const SourceLocation&, Builder&) const override;
         void Store(const SourceLocation&, Builder&, llvm::Value*) const override;
         void StoreForce(const SourceLocation&, Builder&, llvm::Value*) const override;
+
         [[nodiscard]] llvm::Value* Ptr(const SourceLocation&) const override;
         [[nodiscard]] bool IsMutable() const override;
-        [[nodiscard]] bool HasPtr() const override;
+        [[nodiscard]] bool IsReference() const override;
 
     private:
         LValue(TypePtr, llvm::Value*, bool);

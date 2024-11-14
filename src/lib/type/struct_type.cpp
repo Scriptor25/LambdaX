@@ -35,12 +35,12 @@ bool LX::StructType::IsStruct() const
     return true;
 }
 
-LX::Parameter LX::StructType::Element(const SourceLocation&, const size_t i) const
+LX::Parameter& LX::StructType::Element(const SourceLocation&, const size_t i)
 {
     return Elements[i];
 }
 
-size_t LX::StructType::IndexOf(const SourceLocation& where, const std::string& name) const
+size_t LX::StructType::IndexOf(const SourceLocation& where, const std::string& name)
 {
     for (size_t i = 0; i < Elements.size(); ++i)
         if (Elements[i].Name == name)
@@ -48,7 +48,7 @@ size_t LX::StructType::IndexOf(const SourceLocation& where, const std::string& n
     Error(where, "no element '{}' in type {}", name, Name);
 }
 
-void LX::StructType::PutElements(const SourceLocation& where, const std::vector<Parameter>& elements)
+void LX::StructType::SetElements(const SourceLocation& where, const std::vector<Parameter>& elements)
 {
     if (!Elements.empty())
     {
@@ -97,17 +97,32 @@ llvm::DIType* LX::StructType::GenDI(Builder& builder)
     if (m_DI) return m_DI;
     m_DI = reinterpret_cast<llvm::DIType*>(dead_beef);
 
+    const auto di_file = llvm::DIFile::get(
+        builder.IRContext(),
+        builder.DIUnit().getFilename(),
+        builder.DIUnit().getDirectory());
+
     std::vector<llvm::Metadata*> elements;
+    size_t offset = 0;
     for (const auto& [mutable_, type_, name_] : Elements)
-        elements.push_back(type_->GenDI(builder));
+    {
+        elements.push_back(builder.DIBuilder().createMemberType(
+            &builder.DIUnit(),
+            name_,
+            di_file,
+            0,
+            type_->Bits,
+            0,
+            offset,
+            llvm::DINode::FlagZero,
+            type_->GenDI(builder)));
+        offset += type_->Bits;
+    }
 
     return m_DI = builder.DIBuilder().createStructType(
         &builder.DIUnit(),
         StructName,
-        llvm::DIFile::get(
-            builder.IRContext(),
-            builder.DIUnit().getFilename(),
-            builder.DIUnit().getDirectory()),
+        di_file,
         0,
         Bits,
         0,

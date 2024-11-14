@@ -455,13 +455,13 @@ LX::TypePtr LX::OperatorTypeRef(const SourceLocation&, Context& ctx, const TypeP
 LX::ValuePtr LX::OperatorDeref(const SourceLocation& where, Builder& builder, const ValuePtr& val)
 {
     if (val->Type()->IsPointer())
-        return LValue::Create(val->Type()->Element(where), val->Load(where, builder), val->IsMutable());
+        return LValue::Create(val->Type()->Base(where), val->Load(where, builder), val->IsMutable());
     return {};
 }
 
 LX::TypePtr LX::OperatorTypeDeref(const SourceLocation& where, Context&, const TypePtr& type)
 {
     if (type->IsPointer())
-        return type->Element(where);
+        return type->Base(where);
     return {};
 }

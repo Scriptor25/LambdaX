@@ -30,7 +30,7 @@ LX::ValuePtr LX::ConstStructExpr::GenIR(Builder& builder) const
     {
         return Type->IsStruct()
                    ? Type->Element(Where, i).Type
-                   : Type->Element(Where);
+                   : Type->Base(Where);
     };
 
     for (size_t i = 0; i < Elements.size(); ++i)
