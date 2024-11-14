@@ -47,7 +47,7 @@ LX::StmtPtr LX::Parser::ParseImport()
             ] = f->Fun;
 
             auto fi = std::make_unique<FunctionImport>();
-            fi->Type = m_Ctx.GetPointerType(src_type_);
+            fi->Type = m_Ctx.GetPointerType(false, src_type_);
             fi->Name = src_name_;
             fi->Extern = src_extern_;
             imports.push_back(std::move(fi));

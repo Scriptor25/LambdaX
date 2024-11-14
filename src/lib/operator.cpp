@@ -444,12 +444,12 @@ LX::TypePtr LX::OperatorTypeLNot(const SourceLocation&, Context& ctx, const Type
 
 LX::ValuePtr LX::OperatorRef(const SourceLocation& where, Builder& builder, const ValuePtr& val)
 {
-    return RValue::Create(builder.Ctx().GetPointerType(val->Type()), val->Ptr(where));
+    return RValue::Create(builder.Ctx().GetPointerType(val->IsMutable(), val->Type()), val->Ptr(where));
 }
 
 LX::TypePtr LX::OperatorTypeRef(const SourceLocation&, Context& ctx, const TypePtr& type)
 {
-    return ctx.GetPointerType(type);
+    return ctx.GetPointerType(false, type);
 }
 
 LX::ValuePtr LX::OperatorDeref(const SourceLocation& where, Builder& builder, const ValuePtr& val)

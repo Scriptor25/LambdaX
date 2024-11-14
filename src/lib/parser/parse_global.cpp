@@ -15,7 +15,7 @@ LX::StmtPtr LX::Parser::ParseGlobal()
 
     if (!global.IsMutable && At("("))
     {
-        ParseFunction(where, fun);
+        ParseFunction(fun);
         return std::make_unique<FunctionStmt>(where, std::move(fun));
     }
 

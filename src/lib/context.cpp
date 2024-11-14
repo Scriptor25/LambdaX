@@ -59,11 +59,11 @@ LX::TypePtr& LX::Context::GetStructType(
     return type = std::make_shared<StructType>(name, elements);
 }
 
-LX::TypePtr& LX::Context::GetPointerType(const TypePtr& element)
+LX::TypePtr& LX::Context::GetPointerType(const bool is_mutable, const TypePtr& element)
 {
-    auto& type = GetType(PointerType::GetName(element));
+    auto& type = GetType(PointerType::GetName(is_mutable, element));
     if (type) return type;
-    return type = std::make_shared<PointerType>(element);
+    return type = std::make_shared<PointerType>(is_mutable, element);
 }
 
 LX::TypePtr& LX::Context::GetReferenceType(const TypePtr& element)
@@ -73,27 +73,20 @@ LX::TypePtr& LX::Context::GetReferenceType(const TypePtr& element)
     return type = std::make_shared<ReferenceType>(element);
 }
 
-LX::TypePtr& LX::Context::GetArrayType(const TypePtr& element, const size_t size)
+LX::TypePtr& LX::Context::GetArrayType(const bool is_mutable, const TypePtr& element, const size_t size)
 {
-    auto& type = GetType(ArrayType::GetName(element, size));
+    auto& type = GetType(ArrayType::GetName(is_mutable, element, size));
     if (type) return type;
-    return type = std::make_shared<ArrayType>(element, size);
+    return type = std::make_shared<ArrayType>(is_mutable, element, size);
 }
 
 LX::TypePtr& LX::Context::GetFunctionType(
     const TypePtr& result_type,
     const std::vector<Parameter>& params,
+    const bool is_mutable,
     const bool vararg)
 {
-    auto& type = GetType(FunctionType::GetName(result_type, params, vararg));
+    auto& type = GetType(FunctionType::GetName(result_type, params, is_mutable, vararg));
     if (type) return type;
-    return type = std::make_shared<FunctionType>(result_type, params, vararg);
-}
-
-LX::TypePtr& LX::Context::GetFunPtrType(
-    const TypePtr& result_type,
-    const std::vector<Parameter>& params,
-    const bool vararg)
-{
-    return GetPointerType(GetFunctionType(result_type, params, vararg));
+    return type = std::make_shared<FunctionType>(result_type, params, is_mutable, vararg);
 }

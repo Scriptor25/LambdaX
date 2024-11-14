@@ -61,7 +61,7 @@ LX::ValuePtr LX::CallExpr::GenIR(Builder& builder) const
             if (mutable_ && !arg->IsMutable())
                 Error(
                     Where,
-                    "cannot assign immutable reference to mutable reference parameter '{}' (index {}); discarding mutability",
+                    "cannot assign immutable reference to mutable reference parameter '{}' (index {})",
                     name_,
                     i);
             args[i] = arg->Ptr(Where);
@@ -80,6 +80,6 @@ LX::ValuePtr LX::CallExpr::GenIR(Builder& builder) const
     const auto type = callee_type->Result(Where);
     const auto value = builder.IRBuilder().CreateCall(type_ir, callee->Load(Where, builder), args);
     return type->IsReference()
-               ? LValue::Create(type->Base(Where), value, true)
+               ? LValue::Create(type->Base(Where), value, callee_type->IsMutable())
                : RValue::Create(type, value);
 }

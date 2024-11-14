@@ -5,6 +5,7 @@
 std::string LX::FunctionType::GetName(
     const TypePtr& result_type,
     const std::vector<Parameter>& params,
+    const bool is_mutable,
     const bool vararg)
 {
     std::string name = "(";
@@ -19,14 +20,24 @@ std::string LX::FunctionType::GetName(
         name += "...";
     }
     name += ')';
-    if (!result_type->IsVoid()) name += " => " + result_type->Name;
+    if (!result_type->IsVoid())
+    {
+        name += " => ";
+        if (is_mutable) name += "mut ";
+        name += result_type->Name;
+    }
     return name;
 }
 
-LX::FunctionType::FunctionType(TypePtr result_type, std::vector<Parameter> params, const bool vararg)
-    : Type(GetName(result_type, params, vararg), 0),
+LX::FunctionType::FunctionType(
+    TypePtr result_type,
+    std::vector<Parameter> params,
+    const bool is_mutable,
+    const bool vararg)
+    : Type(GetName(result_type, params, is_mutable, vararg), 0),
       ResultType(std::move(result_type)),
       Params(std::move(params)),
+      Mutable(is_mutable),
       VarArg(vararg)
 {
 }
@@ -34,6 +45,11 @@ LX::FunctionType::FunctionType(TypePtr result_type, std::vector<Parameter> param
 bool LX::FunctionType::IsFunction() const
 {
     return true;
+}
+
+bool LX::FunctionType::IsMutable() const
+{
+    return Mutable;
 }
 
 LX::TypePtr& LX::FunctionType::Result(const SourceLocation&)

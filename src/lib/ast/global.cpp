@@ -33,7 +33,7 @@ LX::ValuePtr LX::GlobalSymbol::GenIR(const SourceLocation& where, Builder& build
     ValuePtr init;
     if (Init)
     {
-        const auto type = builder.Ctx().GetFunctionType(builder.Ctx().GetVoidType(), {}, false);
+        const auto type = builder.Ctx().GetFunctionType(builder.Ctx().GetVoidType(), {}, false, false);
         const auto ctor_type = llvm::dyn_cast<llvm::FunctionType>(type->GenIR(where, builder));
         ctor = llvm::Function::Create(
             ctor_type,

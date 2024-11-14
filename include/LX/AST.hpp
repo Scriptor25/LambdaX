@@ -146,6 +146,16 @@ namespace LX
         TypePtr Dest;
     };
 
+    struct ConstCharExpr : Expr
+    {
+        ConstCharExpr(SourceLocation where, char value);
+
+        std::ostream& Print(std::ostream&) const override;
+        ValuePtr GenIR(Builder&) const override;
+
+        char Value;
+    };
+
     struct ConstFloatExpr : Expr
     {
         ConstFloatExpr(SourceLocation where, double value);
@@ -241,6 +251,24 @@ namespace LX
 
         ExprPtr Base;
         ExprPtr Offset;
+    };
+
+    struct Case
+    {
+        std::vector<ExprPtr> Conditions;
+        ExprPtr Then;
+    };
+
+    struct SwitchExpr : Expr
+    {
+        SwitchExpr(SourceLocation where, ExprPtr switch_, std::vector<Case> cases, ExprPtr default_);
+
+        std::ostream& Print(std::ostream&) const override;
+        ValuePtr GenIR(Builder&) const override;
+
+        ExprPtr Switch;
+        std::vector<Case> Cases;
+        ExprPtr Default;
     };
 
     struct SymbolExpr : Expr

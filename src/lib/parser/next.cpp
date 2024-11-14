@@ -90,6 +90,7 @@ LX::Token& LX::Parser::Next()
     enum State
     {
         State_Bin,
+        State_Char,
         State_Comment,
         State_Dec,
         State_Hex,
@@ -189,6 +190,11 @@ LX::Token& LX::Parser::Next()
                 state = State_String;
                 break;
 
+            case '\'':
+                where = m_Where;
+                state = State_Char;
+                break;
+
             default:
                 where = m_Where;
                 if (isdigit(m_Tok))
@@ -278,6 +284,16 @@ LX::Token& LX::Parser::Next()
             {
                 m_Tok = Get();
                 return m_Token = {where, TokenType_String, value};
+            }
+            if (m_Tok == '\\') Escape();
+            value += static_cast<char>(m_Tok);
+            break;
+
+        case State_Char:
+            if (m_Tok == '\'')
+            {
+                m_Tok = Get();
+                return m_Token = {where, TokenType_Char, value};
             }
             if (m_Tok == '\\') Escape();
             value += static_cast<char>(m_Tok);

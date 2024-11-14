@@ -10,6 +10,7 @@ namespace LX
     enum TokenType
     {
         TokenType_EOF,
+        TokenType_Char,
         TokenType_Float,
         TokenType_Int,
         TokenType_Operator,

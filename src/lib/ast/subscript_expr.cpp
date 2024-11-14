@@ -28,7 +28,7 @@ LX::ValuePtr LX::SubscriptExpr::GenIR(Builder& builder) const
             type->GenIR(Where, builder),
             base->Load(Where, builder),
             {offset->Load(Where, builder)});
-        return LValue::Create(type, gep, base->IsMutable());
+        return LValue::Create(type, gep, base->Type()->IsMutable());
     }
     if (base->Type()->IsArray())
     {
@@ -37,7 +37,7 @@ LX::ValuePtr LX::SubscriptExpr::GenIR(Builder& builder) const
             base->Type()->GenIR(Where, builder),
             base->Ptr(Where),
             {zero, offset->Load(Where, builder)});
-        return LValue::Create(type, gep, base->IsMutable());
+        return LValue::Create(type, gep, base->Type()->IsMutable());
     }
 
     Error(Where, "base of subscript must be a pointer or array type, but is {}", base->Type());

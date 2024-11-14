@@ -17,6 +17,9 @@ LX::ExprPtr LX::Parser::ParsePrimary()
     if (At("mut"))
         return ParseMut();
 
+    if (At("switch"))
+        return ParseSwitch();
+
     if (At(TokenType_Operator))
         return ParseUnary();
 
@@ -36,6 +39,9 @@ LX::ExprPtr LX::Parser::ParsePrimary()
             value += Skip().StringValue;
         return std::make_unique<ConstStringExpr>(where, value);
     }
+
+    if (At(TokenType_Char))
+        return std::make_unique<ConstCharExpr>(m_Token.Where, Skip().StringValue[0]);
 
     Error(m_Token.Where, "unhandled token '{}'", m_Token);
 }

@@ -29,6 +29,8 @@ namespace LX
         [[nodiscard]] virtual bool IsFunction() const;
         [[nodiscard]] virtual bool IsReference() const;
 
+        [[nodiscard]] virtual bool IsMutable() const;
+
         virtual TypePtr& Base(const SourceLocation&);
 
         virtual Parameter& Element(const SourceLocation&, size_t);
@@ -90,17 +92,19 @@ namespace LX
 
     struct PointerType : Type
     {
-        static std::string GetName(const TypePtr& base_type);
+        static std::string GetName(bool is_mutable, const TypePtr& base_type);
 
-        explicit PointerType(TypePtr base_type);
+        PointerType(bool is_mutable, TypePtr base_type);
 
         [[nodiscard]] bool IsPointer() const override;
+        [[nodiscard]] bool IsMutable() const override;
 
         TypePtr& Base(const SourceLocation&) override;
 
         llvm::Type* GenIR(const SourceLocation&, Builder&) override;
         llvm::DIType* GenDI(Builder&) override;
 
+        bool Mutable;
         TypePtr BaseType;
     };
 
@@ -122,28 +126,35 @@ namespace LX
 
     struct ArrayType : Type
     {
-        static std::string GetName(const TypePtr& base_type, size_t size);
+        static std::string GetName(bool is_mutable, const TypePtr& base_type, size_t size);
 
-        ArrayType(TypePtr base_type, size_t size);
+        ArrayType(bool is_mutable, TypePtr base_type, size_t size);
 
         [[nodiscard]] bool IsArray() const override;
+        [[nodiscard]] bool IsMutable() const override;
 
         TypePtr& Base(const SourceLocation&) override;
 
         llvm::Type* GenIR(const SourceLocation&, Builder&) override;
         llvm::DIType* GenDI(Builder&) override;
 
+        bool Mutable;
         TypePtr BaseType;
         size_t Size;
     };
 
     struct FunctionType : Type
     {
-        static std::string GetName(const TypePtr& result_type, const std::vector<Parameter>& params, bool vararg);
+        static std::string GetName(
+            const TypePtr& result_type,
+            const std::vector<Parameter>& params,
+            bool is_mutable,
+            bool vararg);
 
-        FunctionType(TypePtr result_type, std::vector<Parameter> params, bool vararg);
+        FunctionType(TypePtr result_type, std::vector<Parameter> params, bool is_mutable, bool vararg);
 
         [[nodiscard]] bool IsFunction() const override;
+        [[nodiscard]] bool IsMutable() const override;
 
         TypePtr& Result(const SourceLocation&) override;
         Parameter& Param(const SourceLocation&, size_t) override;
@@ -155,6 +166,7 @@ namespace LX
 
         TypePtr ResultType;
         std::vector<Parameter> Params;
+        bool Mutable;
         bool VarArg;
     };
 

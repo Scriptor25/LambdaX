@@ -9,6 +9,7 @@ LX::TypePtr LX::Parser::ParseType()
 
     if (NextAt("["))
     {
+        const auto is_mutable = NextAt("mut");
         auto element = m_Ctx.GetVoidType();
         size_t count = 0;
 
@@ -21,19 +22,25 @@ LX::TypePtr LX::Parser::ParseType()
         }
 
         if (!count)
-            type = m_Ctx.GetPointerType(element);
-        else type = m_Ctx.GetArrayType(element, count);
+            type = m_Ctx.GetPointerType(is_mutable, element);
+        else type = m_Ctx.GetArrayType(is_mutable, element, count);
     }
     else if (NextAt("("))
     {
         std::vector<Parameter> params;
         const auto vararg = ParseParameterList(params, ")");
         Expect(")");
+
+        bool is_mutable = false;
         TypePtr result;
         if (NextAt("=>"))
+        {
+            is_mutable = NextAt("mut");
             result = ParseType();
+        }
         else result = m_Ctx.GetVoidType();
-        type = m_Ctx.GetFunctionType(result, params, vararg);
+
+        type = m_Ctx.GetFunctionType(result, params, is_mutable, vararg);
     }
     else if (At("struct"))
     {

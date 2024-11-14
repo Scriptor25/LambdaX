@@ -39,7 +39,7 @@ LX::ValuePtr LX::DefineExpr::GenIR(Builder& builder) const
         if (IsMutable && !init->IsMutable())
             Error(
                 Where,
-                "cannot assign immutable reference to mutable reference; discarding mutability");
+                "cannot assign immutable reference to mutable reference");
         value = LValue::Create(type, init->Ptr(Where), IsMutable);
     }
     else

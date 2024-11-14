@@ -83,6 +83,11 @@ bool LX::Type::IsReference() const
     return false;
 }
 
+bool LX::Type::IsMutable() const
+{
+    return false;
+}
+
 LX::TypePtr& LX::Type::Base(const SourceLocation& where)
 {
     Error(where, "{} is not a pointer, array or mutable type; cannot get element type", Name);

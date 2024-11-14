@@ -36,12 +36,11 @@ namespace LX
         Token Expect(const std::string&);
 
         TypePtr ParseType();
-        bool ParseTypeList(std::vector<TypePtr>&, const std::string&);
 
         void ParseParameter(Parameter&);
         bool ParseParameterList(std::vector<Parameter>&, const std::string&);
 
-        void ParseFunction(const SourceLocation&, Function&);
+        void ParseFunction(Function&);
 
         StmtPtr Parse();
         StmtPtr ParseImport();
@@ -64,6 +63,7 @@ namespace LX
         ExprPtr ParseConstStruct();
         ExprPtr ParseConstFunction();
         ExprPtr ParseMut();
+        ExprPtr ParseSwitch();
         ExprPtr ParseUnary();
         ExprPtr ParseSymbol();
 

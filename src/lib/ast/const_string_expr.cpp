@@ -31,7 +31,7 @@ LX::ValuePtr LX::ConstStringExpr::GenIR(Builder& builder) const
 {
     Where.EmitDI(builder);
 
-    const auto type = builder.Ctx().GetPointerType(builder.Ctx().GetIntType(8, true));
+    const auto type = builder.Ctx().GetPointerType(false, builder.Ctx().GetIntType(8, true));
     const auto value = builder.IRBuilder().CreateGlobalString(Value);
     return RValue::Create(type, value);
 }

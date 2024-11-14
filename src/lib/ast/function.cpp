@@ -17,7 +17,11 @@ std::ostream& LX::Function::Print(std::ostream& os) const
     }
     os << ')';
     if (!Type->Result({})->IsVoid())
-        Type->Result({})->Print(os << " => ");
+    {
+        os << " => ";
+        if (Type->IsMutable()) os << "mut ";
+        Type->Result({})->Print(os);
+    }
     if (Body) Body->Print(os << " = ");
     return os;
 }
@@ -50,7 +54,7 @@ LX::ValuePtr LX::Function::GenIR(const SourceLocation& where, Builder& builder) 
                               : Name;
 
         function = llvm::Function::Create(function_type, linkage, name, builder.IRModule());
-        result = RValue::Create(builder.Ctx().GetPointerType(Type), function);
+        result = RValue::Create(builder.Ctx().GetPointerType(false, Type), function);
 
         if (!Name.empty())
             builder.Define(where, Name) = result;
@@ -119,14 +123,20 @@ LX::ValuePtr LX::Function::GenIR(const SourceLocation& where, Builder& builder) 
     }
 
     auto value = Body->GenIR(builder);
-    if (Type->Result(where)->IsVoid()) builder.IRBuilder().CreateRetVoid();
+    if (const auto result_type = Type->Result(where); result_type->IsVoid())
+    {
+        builder.IRBuilder().CreateRetVoid();
+    }
+    else if (result_type->IsReference())
+    {
+        if (Type->IsMutable() && !value->IsMutable())
+            Error(where, "cannot return immutable reference as mutable");
+        builder.IRBuilder().CreateRet(value->Ptr(where));
+    }
     else
     {
-        value = builder.CreateCast(where, value, Type->Result(where));
-        builder.IRBuilder().CreateRet(
-            Type->Result(where)->IsReference()
-                ? value->Ptr(where)
-                : value->Load(where, builder));
+        value = builder.CreateCast(where, value, result_type);
+        builder.IRBuilder().CreateRet(value->Load(where, builder));
     }
 
     builder.IRBuilder().SetCurrentDebugLocation({});
