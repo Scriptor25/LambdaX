@@ -5,7 +5,7 @@ import "std.lx" as std
 type hittable_list {
     [([], ray, interval, mut record&) => u1] hit,
 
-    mut [[hittable]] objects,
+    mut [mut [hittable]] objects,
     mut u64 count,
 }
 
