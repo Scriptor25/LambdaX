@@ -8,6 +8,6 @@ void LX::Parser::ParseExprList(std::vector<ExprPtr>& list, const std::string& de
         list.push_back(ParseExpr());
 
         if (!At(delim))
-            Expect(",");
+            Expect(TokenType_Comma);
     }
 }

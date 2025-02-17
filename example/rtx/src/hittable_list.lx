@@ -33,7 +33,7 @@ export clear(mut hittable_list& self) = (
 
 export add(mut hittable_list& self, [hittable] object) = (
     self.count = self.count + 1,
-    self.objects = std.realloc(self.objects, self.count * 8),
+    self.objects = std.realloc(self.objects, self.count * sizeof([hittable])),
     self.objects[self.count - 1] = object
 )
 

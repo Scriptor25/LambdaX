@@ -10,11 +10,11 @@ LX::ExprPtr LX::Parser::ParseSequence()
     do
     {
         children.push_back(ParseExpr());
-        if (!At(")"))
-            Expect(",");
+        if (!At(TokenType_ParenClose))
+            Expect(TokenType_Comma);
     }
-    while (!(At(")") || AtEOF()));
-    Expect(")");
+    while (!(At(TokenType_ParenClose) || AtEOF()));
+    Expect(TokenType_ParenClose);
 
     return std::make_unique<SequenceExpr>(where, std::move(children));
 }

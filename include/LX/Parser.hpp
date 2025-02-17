@@ -38,7 +38,7 @@ namespace LX
         TypePtr ParseType();
 
         void ParseParameter(Parameter&);
-        bool ParseParameterList(std::vector<Parameter>&, const std::string&);
+        bool ParseParameterList(std::vector<Parameter>&, TokenType);
 
         void ParseFunction(Function&);
 
@@ -59,11 +59,15 @@ namespace LX
 
         ExprPtr ParsePrimary();
 
+        ExprPtr ParseMut();
+        ExprPtr ParseSwitch();
+        ExprPtr ParseSizeOf();
+        ExprPtr ParseNameOf();
+        ExprPtr ParseNew();
+        ExprPtr ParseDel();
         ExprPtr ParseSequence();
         ExprPtr ParseConstStruct();
         ExprPtr ParseConstFunction();
-        ExprPtr ParseMut();
-        ExprPtr ParseSwitch();
         ExprPtr ParseUnary();
         ExprPtr ParseSymbol();
 

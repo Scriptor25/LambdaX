@@ -6,7 +6,7 @@ LX::ExprPtr LX::Parser::ParseMember(ExprPtr ptr)
     const auto where = m_Token.Where;
 
     const auto deref = NextAt("!");
-    if (!deref) Expect(".");
+    if (!deref) Expect(TokenType_Period);
 
     const auto member = Expect(TokenType_Symbol).StringValue;
 

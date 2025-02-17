@@ -2,10 +2,10 @@
 export extern printf([i8], ...) => i32
 
 # Memory
-export extern malloc(u64) => []
 export extern realloc([], u64) => []
 
 # Math
+export extern tan(f64) => f64
 export extern sqrt(f64) => f64
 export extern fabs(f64) => f64
 export extern fmin(f64, f64) => f64

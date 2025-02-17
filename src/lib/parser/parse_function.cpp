@@ -4,9 +4,9 @@
 
 void LX::Parser::ParseFunction(Function& fun)
 {
-    Expect("(");
-    const auto vararg = ParseParameterList(fun.Params, ")");
-    Expect(")");
+    Expect(TokenType_ParenOpen);
+    const auto vararg = ParseParameterList(fun.Params, TokenType_ParenClose);
+    Expect(TokenType_ParenClose);
 
     TypePtr result;
     bool is_mutable = false;

@@ -141,25 +141,79 @@ LX::Token& LX::Parser::Next()
                 break;
 
             case '(':
+                where = m_Where;
+                value = static_cast<char>(m_Tok);
+                m_Tok = Get();
+                return m_Token = {where, TokenType_ParenOpen, value};
+
             case ')':
+                where = m_Where;
+                value = static_cast<char>(m_Tok);
+                m_Tok = Get();
+                return m_Token = {where, TokenType_ParenClose, value};
+
             case '{':
+                where = m_Where;
+                value = static_cast<char>(m_Tok);
+                m_Tok = Get();
+                return m_Token = {where, TokenType_BraceOpen, value};
+
             case '}':
+                where = m_Where;
+                value = static_cast<char>(m_Tok);
+                m_Tok = Get();
+                return m_Token = {where, TokenType_BraceClose, value};
+
             case '[':
+                where = m_Where;
+                value = static_cast<char>(m_Tok);
+                m_Tok = Get();
+                return m_Token = {where, TokenType_BracketOpen, value};
+
             case ']':
+                where = m_Where;
+                value = static_cast<char>(m_Tok);
+                m_Tok = Get();
+                return m_Token = {where, TokenType_BracketClose, value};
+
             case '.':
+                where = m_Where;
+                value = static_cast<char>(m_Tok);
+                m_Tok = Get();
+                return m_Token = {where, TokenType_Period, value};
+
             case ':':
+                {
+                    where = m_Where;
+                    value = static_cast<char>(m_Tok);
+                    m_Tok = Get();
+                    auto tk = TokenType_Colon;
+                    if (m_Tok == '=')
+                    {
+                        value += static_cast<char>(m_Tok);
+                        m_Tok = Get();
+                        tk = TokenType_ColonEqual;
+                    }
+                    return m_Token = {where, tk, value};
+                }
+
             case ',':
+                where = m_Where;
+                value = static_cast<char>(m_Tok);
+                m_Tok = Get();
+                return m_Token = {where, TokenType_Comma, value};
+
             case ';':
+                where = m_Where;
+                value = static_cast<char>(m_Tok);
+                m_Tok = Get();
+                return m_Token = {where, TokenType_Semicolon, value};
+
             case '$':
                 where = m_Where;
                 value += static_cast<char>(m_Tok);
                 m_Tok = Get();
-                if (value == ":" && m_Tok == '=')
-                {
-                    value += static_cast<char>(m_Tok);
-                    m_Tok = Get();
-                }
-                return m_Token = {where, TokenType_Other, value};
+                return m_Token = {where, TokenType_Dollar, value};
 
             case '0':
                 where = m_Where;

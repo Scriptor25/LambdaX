@@ -10,17 +10,17 @@ import "vec3.lx" as vec3
 extern main(i32 argc, [[i8]] argv) => i32 = (
     mut world := hittable_list.create(),
 
-    material_ground := lambertian.create(vec3.create(0.8, 0.8, 0.0)),
-    material_center := lambertian.create(vec3.create(0.1, 0.2, 0.5)),
-    material_left   := dielectric.create(vec3.scalar(1), 1.5),
-    material_bubble := dielectric.create(vec3.scalar(1), 1 / 1.5),
-    material_right  := metal.create(vec3.create(0.8, 0.6, 0.2), 1.0),
+    material_ground := lambertian.create({ 0.8, 0.8, 0.0 } vec3),
+    material_center := lambertian.create({ 0.1, 0.2, 0.5 } vec3),
+    material_left   := dielectric.create({ 1, 1, 1 } vec3,     1.5),
+    material_bubble := dielectric.create({ 1, 1, 1 } vec3, 1 / 1.5),
+    material_right  := metal.create({ 0.8, 0.6, 0.2 } vec3, 1.0),
 
-    s1 := sphere.create(vec3.create( 0.0, -100.5, -1.0), 100, &material_ground),
-    s2 := sphere.create(vec3.create( 0.0,    0.0, -1.2), 0.5, &material_center),
-    s3 := sphere.create(vec3.create(-1.0,    0.0, -1.0), 0.5, &material_left),
-    s4 := sphere.create(vec3.create(-1.0,    0.0, -1.0), 0.4, &material_bubble),
-    s5 := sphere.create(vec3.create( 1.0,    0.0, -1.0), 0.5, &material_right),
+    s1 := sphere.create({  0, -100.5, -1 } vec3, 100, &material_ground),
+    s2 := sphere.create({  0,    0.0, -1 } vec3, 0.5, &material_center),
+    s3 := sphere.create({ -1,    0.0, -1 } vec3, 0.5, &material_left),
+    s4 := sphere.create({ -1,    0.0, -1 } vec3, 0.4, &material_bubble),
+    s5 := sphere.create({  1,    0.0, -1 } vec3, 0.5, &material_right),
 
     hittable_list.add(world, &s1),
     hittable_list.add(world, &s2),
@@ -28,12 +28,17 @@ extern main(i32 argc, [[i8]] argv) => i32 = (
     hittable_list.add(world, &s4),
     hittable_list.add(world, &s5),
 
-    mut cam => camera,
+    mut cam := {} camera,
 
-    cam.aspect_ratio = 16.0 / 9.0,
-    cam.image_width = 400,
+    cam.aspect_ratio      = 16.0 / 9.0,
+    cam.image_width       = 400,
     cam.samples_per_pixel = 100,
-    cam.max_depth = 50,
+    cam.max_depth         = 50,
+
+    cam.vfov     = 90,
+    cam.lookfrom = { -2, -2,  1 } vec3,
+    cam.lookat   = {  0,  0, -1 } vec3,
+    cam.vup      = {  0,  1,  0 } vec3,
 
     camera.render(cam, &world),
     0

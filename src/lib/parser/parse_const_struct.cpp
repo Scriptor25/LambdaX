@@ -7,13 +7,13 @@ LX::ExprPtr LX::Parser::ParseConstStruct()
     const auto where = Skip().Where;
 
     std::vector<ExprPtr> elements;
-    while (!(At("}") || AtEOF()))
+    while (!(At(TokenType_BraceClose) || AtEOF()))
     {
         elements.push_back(ParseExpr());
-        if (!At("}"))
-            Expect(",");
+        if (!At(TokenType_BraceClose))
+            Expect(TokenType_Comma);
     }
-    Expect("}");
+    Expect(TokenType_BraceClose);
     const auto type = ParseType();
     return std::make_unique<ConstStructExpr>(where, std::move(elements), type);
 }

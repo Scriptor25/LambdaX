@@ -14,12 +14,20 @@ type camera {
     mut u32 samples_per_pixel,
     mut u32 max_depth,
 
+    mut f64 vfov,
+    mut point lookfrom,
+    mut point lookat,
+    mut vec3 vup,
+
     mut u32 image_height,
     mut f64 pixel_samples_scale,
     mut point center,
     mut point pixel00_loc,
     mut vec3 pixel_delta_u,
     mut vec3 pixel_delta_v,
+    mut vec3 u,
+    mut vec3 v,
+    mut vec3 w,
 }
 
 initialize(mut camera& self) = (
@@ -28,19 +36,25 @@ initialize(mut camera& self) = (
 
     self.pixel_samples_scale = 1.0 / self.samples_per_pixel,
 
-    self.center = vec3.empty(),
+    self.center = self.lookfrom,
 
-    focal_length := 1.0,
-    viewport_height := 2.0,
+    focal_length := vec3.length(vec3.sub(self.lookfrom, self.lookat)),
+    theta := util.deg_to_rad(self.vfov),
+    h := std.tan(theta / 2),
+    viewport_height := 2 * h * focal_length,
     viewport_width := viewport_height * self.image_width / self.image_height,
 
-    viewport_u := vec3.create(viewport_width, 0.0, 0.0),
-    viewport_v := vec3.create(0.0, -viewport_height, 0.0),
+    self.w = vec3.normalize(vec3.sub(self.lookfrom, self.lookat)),
+    self.u = vec3.normalize(vec3.cross(self.vup, self.w)),
+    self.v = vec3.cross(self.w, self.u),
+
+    viewport_u := vec3.mul(self.u, viewport_width),
+    viewport_v := vec3.mul(vec3.neg(self.v), viewport_height),
 
     self.pixel_delta_u = vec3.div(viewport_u, self.image_width),
     self.pixel_delta_v = vec3.div(viewport_v, self.image_height),
 
-    viewport_upper_left := vec3.sub(vec3.sub(vec3.sub(self.center, vec3.create(0.0, 0.0, focal_length)), vec3.div(viewport_u, 2)), vec3.div(viewport_v, 2)),
+    viewport_upper_left := vec3.sub(vec3.sub(vec3.sub(self.center, vec3.mul(self.w, focal_length)), vec3.div(viewport_u, 2)), vec3.div(viewport_v, 2)),
     self.pixel00_loc = vec3.add(viewport_upper_left, vec3.mul(vec3.add(self.pixel_delta_u, self.pixel_delta_v), 0.5))
 )
 

@@ -12,7 +12,7 @@ LX::ExprPtr LX::Parser::ParseMut()
 
     if (NextAt("=>"))
         type = ParseType();
-    if ((!type && (Expect(":="), true)) || NextAt(":="))
+    if ((!type && (Expect(TokenType_ColonEqual), true)) || NextAt(TokenType_ColonEqual))
         init = ParseExpr();
 
     return std::make_unique<DefineExpr>(where, true, name, type, std::move(init));

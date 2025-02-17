@@ -220,6 +220,16 @@ namespace LX
         ExprPtr Init;
     };
 
+    struct DelExpr : Expr
+    {
+        DelExpr(SourceLocation where, ExprPtr ptr);
+
+        std::ostream& Print(std::ostream&) const override;
+        ValuePtr GenIR(Builder&) const override;
+
+        ExprPtr Ptr;
+    };
+
     struct MemberExpr : Expr
     {
         MemberExpr(SourceLocation where, ExprPtr parent, std::string member, bool deref);
@@ -230,6 +240,18 @@ namespace LX
         ExprPtr Parent;
         std::string Member;
         bool Deref;
+    };
+
+    struct NewExpr : Expr
+    {
+        NewExpr(SourceLocation where, bool is_mutable, TypePtr type, size_t count);
+
+        std::ostream& Print(std::ostream&) const override;
+        ValuePtr GenIR(Builder&) const override;
+
+        bool Mutable;
+        TypePtr Type;
+        size_t Count;
     };
 
     struct SequenceExpr : Expr

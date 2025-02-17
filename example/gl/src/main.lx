@@ -3,7 +3,6 @@ import "glfw.lx" as glfw
 import "stb_image.lx" as stbi
 
 extern printf([i8], ...) => i32
-extern malloc(u64) => []
 
 on_key([GLFWwindow] window, i32 key, i32 scancode, i32 action, i32 mods)
  = key == glfw.KEY_ESCAPE && action == glfw.RELEASE ?? glfw.setWindowShouldClose(window, glfw.TRUE)

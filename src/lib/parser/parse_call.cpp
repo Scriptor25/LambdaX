@@ -3,11 +3,11 @@
 
 LX::ExprPtr LX::Parser::ParseCall(ExprPtr ptr)
 {
-    const auto where = Expect("(").Where;
+    const auto where = Expect(TokenType_ParenOpen).Where;
 
     std::vector<ExprPtr> args;
     ParseExprList(args, ")");
-    Expect(")");
+    Expect(TokenType_ParenClose);
 
     return std::make_unique<CallExpr>(where, std::move(ptr), std::move(args));
 }

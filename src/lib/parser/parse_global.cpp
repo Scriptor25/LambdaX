@@ -13,7 +13,7 @@ LX::StmtPtr LX::Parser::ParseGlobal()
     global.IsMutable = NextAt("mut");
     fun.Name = global.Name = Expect(TokenType_Symbol).StringValue;
 
-    if (!global.IsMutable && At("("))
+    if (!global.IsMutable && At(TokenType_ParenOpen))
     {
         ParseFunction(fun);
         return std::make_unique<FunctionStmt>(where, std::move(fun));
@@ -22,7 +22,8 @@ LX::StmtPtr LX::Parser::ParseGlobal()
     if ((fun.Export && (Expect("=>"), true)) || NextAt("=>"))
         global.Type = ParseType();
 
-    if ((!fun.Extern && !(global.IsMutable && global.Type) && (Expect(":="), true)) || NextAt(":="))
+    if ((!fun.Extern && !(global.IsMutable && global.Type) && (Expect(TokenType_ColonEqual), true))
+        || NextAt(TokenType_ColonEqual))
         global.Init = ParseExpr();
 
     return std::make_unique<GlobalStmt>(where, std::move(global));

@@ -5,20 +5,32 @@
 
 LX::ExprPtr LX::Parser::ParsePrimary()
 {
-    if (At("("))
-        return ParseSequence();
-
-    if (At("{"))
-        return ParseConstStruct();
-
-    if (At("$"))
-        return ParseConstFunction();
-
     if (At("mut"))
         return ParseMut();
 
     if (At("switch"))
         return ParseSwitch();
+
+    if (At("sizeof"))
+        return ParseSizeOf();
+
+    if (At("nameof"))
+        return ParseNameOf();
+
+    if (At("new"))
+        return ParseNew();
+
+    if (At("del"))
+        return ParseDel();
+
+    if (At(TokenType_ParenOpen))
+        return ParseSequence();
+
+    if (At(TokenType_BraceOpen))
+        return ParseConstStruct();
+
+    if (At(TokenType_Dollar))
+        return ParseConstFunction();
 
     if (At(TokenType_Operator))
         return ParseUnary();

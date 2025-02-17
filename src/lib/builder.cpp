@@ -2,8 +2,6 @@
 #include <ranges>
 #include <llvm/IR/Verifier.h>
 #include <llvm/Passes/PassBuilder.h>
-#include <llvm/Transforms/InstCombine/InstCombine.h>
-#include <llvm/Transforms/Scalar/SimplifyCFG.h>
 #include <llvm/Transforms/Scalar/TailRecursionElimination.h>
 #include <LX/Builder.hpp>
 #include <LX/Context.hpp>
@@ -48,7 +46,7 @@ LX::Builder::Builder(Context& ctx, llvm::LLVMContext& context, const std::string
         llvm::dwarf::DW_LANG_C,
         file,
         "LambdaX",
-        true,
+        false,
         "",
         0);
 
@@ -63,8 +61,6 @@ LX::Builder::Builder(Context& ctx, llvm::LLVMContext& context, const std::string
 
     m_SI->registerCallbacks(*m_PIC, m_MAM.get());
 
-    m_FPM->addPass(llvm::InstCombinePass());
-    m_FPM->addPass(llvm::SimplifyCFGPass());
     m_FPM->addPass(llvm::TailCallElimPass());
     m_FPM->addPass(llvm::VerifierPass());
 

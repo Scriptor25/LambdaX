@@ -6,13 +6,13 @@ LX::ExprPtr LX::Parser::ParseOperand()
     auto ptr = ParsePrimary();
     while (true)
     {
-        if (At("("))
+        if (At(TokenType_ParenOpen))
         {
             ptr = ParseCall(std::move(ptr));
             continue;
         }
 
-        if (At("["))
+        if (At(TokenType_BracketOpen))
         {
             ptr = ParseSubscript(std::move(ptr));
             continue;
@@ -24,7 +24,7 @@ LX::ExprPtr LX::Parser::ParseOperand()
             continue;
         }
 
-        if (At(".") || At("!"))
+        if (At(TokenType_Period) || At("!"))
         {
             ptr = ParseMember(std::move(ptr));
             continue;

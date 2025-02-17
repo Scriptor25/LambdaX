@@ -389,12 +389,12 @@ LX::ValuePtr LX::OperatorNeg(const SourceLocation& where, Builder& builder, cons
 {
     const auto type = val->Type();
 
-    if (val->Type()->IsInt())
+    if (type->IsInt())
     {
         const auto value = builder.IRBuilder().CreateNeg(val->Load(where, builder));
-        return RValue::Create(type, value);
+        return RValue::Create(builder.Ctx().GetIntType(type->Bits, true), value);
     }
-    if (val->Type()->IsFloat())
+    if (type->IsFloat())
     {
         const auto value = builder.IRBuilder().CreateFNeg(val->Load(where, builder));
         return RValue::Create(type, value);
@@ -403,9 +403,11 @@ LX::ValuePtr LX::OperatorNeg(const SourceLocation& where, Builder& builder, cons
     return {};
 }
 
-LX::TypePtr LX::OperatorTypeNeg(const SourceLocation&, Context&, const TypePtr& type)
+LX::TypePtr LX::OperatorTypeNeg(const SourceLocation&, Context& ctx, const TypePtr& type)
 {
-    if (type->IsInt() || type->IsFloat())
+    if (type->IsInt())
+        return ctx.GetIntType(type->Bits, true);
+    if (type->IsFloat())
         return type;
     return {};
 }
@@ -414,7 +416,7 @@ LX::ValuePtr LX::OperatorNot(const SourceLocation& where, Builder& builder, cons
 {
     const auto type = val->Type();
 
-    if (val->Type()->IsInt())
+    if (type->IsInt())
     {
         const auto value = builder.IRBuilder().CreateNot(val->Load(where, builder));
         return RValue::Create(type, value);

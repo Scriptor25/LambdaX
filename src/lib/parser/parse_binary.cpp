@@ -70,7 +70,7 @@ LX::ExprPtr LX::Parser::ParseBinary(ExprPtr left, const unsigned min_pre)
 
         if (operator_ == "?")
         {
-            Expect(":");
+            Expect(TokenType_Colon);
             auto else_ = ParseExpr();
             left = std::make_unique<TernaryExpr>(
                 where_,

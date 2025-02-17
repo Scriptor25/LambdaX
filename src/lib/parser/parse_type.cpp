@@ -7,29 +7,29 @@ LX::TypePtr LX::Parser::ParseType()
 {
     TypePtr type;
 
-    if (NextAt("["))
+    if (NextAt(TokenType_BracketOpen))
     {
         const auto is_mutable = NextAt("mut");
         auto element = m_Ctx.GetVoidType();
         size_t count = 0;
 
-        if (!NextAt("]"))
+        if (!NextAt(TokenType_BracketClose))
         {
             element = ParseType();
-            if (NextAt(","))
+            if (NextAt(TokenType_Comma))
                 count = Expect(TokenType_Int).IntegerValue;
-            Expect("]");
+            Expect(TokenType_BracketClose);
         }
 
         if (!count)
             type = m_Ctx.GetPointerType(is_mutable, element);
         else type = m_Ctx.GetArrayType(is_mutable, element, count);
     }
-    else if (NextAt("("))
+    else if (NextAt(TokenType_ParenOpen))
     {
         std::vector<Parameter> params;
-        const auto vararg = ParseParameterList(params, ")");
-        Expect(")");
+        const auto vararg = ParseParameterList(params, TokenType_ParenClose);
+        Expect(TokenType_ParenClose);
 
         bool is_mutable = false;
         TypePtr result;
@@ -51,10 +51,10 @@ LX::TypePtr LX::Parser::ParseType()
             name = Skip().StringValue;
 
         std::vector<Parameter> elements;
-        if (NextAt("{"))
+        if (NextAt(TokenType_BraceOpen))
         {
-            ParseParameterList(elements, "}");
-            Expect("}");
+            ParseParameterList(elements, TokenType_BraceClose);
+            Expect(TokenType_BraceClose);
         }
 
         type = m_Ctx.GetStructType(where, name, elements);

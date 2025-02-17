@@ -17,7 +17,7 @@ LX::ExprPtr LX::Parser::ParseSymbol()
 
     if (NextAt("=>"))
         type = ParseType();
-    if ((type && (Expect(":="), true)) || NextAt(":="))
+    if ((type && (Expect(TokenType_ColonEqual), true)) || NextAt(TokenType_ColonEqual))
         init = ParseExpr();
 
     if (!init)
